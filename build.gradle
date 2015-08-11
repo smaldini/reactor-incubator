@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2011-2013 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ext {
+  gradleVersion = '2.3'
+  gradleScriptDir = "${rootProject.projectDir}/gradle"
+
+  // Libraries
+  reactorCoreVersion = '2.0.4.RELEASE'
+  pcollectionsVersion = '2.1.2'
+
+}
+
+buildscript {
+  repositories {
+      mavenCentral()
+      maven { url "http://repo.spring.io/plugins-release" }
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+
+
+  repositories {
+    mavenLocal()
+
+    maven { url "https://repo1.maven.org/maven2/" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases" }
+    maven { url "http://repo.spring.io/libs-release" }
+  }
+
+
+}
+
+
+project('reactor-pipe') {
+  description = 'Reactor Pipe components'
+
+  apply plugin: 'osgi'
+
+
+  dependencies {
+    compile "io.projectreactor:reactor-core:$reactorCoreVersion"
+    compile "org.pcollections:pcollections:$pcollectionsVersion"
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
+  }
+
+
+}

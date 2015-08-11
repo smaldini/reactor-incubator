@@ -1,0 +1,3 @@
+rootProject.name = 'reactor-extensions'
+
+include 'reactor-pipe'
