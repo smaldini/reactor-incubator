@@ -21,7 +21,7 @@ ext {
   // Libraries
   reactorCoreVersion = '2.0.4.RELEASE'
   pcollectionsVersion = '2.1.2'
-
+  kafkaVersion = '0.8.2.1'
 }
 
 
@@ -61,6 +61,21 @@ project('reactor-pipe') {
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorCoreVersion"
     compile "org.pcollections:pcollections:$pcollectionsVersion"
+    testCompile group: 'junit', name: 'junit', version:'4.12'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
+  }
+
+
+}
+
+project('reactor-kafka') {
+  description = 'Reactor Pipe components'
+
+  apply plugin: 'osgi'
+
+  dependencies {
+    compile "io.projectreactor:reactor-core:$reactorCoreVersion"
+    compile "org.apache.kafka:kafka_2.10:$kafkaVersion"
     testCompile group: 'junit', name: 'junit', version:'4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
   }

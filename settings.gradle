@@ -1,3 +1,4 @@
 rootProject.name = 'reactor-extensions'
 
 include 'reactor-pipe'
+include 'reactor-kafka'
