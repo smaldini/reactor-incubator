@@ -1,13 +1,14 @@
 package reactor.pipe.registry;
 
-import reactor.pipe.KeyedConsumer;
-import reactor.pipe.concurrent.Atom;
-import reactor.pipe.key.Key;
 import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
+import reactor.fn.Consumer;
 import reactor.fn.tuple.Tuple;
+import reactor.pipe.KeyedConsumer;
+import reactor.pipe.concurrent.Atom;
+import reactor.pipe.key.Key;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,19 +36,29 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
   }
 
   @Override
-  public <V extends KeyedConsumer> Registration<K> register(K obj, V handler) {
+  public <V extends KeyedConsumer> Registration<K> register(final K obj, final V handler) {
     final PVector<Registration<K>> lookedUpArr = lookupMap.deref().get(obj);
 
     if (lookedUpArr == null) {
-      final SimpleRegistration<K, V> reg = new SimpleRegistration<>(obj,
-                                                                    handler,
-                                                                    // TODO: FIX UNREGISTER
-                                                                    reg1 -> lookupMap.deref()
-                                                                                     .get(obj)
-                                                                                     .remove(handler));
+      final Registration<K> reg = new SimpleRegistration<>(obj,
+                                                           handler,
+                                                           // TODO: FIX UNREGISTER
+                                                           new Consumer<Registration<K>>() {
+                                                             @Override
+                                                             public void accept(Registration<K> reg1) {
+                                                               lookupMap.deref()
+                                                                        .get(obj)
+                                                                        .remove(handler);
+                                                             }
+                                                           });
       final PVector<Registration<K>> emptyArr = TreePVector.singleton(reg);
 
-      lookupMap.swap(old -> old.plus(obj, emptyArr));
+      lookupMap.swap(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
+        @Override
+        public PMap<K, PVector<Registration<K>>> apply(PMap<K, PVector<Registration<K>>> old) {
+          return old.plus(obj, emptyArr);
+        }
+      });
 
       return reg;
 
@@ -54,10 +66,22 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
       final Registration<K> reg = new SimpleRegistration<>(obj,
                                                            handler,
                                                            // TODO: FIX REMOVES!!
-                                                           reg1 -> lookupMap.deref()
-                                                                            .get(obj)
-                                                                            .remove(reg1));
-      lookupMap.swap(old -> old.plus(obj, old.get(obj).plus(reg)));
+                                                           new Consumer<Registration<K>>() {
+                                                             @Override
+                                                             public void accept(Registration<K> reg1) {
+                                                               lookupMap.deref()
+                                                                        .get(obj)
+                                                                        .remove(reg1);
+                                                             }
+                                                           });
+
+      lookupMap.swap(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
+        @Override
+        public PMap<K, PVector<Registration<K>>> apply(PMap<K, PVector<Registration<K>>> old) {
+          return old.plus(obj, old.get(obj).plus(reg));
+        }
+      });
+
       return reg;
     }
 
@@ -65,7 +89,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
   @Override
   public boolean unregister(K key) {
-    return lookupMap.swapReturnOther((map) -> {
+    return lookupMap.swapReturnOther((PMap<K, PVector<Registration<K>>> map) -> {
       PMap<K, PVector<Registration<K>>> newv = map.minus(key);
 
       return Tuple.of(newv,
