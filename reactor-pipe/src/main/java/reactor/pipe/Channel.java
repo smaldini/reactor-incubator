@@ -25,7 +25,7 @@ public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
     this.isDrained = new AtomicBoolean(false);
     stream.consume(e -> {
       if (!isDrained.get()) {
-        state.swap(old -> old.plus(e));
+        state.update(old -> old.plus(e));
       }
     });
   }
@@ -35,7 +35,7 @@ public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
       throw new RuntimeException("Channel is already being drained by the stream.");
     }
 
-    return state.swapReturnOther(new Function<PVector<T>, Tuple2<PVector<T>, T>>() {
+    return state.updateAndReturnOther(new Function<PVector<T>, Tuple2<PVector<T>, T>>() {
       @Override
       public Tuple2<PVector<T>, T> apply(PVector<T> buffer) {
         if (buffer.size() == 0) {
@@ -60,31 +60,32 @@ public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
     }
 
     long start = System.currentTimeMillis();
-    T value = state.swapReturnOther(new Predicate<PVector<T>>() {
-                                      @Override
-                                      public boolean test(PVector<T> ts) {
-                                        return !ts.isEmpty() ||
-                                               (System.currentTimeMillis() - start > TimeUnit.MILLISECONDS.convert(time,
-                                                                                                                   timeUnit));
-                                      }
-                                    },
-                                    new Function<PVector<T>, Tuple2<PVector<T>, T>>() {
-                                      @Override
-                                      public Tuple2<PVector<T>, T> apply(PVector<T> buffer) {
-                                        if (buffer.size() == 0) {
-                                          return Tuple.of(buffer,
-                                                          null);
-                                        }
+    T value = state.updateAndReturnOther(new Predicate<PVector<T>>() {
+                                           @Override
+                                           public boolean test(PVector<T> ts) {
+                                             return !ts.isEmpty() ||
+                                                    (System.currentTimeMillis() - start > TimeUnit.MILLISECONDS.convert(
+                                                      time,
+                                                      timeUnit));
+                                           }
+                                         },
+                                         new Function<PVector<T>, Tuple2<PVector<T>, T>>() {
+                                           @Override
+                                           public Tuple2<PVector<T>, T> apply(PVector<T> buffer) {
+                                             if (buffer.size() == 0) {
+                                               return Tuple.of(buffer,
+                                                               null);
+                                             }
 
-                                        T t = buffer.get(0);
-                                        if (t == null) {
-                                          return null;
-                                        } else {
-                                          return Tuple.of(buffer.subList(1, buffer.size()),
-                                                          t);
-                                        }
-                                      }
-                                    });
+                                             T t = buffer.get(0);
+                                             if (t == null) {
+                                               return null;
+                                             } else {
+                                               return Tuple.of(buffer.subList(1, buffer.size()),
+                                                               t);
+                                             }
+                                           }
+                                         });
     if (value == null) {
       throw new RuntimeException("Channel is empty");
     } else {

@@ -30,9 +30,9 @@ public class PartitionOperation<SRC extends Key, DST extends Key, V> implements 
   @Override
   @SuppressWarnings(value = {"unchecked"})
   public void accept(SRC key, V value) {
-    PVector<V> newv = buffer.swap((old) -> old.plus(value));
+    PVector<V> newv = buffer.update((old) -> old.plus(value));
     if (emit.test(newv)) {
-      PVector<V> downstreamValue = buffer.swapReturnOld((old) -> TreePVector.empty());
+      PVector<V> downstreamValue = buffer.updateAndReturnOld((old) -> TreePVector.empty());
       firehose.notify(destination, downstreamValue);
     }
   }

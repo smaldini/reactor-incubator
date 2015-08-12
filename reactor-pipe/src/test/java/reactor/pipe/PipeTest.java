@@ -68,7 +68,7 @@ public class PipeTest extends AbstractStreamTest {
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state) -> {
                     return (i) -> {
-                      return state.swap(old -> old + i);
+                      return state.update(old -> old + i);
                     };
                   },
                   0);
@@ -88,7 +88,7 @@ public class PipeTest extends AbstractStreamTest {
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state, Integer i) -> {
-                    return state.swap(old -> old + i);
+                    return state.update(old -> old + i);
                   },
                   0);
     intPipe.consume(Key.wrap("key3"), res::set);

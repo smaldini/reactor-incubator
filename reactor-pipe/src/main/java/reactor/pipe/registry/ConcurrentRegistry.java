@@ -53,7 +53,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
                                                            });
       final PVector<Registration<K>> emptyArr = TreePVector.singleton(reg);
 
-      lookupMap.swap(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
+      lookupMap.update(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
         @Override
         public PMap<K, PVector<Registration<K>>> apply(PMap<K, PVector<Registration<K>>> old) {
           return old.plus(obj, emptyArr);
@@ -75,7 +75,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
                                                              }
                                                            });
 
-      lookupMap.swap(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
+      lookupMap.update(new UnaryOperator<PMap<K, PVector<Registration<K>>>>() {
         @Override
         public PMap<K, PVector<Registration<K>>> apply(PMap<K, PVector<Registration<K>>> old) {
           return old.plus(obj, old.get(obj).plus(reg));
@@ -89,7 +89,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
   @Override
   public boolean unregister(K key) {
-    return lookupMap.swapReturnOther((PMap<K, PVector<Registration<K>>> map) -> {
+    return lookupMap.updateAndReturnOther((PMap<K, PVector<Registration<K>>> map) -> {
       PMap<K, PVector<Registration<K>>> newv = map.minus(key);
 
       return Tuple.of(newv,
@@ -99,7 +99,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
   @Override
   public boolean unregister(Predicate<K> pred) {
-    return lookupMap.swapReturnOther((map) -> {
+    return lookupMap.updateAndReturnOther((map) -> {
       List<K> unsubscribeKys = map.keySet()
                                   .stream()
                                   .filter(pred)
@@ -115,7 +115,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
   @Override
   public List<Registration<K>> select(final K key) {
     return
-      lookupMap.swap(old -> {
+      lookupMap.update(old -> {
         if (old.containsKey(key)) {
           return old;
         } else {

@@ -152,7 +152,7 @@ public class Pipe<V> {
     final Atom<V> debounced = stateProvider.makeAtom(source, null);
 
     firehose.getTimer().schedule(discarded_ -> {
-      V currentDebounced = debounced.swapReturnOld(old_ -> null);
+      V currentDebounced = debounced.updateAndReturnOld(old_ -> null);
       if (currentDebounced != null) {
         firehose.notify(destination, currentDebounced);
       }
@@ -161,7 +161,7 @@ public class Pipe<V> {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
-        debounced.swap(discardedOld_ -> value);
+        debounced.update(discardedOld_ -> value);
       }
     });
 

@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
 /**
  * Generic Atom
  */
-public class  Atom<T> {
+public class Atom<T> {
 
   private AtomicReference<T> ref;
 
@@ -23,40 +23,40 @@ public class  Atom<T> {
     return ref.get();
   }
 
-  public T swap(UnaryOperator<T> swapOp) {
-    for (;;) {
+  public T update(UnaryOperator<T> swapOp) {
+    for (; ; ) {
       T old = ref.get();
       T newv = swapOp.apply(old);
-      if(ref.compareAndSet(old, newv)) {
+      if (ref.compareAndSet(old, newv)) {
         return newv;
       }
     }
   }
 
-  public T swapReturnOld(UnaryOperator<T> swapOp) {
-    for (;;) {
+  public T updateAndReturnOld(UnaryOperator<T> swapOp) {
+    for (; ; ) {
       T old = ref.get();
       T newv = swapOp.apply(old);
-      if(ref.compareAndSet(old, newv)) {
+      if (ref.compareAndSet(old, newv)) {
         return old;
       }
     }
   }
 
-  public <O> O swapReturnOther(Function<T, Tuple2<T,O>> swapOp) {
-    for (;;) {
+  public <O> O updateAndReturnOther(Function<T, Tuple2<T, O>> swapOp) {
+    for (; ; ) {
       T old = ref.get();
       Tuple2<T, O> newvtuple = swapOp.apply(old);
-      if(ref.compareAndSet(old, newvtuple.getT1())) {
+      if (ref.compareAndSet(old, newvtuple.getT1())) {
         return newvtuple.getT2();
       }
       LockSupport.parkNanos(1L);
     }
   }
 
-  public <O> O swapReturnOther(Predicate<T> pred,
-                               Function<T, Tuple2<T,O>> swapOp) {
-    for (;;) {
+  public <O> O updateAndReturnOther(Predicate<T> pred,
+                                    Function<T, Tuple2<T, O>> swapOp) {
+    for (; ; ) {
       T old = ref.get();
       if (pred.test(old)) {
         Tuple2<T, O> newvtuple = swapOp.apply(old);
@@ -69,9 +69,9 @@ public class  Atom<T> {
   }
 
   public T reset(T newv) {
-    for (;;) {
+    for (; ; ) {
       T old = ref.get();
-      if(ref.compareAndSet(old, newv)) {
+      if (ref.compareAndSet(old, newv)) {
         return newv;
       }
     }

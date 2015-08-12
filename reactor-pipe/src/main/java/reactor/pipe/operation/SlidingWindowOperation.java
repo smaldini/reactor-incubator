@@ -29,7 +29,7 @@ public class SlidingWindowOperation<SRC extends Key, DST extends Key, V> impleme
 
   @Override
   public void accept(SRC key, V value) {
-    PVector<V> newv = buffer.swap((old) -> {
+    PVector<V> newv = buffer.update((old) -> {
       List<V> dropped = drop.apply(old.plus(value));
       return TreePVector.from(dropped);
     });
