@@ -1,18 +1,19 @@
 package reactor.pipe;
 
-import reactor.pipe.channel.ConsumingChannel;
-import reactor.pipe.channel.PublishingChannel;
-import reactor.pipe.concurrent.Atom;
 import org.pcollections.PVector;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
+import reactor.pipe.concurrent.Atom;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
+public class Channel<T> implements Subscriber<T> {
 
   private final AnonymousFlow<T> stream;
   private final Atom<PVector<T>> state;
@@ -98,15 +99,7 @@ public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
     return this.stream;
   }
 
-  public void tell(T item) {
-    stream.notify(item);
-  }
-
-  public PublishingChannel<T> publishingChannel() {
-    return this;
-  }
-
-  public ConsumingChannel<T> consumingChannel() {
+  public Subscriber<T> subscriber() {
     return this;
   }
 
@@ -114,4 +107,36 @@ public class Channel<T> implements PublishingChannel<T>, ConsumingChannel<T> {
     stream.unregister();
   }
 
+
+  /**
+   * Subscriber API
+   */
+
+  private volatile Subscription sub;
+
+  @Override
+  public void onSubscribe(Subscription subscription) {
+    this.sub = subscription;
+    subscription.request(1);
+  }
+
+  @Override
+  public void onNext(T item) {
+    stream.notify(item);
+    this.sub.request(1);
+  }
+
+  public void tell(T item) {
+    stream.notify(item);
+  }
+
+  @Override
+  public void onError(Throwable throwable) {
+    // NO OP
+  }
+
+  @Override
+  public void onComplete() {
+    // NO OP
+  }
 }

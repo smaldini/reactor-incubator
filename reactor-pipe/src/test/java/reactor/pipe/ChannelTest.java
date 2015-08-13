@@ -1,7 +1,8 @@
 package reactor.pipe;
 
-import reactor.pipe.channel.ConsumingChannel;
-import reactor.pipe.channel.PublishingChannel;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.pipe.concurrent.AVar;
 import org.junit.Test;
 
@@ -68,18 +69,31 @@ public class ChannelTest extends AbstractStreamTest {
     Pipe<Integer> pipe = new Pipe<>();
     Channel<Integer> chan = pipe.channel();
 
-    PublishingChannel<Integer> publishingChannel = chan.publishingChannel();
-    ConsumingChannel<Integer> consumingChannel = chan.consumingChannel();
+    Subscriber<Integer> subscriber = chan.subscriber();
+    CountDownLatch requestLatch = new CountDownLatch(2);
+    subscriber.onSubscribe(new Subscription() {
+      @Override
+      public void request(long l) {
+        requestLatch.countDown();
+      }
 
-    publishingChannel.tell(1);
-    publishingChannel.tell(2);
+      @Override
+      public void cancel() {
 
-    assertThat(consumingChannel.get(10, TimeUnit.SECONDS), is(1));
-    assertThat(consumingChannel.get(10, TimeUnit.SECONDS), is(2));
-    assertTrue(consumingChannel.get() == null);
+      }
+    });
+    subscriber.onNext(1);
+    subscriber.onNext(2);
+
+    assertThat(chan.get(10, TimeUnit.SECONDS), is(1));
+    assertThat(chan.get(10, TimeUnit.SECONDS), is(2));
+    assertTrue(chan.get() == null);
 
     chan.tell(3);
-    assertThat(consumingChannel.get(10, TimeUnit.SECONDS), is(3));
+    assertThat(chan.get(10, TimeUnit.SECONDS), is(3));
+
+    requestLatch.await();
+    assertThat(requestLatch.getCount(), is(0L));
   }
 
   @Test
