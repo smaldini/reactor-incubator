@@ -8,68 +8,68 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-public class AnonymousFlow<V> {
+public class AnonymousPipe<V> {
 
   private final Key  rootKey;
   private final Key  upstream;
   private final Pipe pipe;
 
-  public AnonymousFlow(Key upstream, Pipe pipe) {
+  public AnonymousPipe(Key upstream, Pipe pipe) {
     this.upstream = upstream;
     this.rootKey = upstream;
     this.pipe = pipe;
   }
 
-  public AnonymousFlow(Key rootKey, Key upstream, Pipe pipe) {
+  public AnonymousPipe(Key rootKey, Key upstream, Pipe pipe) {
     this.upstream = upstream;
     this.pipe = pipe;
     this.rootKey = rootKey;
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> AnonymousFlow<V1> map(Function<V, V1> mapper) {
+  public <V1> AnonymousPipe<V1> map(Function<V, V1> mapper) {
     Key downstream = upstream.derive();
 
     pipe.map(upstream, downstream, mapper);
 
-    return new AnonymousFlow<>(rootKey, downstream, pipe);
+    return new AnonymousPipe<>(rootKey, downstream, pipe);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousFlow<V> filter(Predicate<V> predicate) {
+  public AnonymousPipe<V> filter(Predicate<V> predicate) {
     Key downstream = upstream.derive();
 
     pipe.filter(upstream, downstream, predicate);
 
-    return new AnonymousFlow<>(rootKey, downstream, pipe);
+    return new AnonymousPipe<>(rootKey, downstream, pipe);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousFlow<List<V>> slide(UnaryOperator<List<V>> drop) {
+  public AnonymousPipe<List<V>> slide(UnaryOperator<List<V>> drop) {
     Key downstream = upstream.derive();
 
     pipe.slide(upstream, downstream, drop);
 
-    return new AnonymousFlow<>(rootKey, downstream, pipe);
+    return new AnonymousPipe<>(rootKey, downstream, pipe);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousFlow<List<V>> partition(Predicate<List<V>> emit) {
+  public AnonymousPipe<List<V>> partition(Predicate<List<V>> emit) {
     Key downstream = upstream.derive();
 
     pipe.partition(upstream, downstream, emit);
 
-    return new AnonymousFlow<>(rootKey, downstream, pipe);
+    return new AnonymousPipe<>(rootKey, downstream, pipe);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousFlow<V> consume(Consumer<V> consumer) {
+  public AnonymousPipe<V> consume(Consumer<V> consumer) {
     pipe.consume(upstream, consumer);
     return this;
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousFlow<V> redirect(Key destination) {
+  public AnonymousPipe<V> redirect(Key destination) {
     pipe.consume(upstream, new KeyedConsumer<Key, V>() {
       @Override
       public void accept(Key key, V value) {

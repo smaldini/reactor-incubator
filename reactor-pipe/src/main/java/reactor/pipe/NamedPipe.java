@@ -17,29 +17,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.*;
 
-public class Pipe<V> {
+public class NamedPipe<V> {
 
   private final Firehose      firehose;
   private final StateProvider stateProvider;
 
-  public Pipe() {
+  public NamedPipe() {
     this(new Firehose());
   }
 
 
-  protected Pipe(Firehose firehose) {
+  protected NamedPipe(Firehose firehose) {
     this.firehose = firehose;
     this.stateProvider = new DefaultStateProvider();
   }
 
-  public Pipe<V> fork(ExecutorService executorService,
+  public NamedPipe<V> fork(ExecutorService executorService,
                         int ringBufferSize) {
-    return new Pipe<V>(firehose.fork(executorService,
+    return new NamedPipe<V>(firehose.fork(executorService,
                                        ringBufferSize));
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key> Pipe<List<V>> partition(SRC source,
+  public <SRC extends Key, DST extends Key> NamedPipe<List<V>> partition(SRC source,
                                                                       DST destination,
                                                                       Predicate<List<V>> emit) {
     Atom<PVector<V>> buffer = stateProvider.makeAtom(source, TreePVector.empty());
@@ -49,11 +49,11 @@ public class Pipe<V> {
                                                             emit,
                                                             destination));
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key> Pipe<V> divide(SRC source,
+  public <SRC extends Key, DST extends Key> NamedPipe<V> divide(SRC source,
                                                              BiFunction<SRC, V, DST> divider) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
@@ -62,12 +62,12 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key> Pipe<List<V>> slide(SRC source,
+  public <SRC extends Key, DST extends Key> NamedPipe<List<V>> slide(SRC source,
                                                                   DST destination,
                                                                   UnaryOperator<List<V>> drop) {
     Atom<PVector<V>> buffer = stateProvider.makeAtom(source, TreePVector.empty());
@@ -77,11 +77,11 @@ public class Pipe<V> {
                                                                 drop,
                                                                 destination));
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key, V1> Pipe<V1> map(SRC source,
+  public <SRC extends Key, DST extends Key, V1> NamedPipe<V1> map(SRC source,
                                                                DST destination,
                                                                Function<V, V1> mapper) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
@@ -91,11 +91,11 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key, V1, ST> Pipe<V1> map(SRC source,
+  public <SRC extends Key, DST extends Key, V1, ST> NamedPipe<V1> map(SRC source,
                                                                    DST destination,
                                                                    BiFunction<Atom<ST>, V, V1> fn,
                                                                    ST init) {
@@ -108,11 +108,11 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key, V1, ST> Pipe<V1> map(SRC source,
+  public <SRC extends Key, DST extends Key, V1, ST> NamedPipe<V1> map(SRC source,
                                                                    DST destination,
                                                                    StatefulSupplier<ST, Function<V, V1>> supplier,
                                                                    ST init) {
@@ -125,11 +125,11 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key> Pipe<V> filter(SRC source,
+  public <SRC extends Key, DST extends Key> NamedPipe<V> filter(SRC source,
                                                              DST destination,
                                                              Predicate<V> predicate) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
@@ -141,11 +141,11 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, DST extends Key> Pipe<V> debounce(SRC source,
+  public <SRC extends Key, DST extends Key> NamedPipe<V> debounce(SRC source,
                                                                DST destination,
                                                                int period,
                                                                TimeUnit timeUnit) {
@@ -165,7 +165,7 @@ public class Pipe<V> {
       }
     });
 
-    return new Pipe<>(firehose);
+    return new NamedPipe<>(firehose);
   }
 
   @SuppressWarnings(value = {"unchecked"})
@@ -188,8 +188,8 @@ public class Pipe<V> {
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key> AnonymousFlow<V> anonymous(SRC source) {
-    return new AnonymousFlow<>(source, this);
+  public <SRC extends Key> AnonymousPipe<V> anonymous(SRC source) {
+    return new AnonymousPipe<>(source, this);
   }
 
   @SuppressWarnings(value = {"unchecked"})
@@ -202,9 +202,9 @@ public class Pipe<V> {
   @SuppressWarnings(value = {"unchecked"})
   public Channel<V> channel() {
     Key k = new Key(new Object[]{UUID.randomUUID()});
-    AnonymousFlow<V> anonymousFlow = new AnonymousFlow<>(k,
+    AnonymousPipe<V> anonymousPipe = new AnonymousPipe<>(k,
                                                                this);
-    return new Channel<V>(anonymousFlow,
+    return new Channel<V>(anonymousPipe,
                           stateProvider.makeAtom(k, TreePVector.empty()));
   }
 

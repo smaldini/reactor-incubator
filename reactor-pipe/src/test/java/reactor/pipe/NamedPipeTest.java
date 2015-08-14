@@ -18,12 +18,12 @@ import java.util.function.Predicate;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class PipeTest extends AbstractStreamTest {
+public class NamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testMap() throws InterruptedException {
     AVar<Integer> res = new AVar<>();
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.consume(Key.wrap("key2"), res::set);
@@ -36,7 +36,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void debounceTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>();
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
@@ -63,7 +63,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void streamStateSupplierTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(3);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state) -> {
@@ -84,7 +84,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void streamStateFnTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(3);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state, Integer i) -> {
@@ -103,7 +103,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void streamFilterTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(2);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.filter(Key.wrap("key1"), Key.wrap("key2"), (i) -> i % 2 == 0);
     intPipe.consume(Key.wrap("key2"), res::set);
@@ -126,7 +126,7 @@ public class PipeTest extends AbstractStreamTest {
     Key oddKey = Key.wrap("odd");
     Key numbersKey = Key.wrap("numbers");
 
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
     intPipe.divide(numbersKey,
                      (k, v) -> {
                        return v % 2 == 0 ? evenKey : oddKey;
@@ -155,7 +155,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void partitionTest() throws InterruptedException {
     AVar<List<Integer>> res = new AVar<>();
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.partition(Key.wrap("key1"), Key.wrap("key2"), (i) -> {
       return i.size() == 5;
@@ -178,7 +178,7 @@ public class PipeTest extends AbstractStreamTest {
   @Test
   public void slideTest() throws InterruptedException {
     AVar<List<Integer>> res = new AVar<>(6);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.slide(Key.wrap("key1"), Key.wrap("key2"), (i) -> {
       return i.subList(i.size() > 5 ? i.size() - 5 : 0,
@@ -203,7 +203,7 @@ public class PipeTest extends AbstractStreamTest {
     Key k2 = Key.wrap("key2");
 
     CountDownLatch latch = new CountDownLatch(1);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.map(k1, k2, (i) -> i + 1);
     intPipe.consume(k2, (i) -> latch.countDown());
@@ -220,7 +220,7 @@ public class PipeTest extends AbstractStreamTest {
     Key k2 = Key.wrap("key2");
 
     CountDownLatch latch = new CountDownLatch(2);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.map(k1, k2, (i) -> {
       latch.countDown();
@@ -241,7 +241,7 @@ public class PipeTest extends AbstractStreamTest {
     Key k2 = Key.wrap("key2");
 
     CountDownLatch latch = new CountDownLatch(1);
-    Pipe<Integer> intPipe = new Pipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.fork(Executors.newFixedThreadPool(2),
                    2048)
