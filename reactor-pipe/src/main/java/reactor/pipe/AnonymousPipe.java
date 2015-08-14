@@ -10,17 +10,17 @@ import java.util.function.UnaryOperator;
 
 public class AnonymousPipe<V> {
 
-  private final Key  rootKey;
-  private final Key  upstream;
-  private final Pipe pipe;
+  private final Key       rootKey;
+  private final Key       upstream;
+  private final NamedPipe pipe;
 
-  public AnonymousPipe(Key upstream, Pipe pipe) {
+  public AnonymousPipe(Key upstream, NamedPipe pipe) {
     this.upstream = upstream;
     this.rootKey = upstream;
     this.pipe = pipe;
   }
 
-  public AnonymousPipe(Key rootKey, Key upstream, Pipe pipe) {
+  public AnonymousPipe(Key rootKey, Key upstream, NamedPipe pipe) {
     this.upstream = upstream;
     this.pipe = pipe;
     this.rootKey = rootKey;

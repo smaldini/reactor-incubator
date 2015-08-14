@@ -16,7 +16,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void mapTest() throws InterruptedException {
-    Pipe<Integer> pipe = new Pipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>();
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -31,7 +31,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testFilter() throws InterruptedException {
-    Pipe<Integer> pipe = new Pipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>();
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -50,7 +50,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testPartition() throws InterruptedException {
-    Pipe<Integer> pipe = new Pipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>();
     AVar<List<Integer>> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -72,7 +72,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testSlide() throws InterruptedException {
-    Pipe<Integer> pipe = new Pipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>();
     AVar<List<Integer>> res = new AVar<>(6);
 
     pipe.matched(key -> key.getPart(0).equals("source"))

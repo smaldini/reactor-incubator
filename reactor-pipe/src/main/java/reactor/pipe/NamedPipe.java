@@ -1,5 +1,7 @@
 package reactor.pipe;
 
+import org.pcollections.PVector;
+import org.pcollections.TreePVector;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import reactor.pipe.operation.PartitionOperation;
@@ -8,8 +10,6 @@ import reactor.pipe.registry.KeyMissMatcher;
 import reactor.pipe.state.DefaultStateProvider;
 import reactor.pipe.state.StateProvider;
 import reactor.pipe.state.StatefulSupplier;
-import org.pcollections.PVector;
-import org.pcollections.TreePVector;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,22 +26,21 @@ public class NamedPipe<V> {
     this(new Firehose());
   }
 
-
   protected NamedPipe(Firehose firehose) {
     this.firehose = firehose;
     this.stateProvider = new DefaultStateProvider();
   }
 
   public NamedPipe<V> fork(ExecutorService executorService,
-                        int ringBufferSize) {
+                           int ringBufferSize) {
     return new NamedPipe<V>(firehose.fork(executorService,
-                                       ringBufferSize));
+                                          ringBufferSize));
   }
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key> NamedPipe<List<V>> partition(SRC source,
-                                                                      DST destination,
-                                                                      Predicate<List<V>> emit) {
+                                                                         DST destination,
+                                                                         Predicate<List<V>> emit) {
     Atom<PVector<V>> buffer = stateProvider.makeAtom(source, TreePVector.empty());
 
     firehose.on(source, new PartitionOperation<SRC, DST, V>(firehose,
@@ -54,7 +53,7 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key> NamedPipe<V> divide(SRC source,
-                                                             BiFunction<SRC, V, DST> divider) {
+                                                                BiFunction<SRC, V, DST> divider) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
@@ -68,8 +67,8 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key> NamedPipe<List<V>> slide(SRC source,
-                                                                  DST destination,
-                                                                  UnaryOperator<List<V>> drop) {
+                                                                     DST destination,
+                                                                     UnaryOperator<List<V>> drop) {
     Atom<PVector<V>> buffer = stateProvider.makeAtom(source, TreePVector.empty());
 
     firehose.on(source, new SlidingWindowOperation<SRC, DST, V>(firehose,
@@ -82,8 +81,8 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key, V1> NamedPipe<V1> map(SRC source,
-                                                               DST destination,
-                                                               Function<V, V1> mapper) {
+                                                                  DST destination,
+                                                                  Function<V, V1> mapper) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
@@ -96,9 +95,9 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key, V1, ST> NamedPipe<V1> map(SRC source,
-                                                                   DST destination,
-                                                                   BiFunction<Atom<ST>, V, V1> fn,
-                                                                   ST init) {
+                                                                      DST destination,
+                                                                      BiFunction<Atom<ST>, V, V1> fn,
+                                                                      ST init) {
     Atom<ST> st = stateProvider.makeAtom(source, init);
 
     firehose.on(source, new KeyedConsumer<SRC, V>() {
@@ -113,9 +112,9 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key, V1, ST> NamedPipe<V1> map(SRC source,
-                                                                   DST destination,
-                                                                   StatefulSupplier<ST, Function<V, V1>> supplier,
-                                                                   ST init) {
+                                                                      DST destination,
+                                                                      StatefulSupplier<ST, Function<V, V1>> supplier,
+                                                                      ST init) {
     Function<V, V1> mapper = supplier.get(stateProvider.makeAtom(source, init));
 
     firehose.on(source, new KeyedConsumer<SRC, V>() {
@@ -130,8 +129,8 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key> NamedPipe<V> filter(SRC source,
-                                                             DST destination,
-                                                             Predicate<V> predicate) {
+                                                                DST destination,
+                                                                Predicate<V> predicate) {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
@@ -146,9 +145,9 @@ public class NamedPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, DST extends Key> NamedPipe<V> debounce(SRC source,
-                                                               DST destination,
-                                                               int period,
-                                                               TimeUnit timeUnit) {
+                                                                  DST destination,
+                                                                  int period,
+                                                                  TimeUnit timeUnit) {
     final Atom<V> debounced = stateProvider.makeAtom(source, null);
 
     firehose.getTimer().schedule(discarded_ -> {
@@ -203,7 +202,7 @@ public class NamedPipe<V> {
   public Channel<V> channel() {
     Key k = new Key(new Object[]{UUID.randomUUID()});
     AnonymousPipe<V> anonymousPipe = new AnonymousPipe<>(k,
-                                                               this);
+                                                         this);
     return new Channel<V>(anonymousPipe,
                           stateProvider.makeAtom(k, TreePVector.empty()));
   }
@@ -230,7 +229,6 @@ public class NamedPipe<V> {
   public StateProvider stateProvider() {
     return this.stateProvider;
   }
-
 
 
   // TODO: last()

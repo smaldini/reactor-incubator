@@ -31,7 +31,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                           DST dst,
-                                                                          Pipe<V1> pipe) {
+                                                                          NamedPipe<V1> pipe) {
         return (key, value) -> {
           pipe.notify(dst, mapper.apply(value));
         };
@@ -46,7 +46,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                           DST dst,
-                                                                          Pipe<V> pipe) {
+                                                                          NamedPipe<V> pipe) {
         return (key, value) -> {
           if (predicate.test(value)) {
             pipe.notify(dst, value);
@@ -64,7 +64,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                           DST dst,
-                                                                          Pipe<V> pipe) {
+                                                                          NamedPipe<V> pipe) {
         Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
 
         return new SlidingWindowOperation<SRC, DST, V>(pipe.firehose(),
@@ -83,7 +83,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                           DST dst,
-                                                                          Pipe<V> pipe) {
+                                                                          NamedPipe<V> pipe) {
         Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
 
         return new PartitionOperation<SRC, DST, V>(pipe.firehose(),
@@ -102,7 +102,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                           DST dst,
-                                                                          Pipe<NullType> pipe) {
+                                                                          NamedPipe<NullType> pipe) {
         return (key, value) -> consumer.accept(value);
       }
     });
@@ -113,7 +113,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   public static interface StreamSupplier<V, V1> {
     public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
                                                                         DST dst,
-                                                                        Pipe<V1> pipe);
+                                                                        NamedPipe<V1> pipe);
   }
 
 

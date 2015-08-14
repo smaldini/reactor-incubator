@@ -14,7 +14,7 @@ class FinalizedMatchedStream<V> {
     this.suppliers = suppliers;
   }
 
-  public Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>> subscribers(Pipe pipe) {
+  public Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>> subscribers(NamedPipe pipe) {
     return new Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>>() {
       @Override
       public Map<Key, KeyedConsumer<? extends Key, V>> apply(Key key) {

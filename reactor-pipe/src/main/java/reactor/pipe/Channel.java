@@ -1,7 +1,6 @@
 package reactor.pipe;
 
 import org.pcollections.PVector;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.fn.tuple.Tuple;
@@ -15,11 +14,11 @@ import java.util.function.Predicate;
 
 public class Channel<T> implements Subscriber<T> {
 
-  private final AnonymousFlow<T> stream;
+  private final AnonymousPipe<T> stream;
   private final Atom<PVector<T>> state;
   private final AtomicBoolean    isDrained;
 
-  Channel(AnonymousFlow<T> stream,
+  Channel(AnonymousPipe<T> stream,
           Atom<PVector<T>> state) {
     this.stream = stream;
     this.state = state;
@@ -94,7 +93,7 @@ public class Channel<T> implements Subscriber<T> {
     }
   }
 
-  public AnonymousFlow<T> stream() {
+  public AnonymousPipe<T> stream() {
     this.isDrained.set(true);
     return this.stream;
   }
