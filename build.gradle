@@ -22,6 +22,7 @@ ext {
   reactorCoreVersion = '2.0.4.RELEASE'
   pcollectionsVersion = '2.1.2'
   kafkaVersion = '0.8.2.1'
+  metricsVersion = '3.1.1'
 }
 
 
@@ -61,6 +62,10 @@ project('reactor-pipe') {
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorCoreVersion"
     compile "org.pcollections:pcollections:$pcollectionsVersion"
+
+    compile "io.projectreactor:reactor-logback:$reactorCoreVersion"
+    compile "io.dropwizard.metrics:metrics-core:$metricsVersion"
+
     testCompile group: 'junit', name: 'junit', version:'4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
   }
