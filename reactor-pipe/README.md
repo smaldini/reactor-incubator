@@ -1,7 +1,7 @@
 # Reactor Pipes - in-process channels and streams
 
 Reactor Pipes is foundation for building complex, performant distributed and in-memory
-stream processing toplogies. 
+stream processing topologies. 
 
 Main features include:
 
@@ -18,8 +18,10 @@ Main features include:
 
 Near-future plans for extensions:
 
-  * Integration with Databases for persisting Stream information between restarts
-  * Integration with Message Queues for distributed and fault-tolerant processing
+  * Integration with Databases for persisting Stream information between
+    restarts
+  * Integration with Message Queues for distributed and fault-tolerant
+    processing
   * Mesos integration for distribution
   
 ## Why Pipes?
@@ -39,40 +41,40 @@ but eternal sequences.
 Reactor Pipes can be also used to make asynchronous/concurrent programs
 simpler, easier to maintain and construct. For example, you could use
 __Channels__ with __Matched Pipes__ in order to build a lightweight
-websocket server implementation. Another example is asynchronous
+WebSocket server implementation. Another example is asynchronous
 handlers in your HTTP server, which would work with any driver, no
 matter whether it offers asynchronous API or no. Other examples include
 IoT, Machine Learning, Business Analytics and more.
 
-The problem with Machine Learning on Streams is that most of algorithms
-assume some kind of state: for example, Classification assumes that
-trained model is available. Having this state somewhere in the Database
-or Cache brings additional deserialization overhead, and having it in
-memory might be hard if the system doesn't give you partitioning
-guarantees (that requests dedicated to same logical entity will end up
-on the same node).
+The problem with Machine Learning on Streams is that most of the
+algorithms assume some kind of state: for example, Classification
+assumes that trained model is available. Having this state somewhere in
+the Database or Cache brings additional deserialization overhead, and
+having it in memory might be hard if the system doesn't give you
+partitioning guarantees (that requests dedicated to same logical entity
+will end up on the same node).
 
 Reactor Pipes approach is simple: develop on one box, for one box, break
 processing in logical steps for distribution and scale up upon the
-need. Because of the nature and the layout of wiring between pipes and
-data flows, you will be able to effortlessly scale it up.
+need. Because of nature and the layout of wiring between pipes and data
+flows, you will be able to effortlessly scale it up.
 
 ## Terminology
 
-`Stream` is a term coming from Reactive Programming. Stream looks a little
-like a collection from the consumer perspective, with the only
-difference that if collection is a ready set of events, stream is an
-infinite collection. If you do `map` operation on the stream, `map`
-function will see each and every element coming to the stream.
+`Stream` is a term coming from Reactive Programming. The stream looks a
+little like a collection from the consumer perspective, with the only
+difference that if a collection is a ready set of events, the stream is
+an infinite collection. If you do `map` operation on the stream, the
+`map` function will see each and every element coming to the stream.
 
 `Publisher` (`generator` or `producer` in some terminologies) is a
 function or entity that publishes items to the stream. `Consumer` (or
 `listener`, in some terminologies) is a function that is subscribed to
-the stream, and will be asyncronously getting items that the `publisher`
-publishes to the stream.
+the stream, and will be asynchronously getting items that the
+`publisher` publishes to the stream.
 
 In some cases, pipes can serve simultaneously as a `consumer` and as a
-`producer`. For example, `map` is consumed to the events coming in
+`producer`. For example, `map` is consumed to the events coming in the
 stream, and publishes modified events further downstream.
 
 `Topology` is a stream with a chain of publishers and producers attached
@@ -87,7 +89,7 @@ incrementing each one of them, it serves as an upstream for the
 following `filter` function, that consumes events from it.  `Filter`
 serves as a `downstream` in this example.
 
-`Named` and `anonymous` pipes are just the means of explaning the
+`Named` and `anonymous` pipes are just the means of explaining the
 wiring between the parts of the topology. If each item within the
 `named` stream has to know where to subscribe and where to publish the
 resulting events, in `anonymous` topologies the connection between
@@ -122,8 +124,7 @@ intPipe.notify(Key.wrap("key1"), 1);
 
 ## Anonymous Topologies
 
-Anonymous streams are chain of decoupled async stream operations that
-represent a single logical operation. Anonymous Topology is subscribed
+Anonymous streams are a chain of decoupled async stream operations that represent a single logical operation. Anonymous Topology is subscribed
 to the particular key, and will create all the additional wiring between
 handlers in the Anonymous Topologies automatically.
 
@@ -145,7 +146,7 @@ pipe.notify(Key.wrap("source"), 2);
 
 The main difference between Java Streams and Reactor Pipes is the
 dispatch flexibility and combination of multiple streaming
-paradigms. You can pick the underlaying dispatcher depending on whether
+paradigms. You can pick the underlying dispatcher depending on whether
 your processing pipeline consists of short or long lived functions and
 so on.
 
@@ -159,12 +160,12 @@ the slower matching gets.
 However, with Matched Lazy Topologies, your lookups will still complete
 in constant time (`O(1)`) on average. In order to allow such a
 flexibility, you specify the predicate that will check if the key
-should be processed by this topology. Whenever first key comes,
+should be processed by this topology. Whenever the first key comes,
 all matchers will be queried and topologies will get created for
-the matched keys. All subsequent messages with same key will be
+the matched keys. All subsequent messages with the same key will be
 processed immediately. 
 
-This is not just a performance optimisation, this also allows you
+This is not just a performance optimization, this also allows you
 to process different entities independently. 
 
 ```java
@@ -180,11 +181,11 @@ firehose.notify(Key.wrap("source", "second"), 2);
 // => 4
 ```
 
-As you can see, toplogies will be created per-entity, which opens op a
+As you can see, topologies will be created per-entity, which opens op a
 lot of opportunities for independent stream processing, entity matching
 and storing per-entity state.
 
-## Independent Per-Entity Toplogies
+## Independent Per-Entity Topologies
 
 No more need to manage streams for multiple logical entities in the same handler,
 we'll do that for you. This future is used together with Matched Lazy Streams, so
@@ -193,10 +194,10 @@ every entity stream will have it's own in-memory state.
 ## Atomic State operations
 
 Since entity streams are independent and locks are expensive, it's important to
-keep the operations lock-free. For that you're provided with an `Atom<T>` which
+keep the operations lock-free. For that, you're provided with an `Atom<T>` which
 will ensure lock-free atomic updates to the state.
 
-And since the state for entity are split, you're able to save and restore between
+And since the states for the entities are split, you're able to save and restore between
 restarts of your processing topologies.
 
 ```java
