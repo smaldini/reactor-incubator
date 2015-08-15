@@ -208,10 +208,11 @@ public class Firehose<K extends Key> {
             requested.accumulateAndGet(l, new LongBinaryOperator() {
               @Override
               public long applyAsLong(long left, long right) {
-                if (left + right >= Long.MAX_VALUE) {
+                long sum = left + right;
+                if (sum >= Long.MAX_VALUE) {
                   return Long.MAX_VALUE; // Effectively unbounded
                 } else {
-                  return left + right;
+                  return sum;
                 }
               }
             });
@@ -228,7 +229,20 @@ public class Firehose<K extends Key> {
         ref.on(subscriptionKey, new SimpleConsumer<V>() {
           @Override
           public void accept(V value) {
-            long r = requested.getAndDecrement();
+            long r = requested.accumulateAndGet(-1, new LongBinaryOperator() {
+              @Override
+              public long applyAsLong(long old, long diff) {
+                long sum = old + diff;
+
+                if (sum >= Long.MAX_VALUE) {
+                  return Long.MAX_VALUE; // Effectively unbounded
+                } else if (sum <= 0){
+                  return 0;
+                } else {
+                  return sum;
+                }
+              }
+            });
             if (r >= 0) {
               subscriber.onNext(Tuple.of(subscriptionKey, value));
             }
