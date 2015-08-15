@@ -1,12 +1,15 @@
 package reactor.pipe;
 
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.processor.RingBufferProcessor;
 import reactor.core.support.Assert;
 import reactor.fn.Consumer;
 import reactor.fn.timer.HashWheelTimer;
+import reactor.fn.tuple.Tuple;
+import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.*;
@@ -14,7 +17,9 @@ import reactor.pipe.registry.*;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.LongBinaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -151,5 +156,85 @@ public class Firehose<K extends Key> {
   public void shutdown() {
     processor.onComplete();
 
+  }
+
+  public <V> Subscriber<Tuple2<K, V>> makeSubscriber() {
+    Firehose<K> ref = this;
+
+    return new Subscriber<Tuple2<K, V>>() {
+      private volatile Subscription subscription;
+
+      @Override
+      public void onSubscribe(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1L);
+      }
+
+      @Override
+      public void onNext(Tuple2<K, V> tuple) {
+        ref.notify(tuple.getT1(), tuple.getT2());
+        subscription.request(1L);
+      }
+
+      @Override
+      public void onError(Throwable throwable) {
+        ref.errorHandler.accept(throwable);
+      }
+
+      @Override
+      public void onComplete() {
+        subscription.cancel();
+      }
+    };
+  }
+
+  public <V> Publisher<Tuple2<K, V>> makePublisher(K subscriptionKey) {
+    Firehose<K> ref = this;
+
+
+    return new Publisher<Tuple2<K, V>>() {
+      @Override
+      public void subscribe(Subscriber<? super Tuple2<K, V>> subscriber) {
+
+        AtomicLong requested = new AtomicLong(0);
+
+        Subscription subscription = new Subscription() {
+          @Override
+          public void request(long l) {
+            if (l < 1) {
+              throw new RuntimeException("Can't request a non-positive number");
+            }
+
+            requested.accumulateAndGet(l, new LongBinaryOperator() {
+              @Override
+              public long applyAsLong(long left, long right) {
+                if (left + right >= Long.MAX_VALUE) {
+                  return Long.MAX_VALUE; // Effectively unbounded
+                } else {
+                  return left + right;
+                }
+              }
+            });
+          }
+
+          @Override
+          public void cancel() {
+            ref.unregister(subscriptionKey);
+          }
+        };
+
+        subscriber.onSubscribe(subscription);
+
+        ref.on(subscriptionKey, new SimpleConsumer<V>() {
+          @Override
+          public void accept(V value) {
+            long r = requested.getAndDecrement();
+            if (r >= 0) {
+              subscriber.onNext(Tuple.of(subscriptionKey, value));
+            }
+          }
+        });
+      }
+    };
   }
 }
