@@ -18,10 +18,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 import java.util.function.LongBinaryOperator;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.Supplier;
 
 
 public class Firehose<K extends Key> {

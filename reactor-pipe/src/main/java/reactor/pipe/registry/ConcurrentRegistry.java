@@ -14,9 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,7 +102,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
     return lookupMap.updateAndReturnOther((map) -> {
       List<K> unsubscribeKys = map.keySet()
                                   .stream()
-                                  .filter(pred)
+                                  .filter(pred::test)
                                   .collect(Collectors.toList());
 
       PMap<K, PVector<Registration<K>>> newv = map.minusAll(unsubscribeKys);

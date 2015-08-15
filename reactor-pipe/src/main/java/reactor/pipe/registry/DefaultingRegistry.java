@@ -4,7 +4,7 @@ import reactor.pipe.KeyedConsumer;
 import reactor.pipe.key.Key;
 
 import java.util.Map;
-import java.util.function.Function;
+import reactor.fn.Function;
 
 public interface DefaultingRegistry<K extends Key> extends Registry<K>, Iterable<Registration<K>> {
 

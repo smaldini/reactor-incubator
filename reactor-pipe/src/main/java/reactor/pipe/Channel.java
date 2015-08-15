@@ -9,8 +9,8 @@ import reactor.pipe.concurrent.Atom;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
 
 public class Channel<T> implements Subscriber<T> {
 

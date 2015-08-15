@@ -1,6 +1,6 @@
 package reactor.pipe.fn;
 
-import java.util.function.BiFunction;
+import reactor.fn.BiFunction;
 
 /**
  * Java Reducer interface is much too confusing.

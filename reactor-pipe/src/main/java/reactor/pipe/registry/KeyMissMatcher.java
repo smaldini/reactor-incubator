@@ -1,6 +1,6 @@
 package reactor.pipe.registry;
 
-import java.util.function.Predicate;
+import reactor.fn.Predicate;
 
 public interface KeyMissMatcher<T> extends Predicate<T> {
 

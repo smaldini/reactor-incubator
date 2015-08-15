@@ -3,7 +3,7 @@ package reactor.pipe.concurrent;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import reactor.fn.Supplier;
 
 public class LazyVar<T> {
 

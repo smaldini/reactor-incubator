@@ -4,7 +4,7 @@ package reactor.pipe;
 import reactor.pipe.key.Key;
 
 import java.util.*;
-import java.util.function.Function;
+import reactor.fn.Function;
 
 class FinalizedMatchedStream<V> {
 

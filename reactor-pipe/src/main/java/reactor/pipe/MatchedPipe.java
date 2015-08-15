@@ -10,10 +10,10 @@ import org.pcollections.TreePVector;
 import javax.lang.model.type.NullType;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.UnaryOperator;
 
 public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 

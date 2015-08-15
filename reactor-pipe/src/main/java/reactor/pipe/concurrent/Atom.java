@@ -4,9 +4,9 @@ import reactor.fn.tuple.Tuple2;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.UnaryOperator;
 
 /**
  * Generic Atom
@@ -79,4 +79,3 @@ public class Atom<T> {
 
 
 }
-

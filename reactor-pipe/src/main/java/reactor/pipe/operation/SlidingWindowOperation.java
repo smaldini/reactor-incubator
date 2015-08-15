@@ -8,7 +8,7 @@ import org.pcollections.PVector;
 import org.pcollections.TreePVector;
 
 import java.util.List;
-import java.util.function.UnaryOperator;
+import reactor.fn.UnaryOperator;
 
 public class SlidingWindowOperation<SRC extends Key, DST extends Key, V> implements KeyedConsumer<SRC, V> {
 

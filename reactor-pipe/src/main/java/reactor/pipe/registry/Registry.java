@@ -4,7 +4,7 @@ import reactor.pipe.KeyedConsumer;
 import reactor.pipe.key.Key;
 
 import java.util.List;
-import java.util.function.Predicate;
+import reactor.fn.Predicate;
 import java.util.stream.Stream;
 
 public interface Registry<K extends Key> {
