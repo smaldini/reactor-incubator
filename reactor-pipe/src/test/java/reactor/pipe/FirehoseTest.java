@@ -1,5 +1,8 @@
 package reactor.pipe;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.key.Key;
 import org.junit.Test;
@@ -9,8 +12,10 @@ import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 
 import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -152,5 +157,101 @@ public class FirehoseTest extends AbstractFirehoseTest {
     assertTrue(caught.get(1, TimeUnit.MINUTES) instanceof ArithmeticException);
 
     asyncDispatcher.shutdown();
+  }
+
+  @Test
+  public void subscriberTest() throws InterruptedException {
+    Subscriber<Tuple2<Key, Integer>> subscriber = firehose.makeSubscriber();
+    AVar<Integer> val = new AVar<>();
+    AVar<Integer> val2 = new AVar<>();
+
+    AtomicLong requested = new AtomicLong(0);
+    AtomicBoolean cancelCalled = new AtomicBoolean(false);
+    Subscription subscription = new Subscription() {
+      @Override
+      public void request(long l) {
+        requested.addAndGet(l);
+      }
+
+      @Override
+      public void cancel() {
+        cancelCalled.set(true);
+      }
+    };
+
+    subscriber.onSubscribe(subscription);
+    assertThat(requested.get(), is(1L));
+
+    firehose.on(Key.wrap("key1"), val::set);
+    assertThat(requested.get(), is(1L));
+    firehose.on(Key.wrap("key2"), val2::set);
+    assertThat(requested.get(), is(1L));
+
+    subscriber.onNext(Tuple.of(Key.wrap("key1"), 1));
+    subscriber.onNext(Tuple.of(Key.wrap("key2"), 2));
+
+    assertThat(val.get(10, TimeUnit.SECONDS), is(1));
+    assertThat(val2.get(10, TimeUnit.SECONDS), is(2));
+
+    subscriber.onComplete();
+    assertThat(cancelCalled.get(), is(true));
+  }
+
+  @Test
+  public void publisherTest() throws InterruptedException, TimeoutException, BrokenBarrierException {
+    Publisher<Tuple2<Key, Integer>> publisher = firehose.makePublisher(Key.wrap("key1"));
+
+    AtomicReference<Tuple2<Key, Integer>> tupleRef = new AtomicReference<>();
+    CountDownLatch latch1 = new CountDownLatch(1);
+    CountDownLatch latch2 = new CountDownLatch(2);
+    CountDownLatch latch3 = new CountDownLatch(3);
+
+    Subscriber<Tuple2<Key, Integer>> subscriber = new Subscriber<Tuple2<Key, Integer>>() {
+      private volatile Subscription subscription;
+      @Override
+      public void onSubscribe(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1);
+      }
+
+      @Override
+      public void onNext(Tuple2<Key, Integer> tuple) {
+        tupleRef.set(tuple);
+        subscription.request(1);
+        try {
+          latch1.countDown();
+          latch2.countDown();
+          latch3.countDown();
+        } catch (Exception e) {
+          //
+        }
+      }
+
+      @Override
+      public void onError(Throwable throwable) {
+
+      }
+
+      @Override
+      public void onComplete() {
+        subscription.cancel();
+      }
+    };
+
+    publisher.subscribe(subscriber);
+
+    firehose.notify(Key.wrap("key1"), 1);
+
+    latch1.await(10, TimeUnit.SECONDS);
+    assertThat(tupleRef.get().getT2(), is(1));
+
+    firehose.notify(Key.wrap("key1"), 2);
+    latch2.await(10, TimeUnit.SECONDS);
+    assertThat(tupleRef.get().getT2(), is(2));
+
+    subscriber.onComplete();
+    firehose.notify(Key.wrap("key1"), 3);
+    latch2.await(1, TimeUnit.SECONDS);
+    assertThat(tupleRef.get().getT2(), is(2));
   }
 }
