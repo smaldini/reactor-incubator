@@ -10,6 +10,8 @@ import kafka.serializer.Decoder;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.fn.tuple.Tuple;
+import reactor.fn.tuple.Tuple2;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +21,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class KafkaPublisher<K, V> implements Publisher<KeyValuePair<K, V>> {
+public class KafkaPublisher<K, V> implements Publisher<Tuple2<K, V>> {
 
   private final static int concurrencyLevel = 1;
 
-  private final ExecutorService                                           executor;
-  private final Map<Subscription, Subscriber<? super KeyValuePair<K, V>>> subscribers;
+  private final ExecutorService                                     executor;
+  private final Map<Subscription, Subscriber<? super Tuple2<K, V>>> subscribers;
 
   public KafkaPublisher(Properties consumerProperties,
                         String topic,
@@ -49,10 +51,9 @@ public class KafkaPublisher<K, V> implements Publisher<KeyValuePair<K, V>> {
         ConsumerIterator<K, V> it = stream.iterator();
         while (it.hasNext() && !Thread.currentThread().isInterrupted()) {
           MessageAndMetadata<K, V> msg = it.next();
-          KeyValuePair<K, V> kvp = new KeyValuePair<K, V>(msg.key(), msg.message());
-
-          for(Map.Entry<Subscription, Subscriber<? super KeyValuePair<K, V>>> entry: subscribers.entrySet()) {
-            entry.getValue().onNext(kvp);
+          Tuple2<K, V> tuple = Tuple.of(msg.key(), msg.message());
+          for (Map.Entry<Subscription, Subscriber<? super Tuple2<K, V>>> entry : subscribers.entrySet()) {
+            entry.getValue().onNext(tuple);
           }
 
         }
@@ -62,12 +63,10 @@ public class KafkaPublisher<K, V> implements Publisher<KeyValuePair<K, V>> {
   }
 
   @Override
-  public void subscribe(Subscriber<? super KeyValuePair<K, V>> subscriber) {
+  public void subscribe(Subscriber<? super Tuple2<K, V>> subscriber) {
     this.subscribers.put(new KafkaSubscription<>(subscriber,
                                                  subscribers::remove),
                          subscriber);
-
   }
-
 
 }
