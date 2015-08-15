@@ -94,7 +94,7 @@ project('reactor-pipe-examples') {
   apply plugin: 'osgi'
 
   dependencies {
-    compile project(':reactor-core')
+    compile project(':reactor-pipe')
     testCompile group: 'junit', name: 'junit', version:'4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version:'1.3'
   }
