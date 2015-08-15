@@ -28,9 +28,9 @@ public class KafkaSubscription<T> implements Subscription {
 
     requested.accumulateAndGet(l, new LongBinaryOperator() {
       @Override
-      public long applyAsLong(long left, long right) {
-        long sum = left + right;
-        if (sum >= Long.MAX_VALUE) {
+      public long applyAsLong(long old, long diff) {
+        long sum = old + diff;
+        if (sum < 0 || sum == Long.MAX_VALUE) {
           return Long.MAX_VALUE; // Effectively unbounded
         } else {
           return sum;
@@ -45,9 +45,9 @@ public class KafkaSubscription<T> implements Subscription {
       public long applyAsLong(long old, long diff) {
         long sum = old + diff;
 
-        if (sum >= Long.MAX_VALUE) {
+        if (old == Long.MAX_VALUE || sum <= 0) {
           return Long.MAX_VALUE; // Effectively unbounded
-        } else if (sum <= 0){
+        } else if (old == 1) {
           return 0;
         } else {
           return sum;
