@@ -35,11 +35,12 @@ public class RedisStateProvider implements StateProvider {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <SRC, T> Atom<T> makeAtom(SRC src, T init) { // Init should never be null!
-    Codec<SRC, String> keyCodec = getCodec((Class<SRC>) init.getClass());
+    Codec<SRC, String> keyCodec = getCodec((Class<SRC>) src.getClass());
     Codec<T, String> valueCodec = getCodec((Class<T>) init.getClass());
 
-    Atom<T> atom = new Atom<>(init);
+    Atom<T> atom = new Atom<>(initialLoad(src, init));
 
     executor.submit(new Runnable() {
       @Override
@@ -57,5 +58,20 @@ public class RedisStateProvider implements StateProvider {
     return atom;
   }
 
-  
+  @SuppressWarnings("unchecked")
+  protected <SRC, T> T initialLoad(SRC src, T init) {
+    Codec<SRC, String> keyCodec = getCodec((Class<SRC>) src.getClass());
+    Codec<T, String> valueCodec = getCodec((Class<T>) init.getClass());
+
+    try (Jedis client = pool.getResource()) {
+      String loaded = client.get(keyCodec.encode(src));
+      if (loaded == null) {
+        return init;
+      } else {
+        return valueCodec.decode(loaded);
+      }
+    } catch (Exception e) {
+      throw e;
+    }
+  }
 }
