@@ -3,13 +3,14 @@ package reactor.pipe.redis;
 import reactor.pipe.codec.Codec;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.state.StateProvider;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import redis.clients.jedis.*;
 
 public class RedisStateProvider implements StateProvider {
 
@@ -25,7 +26,8 @@ public class RedisStateProvider implements StateProvider {
                          6379);
   }
 
-  public <T> void registerCodec(Class<T> klass, Codec<T, String> encoder) {
+  public <T> void registerCodec(Class<T> klass,
+                                Codec<T, String> encoder) {
     this.encoders.put(klass, encoder);
   }
 
