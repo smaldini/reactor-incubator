@@ -86,5 +86,9 @@ public class Key {
            "parts=" + Arrays.toString(parts) +
            '}';
   }
+
+  public Object[] getObjects() {
+    return Arrays.copyOf(parts, parts.length);
+  }
 }
 
