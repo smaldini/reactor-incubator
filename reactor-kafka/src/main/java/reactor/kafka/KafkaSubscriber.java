@@ -30,6 +30,7 @@ public class KafkaSubscriber<K, V> implements Subscriber<Tuple2<K, V>> {
 
   @Override
   public void onSubscribe(Subscription subscription) {
+    this.subscription = subscription;
     this.subscription.request(Long.MAX_VALUE);
   }
 
