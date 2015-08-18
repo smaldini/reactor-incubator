@@ -24,6 +24,8 @@ ext {
   redisVersion = "2.7.2"
   kafkaVersion = "0.8.2.1"
   metricsVersion = "3.1.1"
+  logbackVersion = "1.1.3"
+  slf4jVersion = "1.7.12"
 }
 
 
@@ -64,8 +66,10 @@ project("reactor-pipe") {
     compile "io.projectreactor:reactor-core:$reactorCoreVersion"
     compile "org.pcollections:pcollections:$pcollectionsVersion"
 
-    compile "io.projectreactor:reactor-logback:$reactorCoreVersion"
     compile "io.dropwizard.metrics:metrics-core:$metricsVersion"
+
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "ch.qos.logback:logback-classic:$logbackVersion"
 
     testCompile group: "junit", name: "junit", version:"4.12"
     testCompile group: "org.hamcrest", name: "hamcrest-all", version:"1.3"
@@ -94,6 +98,9 @@ project("reactor-pipe-examples") {
 
   dependencies {
     compile project(":reactor-pipe")
+    compile project(":reactor-pipe-redis")
+    compile project(":reactor-kafka")
+
     testCompile group: "junit", name: "junit", version:"4.12"
     testCompile group: "org.hamcrest", name: "hamcrest-all", version:"1.3"
   }
