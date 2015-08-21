@@ -1,5 +1,6 @@
 package reactor.pipe.example.twitter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,12 @@ public class ActivityDashboard {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ActivityDashboard.class);
 
+
+  private ObjectMapper objectMapper;
+
   public ActivityDashboard() {
+    this.objectMapper = new ObjectMapper();
+
     ExecutorService executorService = Executors.newFixedThreadPool(2);
     executorService.submit(producerRunnable());
     executorService.submit(consumerRunnable());
