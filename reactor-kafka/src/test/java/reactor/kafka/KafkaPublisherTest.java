@@ -53,7 +53,7 @@ public class KafkaPublisherTest {
     KafkaPublisher<Key, String> kafkaPublisher = new KafkaPublisher<>(consumerProperties(),
                                                                       topic,
                                                                       (i) -> {
-                                                                        return Key.wrap(new String(i).split(","));
+                                                                        return Key.wrap((Object[])new String(i).split(","));
                                                                       },
                                                                       String::new);
     Subscriber<Tuple2<Key, String>> firehoseConsumer = publisherFirehose.makeSubscriber();
