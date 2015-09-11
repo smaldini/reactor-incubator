@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Reads the items from the kafka queue and puts them into the publisher
+ */
 public class KafkaPublisher<K, V> implements Publisher<Tuple2<K, V>> {
 
   private final static int concurrencyLevel = 1;
@@ -45,7 +48,6 @@ public class KafkaPublisher<K, V> implements Publisher<Tuple2<K, V>> {
                                     valueDecoder);
     List<KafkaStream<K, V>> streams = consumerMap.get(topic);
 
-
     for (final KafkaStream stream : streams) {
       executor.execute(() -> {
         ConsumerIterator<K, V> it = stream.iterator();
@@ -64,8 +66,11 @@ public class KafkaPublisher<K, V> implements Publisher<Tuple2<K, V>> {
 
   @Override
   public void subscribe(Subscriber<? super Tuple2<K, V>> subscriber) {
-    this.subscribers.put(new KafkaSubscription<>(subscriber,
-                                                 subscribers::remove),
+    Subscription subscription = new KafkaSubscription<>(subscriber,
+                                                        subscribers::remove);
+    subscriber.onSubscribe(subscription);
+
+    this.subscribers.put(subscription,
                          subscriber);
   }
 
