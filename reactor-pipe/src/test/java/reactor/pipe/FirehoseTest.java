@@ -6,8 +6,6 @@ import org.reactivestreams.Subscription;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.key.Key;
 import org.junit.Test;
-import reactor.core.Dispatcher;
-import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 
@@ -144,7 +142,6 @@ public class FirehoseTest extends AbstractFirehoseTest {
   @Test
   public void errorTest() throws InterruptedException {
     AVar<Throwable> caught = new AVar<>();
-    Dispatcher asyncDispatcher = new ThreadPoolExecutorDispatcher(2, 100);
     Firehose<Key> asyncFirehose = new Firehose<>(throwable -> caught.set(throwable));
     Key k1 = Key.wrap("key1");
 
@@ -156,7 +153,7 @@ public class FirehoseTest extends AbstractFirehoseTest {
 
     assertTrue(caught.get(1, TimeUnit.MINUTES) instanceof ArithmeticException);
 
-    asyncDispatcher.shutdown();
+    asyncFirehose.shutdown();
   }
 
   @Test
