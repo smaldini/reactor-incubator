@@ -10,6 +10,9 @@ import reactor.fn.tuple.Tuple2;
 
 import java.util.Properties;
 
+/**
+ * Writes received items to Kafka
+ */
 public class KafkaSubscriber<K, V> implements Subscriber<Tuple2<K, V>> {
 
   private final    KafkaProducer<K, V>  kafkaProducer;
