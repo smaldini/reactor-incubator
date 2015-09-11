@@ -26,7 +26,7 @@ public class NamedPipe<V> {
     this(new Firehose());
   }
 
-  protected NamedPipe(Firehose firehose) {
+  public NamedPipe(Firehose firehose) {
     this.firehose = firehose;
     this.stateProvider = new DefaultStateProvider();
   }
