@@ -96,6 +96,7 @@ project("reactor-pipe") {
   apply plugin: 'maven'
 
   group = 'io.projectreactor'
+  version = '1.0.0-SNAPSHOT'
 
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorVersion"
@@ -117,6 +118,7 @@ project("reactor-kafka") {
   apply plugin: 'maven'
 
   group = 'io.projectreactor'
+  version = '1.0.0-SNAPSHOT'
 
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorVersion"
@@ -130,6 +132,10 @@ project("reactor-pipe-examples") {
   description = "Reactor Pipe Examples"
 
   apply plugin: 'osgi'
+  apply plugin: 'maven'
+
+  group = 'io.projectreactor'
+  version = '1.0.0-SNAPSHOT'
 
   dependencies {
     compile project(":reactor-pipe")
