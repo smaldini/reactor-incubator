@@ -26,12 +26,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> MatchedPipe<V1> map(Function<V, V1> mapper) {
-    this.suppliers.add(new StreamSupplier<V, V1>() {
+  public <SRC extends Key, V1> MatchedPipe<V1> map(Function<V, V1> mapper) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V1>() {
       @Override
-      public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                          DST dst,
-                                                                          NamedPipe<V1> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V1> pipe) {
         return (key, value) -> {
           pipe.notify(dst, mapper.apply(value));
         };
@@ -41,12 +41,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<V> filter(Predicate<V> predicate) {
-    this.suppliers.add(new StreamSupplier<V, V>() {
+  public <SRC extends Key> MatchedPipe<V> filter(Predicate<V> predicate) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V>() {
       @Override
-      public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                          DST dst,
-                                                                          NamedPipe<V> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V> pipe) {
         return (key, value) -> {
           if (predicate.test(value)) {
             pipe.notify(dst, value);
@@ -59,12 +59,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<List<V>> slide(UnaryOperator<List<V>> drop) {
-    this.suppliers.add(new StreamSupplier<V, V>() {
+  public <SRC extends Key> MatchedPipe<List<V>> slide(UnaryOperator<List<V>> drop) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V>() {
       @Override
-      public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                          DST dst,
-                                                                          NamedPipe<V> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V> pipe) {
         Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
 
         return new SlidingWindowOperation<SRC, DST, V>(pipe.firehose(),
@@ -78,12 +78,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<List<V>> partition(Predicate<List<V>> emit) {
-    this.suppliers.add(new StreamSupplier<V, V>() {
+  public <SRC extends Key> MatchedPipe<List<V>> partition(Predicate<List<V>> emit) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V>() {
       @Override
-      public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                          DST dst,
-                                                                          NamedPipe<V> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V> pipe) {
         Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
 
         return new PartitionOperation<SRC, DST, V>(pipe.firehose(),
@@ -97,12 +97,26 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public FinalizedMatchedStream consume(Consumer<V> consumer) {
-    this.suppliers.add(new StreamSupplier<V, NullType>() {
+  public <SRC extends Key> FinalizedMatchedStream consume(KeyedConsumer<SRC, V> consumer) {
+    this.suppliers.add(new StreamSupplier<SRC, V, NullType>() {
+
       @Override
-      public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                          DST dst,
-                                                                          NamedPipe<NullType> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<NullType> pipe) {
+        return consumer;
+      }
+    });
+    return new FinalizedMatchedStream(suppliers);
+  }
+
+  @SuppressWarnings(value = {"unchecked"})
+  public <SRC extends Key> FinalizedMatchedStream consume(Consumer<V> consumer) {
+    this.suppliers.add(new StreamSupplier<SRC, V, NullType>() {
+      @Override
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<NullType> pipe) {
         return (key, value) -> consumer.accept(value);
       }
     });
@@ -110,10 +124,10 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @FunctionalInterface
-  public static interface StreamSupplier<V, V1> {
-    public <SRC extends Key, DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                                        DST dst,
-                                                                        NamedPipe<V1> pipe);
+  public static interface StreamSupplier<SRC, V, V1> {
+    public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                       DST dst,
+                                                       NamedPipe<V1> pipe);
   }
 
 
