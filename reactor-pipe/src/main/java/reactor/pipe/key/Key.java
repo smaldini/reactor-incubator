@@ -7,6 +7,7 @@ public class Key {
 
   private final Object[] parts;
   private final boolean isDerived;
+  private volatile Object metadata;
 
   public Key(Object[] parts) {
     this(parts, false);
@@ -15,6 +16,11 @@ public class Key {
   protected Key(Object[] parts, boolean isDerived) {
     this.parts = parts;
     this.isDerived = isDerived;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T getMetadata() {
+    return (T) metadata;
   }
 
   public Key derive() {
