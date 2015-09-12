@@ -18,12 +18,12 @@ public class RedisStateProvider implements StateProvider {
   private final ScheduledExecutorService executor;
   private final JedisPool                pool;
 
-  public RedisStateProvider() {
+  public RedisStateProvider(String host, int port) {
     this.encoders = new HashMap<>();
     executor = Executors.newScheduledThreadPool(1);
     pool = new JedisPool(new JedisPoolConfig(),
-                         "localhost",
-                         6379);
+                         host,
+                         port);
   }
 
   public <T> void registerCodec(Class<T> klass,
