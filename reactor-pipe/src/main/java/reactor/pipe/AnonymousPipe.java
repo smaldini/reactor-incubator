@@ -1,13 +1,10 @@
 package reactor.pipe;
 
+import reactor.fn.*;
+import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 
 import java.util.List;
-import reactor.fn.UnaryOperator;
-
-import reactor.fn.Consumer;
-import reactor.fn.Function;
-import reactor.fn.Predicate;
 
 
 public class AnonymousPipe<V> {
@@ -33,6 +30,16 @@ public class AnonymousPipe<V> {
     Key downstream = upstream.derive();
 
     pipe.map(upstream, downstream, mapper);
+
+    return new AnonymousPipe<>(rootKey, downstream, pipe);
+  }
+
+  @SuppressWarnings(value = {"unchecked"})
+  public <V1, ST> AnonymousPipe<V1> map(BiFunction<Atom<ST>, V, V1> mapper,
+                                        ST init) {
+    Key downstream = upstream.derive();
+
+    pipe.map(upstream, downstream, mapper, init);
 
     return new AnonymousPipe<>(rootKey, downstream, pipe);
   }
