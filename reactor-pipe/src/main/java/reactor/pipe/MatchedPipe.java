@@ -1,5 +1,6 @@
 package reactor.pipe;
 
+import reactor.fn.*;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import reactor.pipe.operation.PartitionOperation;
@@ -10,10 +11,6 @@ import org.pcollections.TreePVector;
 import javax.lang.model.type.NullType;
 import java.util.LinkedList;
 import java.util.List;
-import reactor.fn.Consumer;
-import reactor.fn.Function;
-import reactor.fn.Predicate;
-import reactor.fn.UnaryOperator;
 
 public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 
@@ -34,6 +31,24 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
                                                          NamedPipe<V1> pipe) {
         return (key, value) -> {
           pipe.notify(dst, mapper.apply(value));
+        };
+      }
+    });
+    return new MatchedPipe<>(suppliers);
+  }
+
+  @SuppressWarnings(value = {"unchecked"})
+  public <SRC extends Key, ST, V1> MatchedPipe<V1> map(BiFunction<Atom<ST>, V, V1> mapper,
+                                                       ST init) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V1>() {
+      @Override
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V1> pipe) {
+        Atom<ST> st = pipe.stateProvider().makeAtom(src, init);
+
+        return (key, value) -> {
+          pipe.notify(dst, mapper.apply(st, value));
         };
       }
     });

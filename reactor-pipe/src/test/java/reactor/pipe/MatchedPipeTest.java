@@ -1,6 +1,7 @@
 package reactor.pipe;
 
 import reactor.pipe.concurrent.AVar;
+import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import org.junit.Test;
 import org.pcollections.TreePVector;
@@ -27,6 +28,26 @@ public class MatchedPipeTest extends AbstractStreamTest {
     pipe.notify(Key.wrap("source", "first"), 1);
 
     assertThat(res.get(1, TimeUnit.SECONDS), is(4));
+  }
+
+  @Test
+  public void statefulMapTest() throws InterruptedException {
+    AVar<Integer> res = new AVar<>(9);
+    NamedPipe<Integer> intPipe = new NamedPipe<>();
+
+    intPipe.matched((key) -> key.getPart(0).equals("source"))
+           .map((i) -> i + 1)
+           .map((Atom<Integer> state, Integer i) -> {
+                  return state.update(old -> old + i);
+                },
+                0)
+           .consume(res::set);
+
+    intPipe.notify(Key.wrap("source", "1"), 1);
+    intPipe.notify(Key.wrap("source", "1"), 2);
+    intPipe.notify(Key.wrap("source", "1"), 3);
+
+    assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(9));
   }
 
   @Test
