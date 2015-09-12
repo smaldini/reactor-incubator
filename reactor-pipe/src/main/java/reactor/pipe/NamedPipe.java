@@ -27,8 +27,13 @@ public class NamedPipe<V> {
   }
 
   public NamedPipe(Firehose firehose) {
+    this(firehose, new DefaultStateProvider());
+  }
+
+  public NamedPipe(Firehose firehose,
+                   StateProvider stateProvider) {
     this.firehose = firehose;
-    this.stateProvider = new DefaultStateProvider();
+    this.stateProvider = stateProvider;
   }
 
   public NamedPipe<V> fork(ExecutorService executorService,
