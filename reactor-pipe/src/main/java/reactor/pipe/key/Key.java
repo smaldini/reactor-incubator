@@ -19,6 +19,11 @@ public class Key {
   }
 
   @SuppressWarnings("unchecked")
+  public <T> void setMetadata(T metadata) {
+    this.metadata = metadata;
+  }
+
+  @SuppressWarnings("unchecked")
   public <T> T getMetadata() {
     return (T) metadata;
   }
