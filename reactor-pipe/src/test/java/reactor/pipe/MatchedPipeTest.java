@@ -32,7 +32,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void statefulMapTest() throws InterruptedException {
-    AVar<Integer> res = new AVar<>(9);
+    AVar<Integer> res = new AVar<>(3);
     NamedPipe<Integer> intPipe = new NamedPipe<>();
 
     intPipe.matched((key) -> key.getPart(0).equals("source"))
