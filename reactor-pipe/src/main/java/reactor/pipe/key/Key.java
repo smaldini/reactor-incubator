@@ -10,12 +10,13 @@ public class Key {
   private volatile Object metadata;
 
   public Key(Object[] parts) {
-    this(parts, false);
+    this(parts, false, null);
   }
 
-  protected Key(Object[] parts, boolean isDerived) {
+  protected Key(Object[] parts, boolean isDerived, Object metadata) {
     this.parts = parts;
     this.isDerived = isDerived;
+    this.metadata = metadata;
   }
 
   @SuppressWarnings("unchecked")
@@ -32,16 +33,17 @@ public class Key {
     Object[] newKey = new Object[parts.length + 1];
     System.arraycopy(parts, 0, newKey, 0, parts.length);
     newKey[parts.length] = UUID.randomUUID();
-    return new Key(newKey, true);
+    return new Key(newKey, true, metadata);
   }
 
-  public Object getPart(int index) {
+  @SuppressWarnings("unchecked")
+  public <T> T getPart(int index) {
     if (index > parts.length - 1) {
       throw new RuntimeException(String.format("Can't get a part with index %d from %d long key",
                                                index,
                                                parts.length));
     } else {
-      return parts[index];
+      return (T) parts[index];
     }
   }
 
