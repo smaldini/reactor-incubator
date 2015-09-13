@@ -1,22 +1,30 @@
 package reactor.pipe.concurrent;
 
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.UnaryOperator;
 import reactor.fn.tuple.Tuple2;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import reactor.fn.Function;
-import reactor.fn.Predicate;
-import reactor.fn.UnaryOperator;
 
 /**
  * Generic Atom
  */
 public class Atom<T> {
 
-  private AtomicReference<T> ref;
+  private final AtomicReference<T> ref;
+  private final Consumer<T>        newValueConsumer;
 
   public Atom(T ref) {
+    this(ref, null);
+  }
+  // TODO: make atom an intereace, extract consumer impl elsewhere
+  public Atom(T ref,
+              Consumer<T> newValueConsumer) {
     this.ref = new AtomicReference<T>(ref);
+    this.newValueConsumer = newValueConsumer;
   }
 
   public T deref() {
@@ -28,6 +36,9 @@ public class Atom<T> {
       T old = ref.get();
       T newv = swapOp.apply(old);
       if (ref.compareAndSet(old, newv)) {
+        if (newValueConsumer != null && !newv.equals(old)) {
+          newValueConsumer.accept(newv);
+        }
         return newv;
       }
     }
