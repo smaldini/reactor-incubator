@@ -142,7 +142,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
                                           if (acc.containsKey(entry.getKey())) {
                                             return acc.plus(entry.getKey(),
-                                                            acc.get(entry.getValue()).plus(reg));
+                                                            acc.get(entry.getKey()).plus(reg));
                                           } else {
                                             return acc.plus(entry.getKey(),
                                                             TreePVector.singleton(reg));
