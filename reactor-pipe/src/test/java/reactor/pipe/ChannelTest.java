@@ -12,11 +12,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class ChannelTest extends AbstractStreamTest {
+public class ChannelTest extends AbstractFirehoseTest {
 
   @Test
   public void simpleChannelTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     chan.tell(1);
@@ -33,7 +33,7 @@ public class ChannelTest extends AbstractStreamTest {
   @Test
   public void channelStreamTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>();
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     chan.stream().consume((i) -> res.set(i));
@@ -46,7 +46,7 @@ public class ChannelTest extends AbstractStreamTest {
   @Test
   public void drainedChannelTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>();
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     chan.stream().consume((i) -> res.set(i));
@@ -65,7 +65,7 @@ public class ChannelTest extends AbstractStreamTest {
 
   @Test
   public void consumingPublishingChannelsTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     Subscriber<Integer> subscriber = chan.subscriber();
@@ -97,7 +97,7 @@ public class ChannelTest extends AbstractStreamTest {
 
   @Test
   public void timedGetTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     CountDownLatch latch = new CountDownLatch(1);
@@ -118,7 +118,7 @@ public class ChannelTest extends AbstractStreamTest {
 
   @Test
   public void timedGetUnresolvedTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     Channel<Integer> chan = pipe.channel();
 
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(1L));
@@ -135,7 +135,7 @@ public class ChannelTest extends AbstractStreamTest {
 
   @Test
   public void channelDisposeTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(0L));
     Channel<Integer> chan = pipe.channel();
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(1L));

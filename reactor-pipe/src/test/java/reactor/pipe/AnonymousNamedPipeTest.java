@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class AnonymousNamedPipeTest extends AbstractStreamTest {
+public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
 
   @Test
   public void testMap() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
@@ -35,7 +35,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
   @Test
   public void statefulMapTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(3);
-    NamedPipe<Integer> intPipe = new NamedPipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
 
     intPipe.anonymous(Key.wrap("key1"))
            .map((i) -> i + 1)
@@ -54,7 +54,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testFilter() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
@@ -73,7 +73,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testPartition() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<List<Integer>> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
@@ -95,7 +95,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testSlide() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<List<Integer>> res = new AVar<>(6);
 
     pipe.anonymous(Key.wrap("source"))
@@ -117,7 +117,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testNotify() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     AnonymousPipe<Integer> s = pipe.anonymous(Key.wrap("source"));
@@ -133,7 +133,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testUnregister() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     CountDownLatch latch = new CountDownLatch(2);
 
     AnonymousPipe<Integer> s = pipe.anonymous(Key.wrap("source"));
@@ -153,7 +153,7 @@ public class AnonymousNamedPipeTest extends AbstractStreamTest {
   @Test
   public void testRedirect() throws InterruptedException {
     Key destination = Key.wrap("destination");
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     AnonymousPipe<Integer> s = pipe.anonymous(Key.wrap("source"));

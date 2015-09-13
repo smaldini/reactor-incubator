@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 
-  public MatchedPipe() {
+  MatchedPipe() {
     super(new LinkedList<>());
   }
 

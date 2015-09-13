@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class RedisStateProvider implements StateProvider {
+public class RedisStateProvider<K> implements StateProvider<K> {
 
   private final Map<Class, Codec>        encoders;
   private final ScheduledExecutorService executor;
@@ -38,8 +38,8 @@ public class RedisStateProvider implements StateProvider {
 
   @Override
   @SuppressWarnings("unchecked")
-  public <SRC, T> Atom<T> makeAtom(SRC src, T init) { // Init should never be null!
-    Codec<SRC, String> keyCodec = getCodec((Class<SRC>) src.getClass());
+  public <T> Atom<T> makeAtom(K src, T init) { // Init should never be null!
+    Codec<K, String> keyCodec = getCodec((Class<K>) src.getClass());
     Codec<T, String> valueCodec = getCodec((Class<T>) init.getClass());
 
     Atom<T> atom = new Atom<>(initialLoad(src, init));
@@ -61,8 +61,8 @@ public class RedisStateProvider implements StateProvider {
   }
 
   @SuppressWarnings("unchecked")
-  protected <SRC, T> T initialLoad(SRC src, T init) {
-    Codec<SRC, String> keyCodec = getCodec((Class<SRC>) src.getClass());
+  protected <T> T initialLoad(K src, T init) {
+    Codec<K, String> keyCodec = getCodec((Class<K>) src.getClass());
     Codec<T, String> valueCodec = getCodec((Class<T>) init.getClass());
 
     try (Jedis client = pool.getResource()) {

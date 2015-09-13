@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class MatchedPipeTest extends AbstractStreamTest {
+public class MatchedPipeTest extends AbstractFirehoseTest {
 
   @Test
   public void mapTest() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -33,7 +33,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
   @Test
   public void statefulMapTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(3);
-    NamedPipe<Integer> intPipe = new NamedPipe<>();
+    NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
 
     intPipe.matched((key) -> key.getPart(0).equals("source"))
            .map((i) -> i + 1)
@@ -52,7 +52,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testFilter() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -71,7 +71,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testPartition() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<List<Integer>> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
@@ -93,7 +93,7 @@ public class MatchedPipeTest extends AbstractStreamTest {
 
   @Test
   public void testSlide() throws InterruptedException {
-    NamedPipe<Integer> pipe = new NamedPipe<>();
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<List<Integer>> res = new AVar<>(6);
 
     pipe.matched(key -> key.getPart(0).equals("source"))

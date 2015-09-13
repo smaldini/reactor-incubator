@@ -2,6 +2,7 @@ package reactor.pipe;
 
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
+import reactor.fn.*;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import reactor.pipe.operation.PartitionOperation;
@@ -15,23 +16,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import reactor.fn.*;
 
 public class NamedPipe<V> {
 
-  private final Firehose      firehose;
-  private final StateProvider stateProvider;
-
-  public NamedPipe() {
-    this(new Firehose());
-  }
+  private final Firehose           firehose;
+  private final StateProvider<Key> stateProvider;
 
   public NamedPipe(Firehose firehose) {
-    this(firehose, new DefaultStateProvider());
+    this(firehose, new DefaultStateProvider<>());
   }
 
   public NamedPipe(Firehose firehose,
-                   StateProvider stateProvider) {
+                   StateProvider<Key> stateProvider) {
     this.firehose = firehose;
     this.stateProvider = stateProvider;
   }
@@ -231,7 +227,7 @@ public class NamedPipe<V> {
     return this.firehose;
   }
 
-  public StateProvider stateProvider() {
+  public StateProvider<Key> stateProvider() {
     return this.stateProvider;
   }
 

@@ -2,8 +2,8 @@ package reactor.pipe.state;
 
 import reactor.pipe.concurrent.Atom;
 
-public interface StateProvider {
+public interface StateProvider<K> {
 
-  public <SRC, T> Atom<T> makeAtom(SRC src, T init);
+  public <T> Atom<T> makeAtom(K src, T init);
 
 }

@@ -2,10 +2,10 @@ package reactor.pipe.state;
 
 import reactor.pipe.concurrent.Atom;
 
-public class DefaultStateProvider implements StateProvider {
+public class DefaultStateProvider<K> implements StateProvider<K> {
 
   @Override
-  public <SRC, T> Atom<T> makeAtom(SRC src, T init) {
+  public <T> Atom<T> makeAtom(K src, T init) {
     return new Atom<>(init);
   }
 }
