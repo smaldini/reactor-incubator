@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> {
 
   private final Atom<PMap<K, PVector<Registration<K>>>>                    lookupMap;
+  // TODO: Add a workaround for capturing lambdas, some kind of sequence id...
   private final Map<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>> keyMissMatchers;
 
   public ConcurrentRegistry() {
