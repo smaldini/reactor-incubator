@@ -9,31 +9,33 @@ import reactor.fn.Function;
 import reactor.fn.Predicate;
 import reactor.fn.UnaryOperator;
 import reactor.fn.tuple.Tuple;
+import reactor.fn.tuple.Tuple2;
 import reactor.pipe.KeyedConsumer;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> {
 
-  private final Atom<PMap<K, PVector<Registration<K>>>>                    lookupMap;
-  // TODO: Add a workaround for capturing lambdas, some kind of sequence id...
-  private final Map<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>> keyMissMatchers;
+  private final Atom<PMap<K, PVector<Registration<K>>>>                             lookupMap;
+  // This one can't be map, since key miss matcher is a possibly non-capturing lambda,
+  // So we have no other means to work around the uniqueness
+  private final List<Tuple2<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>>> keyMissMatchers;
 
   public ConcurrentRegistry() {
     this.lookupMap = new Atom<>(HashTreePMap.empty());
-    this.keyMissMatchers = new ConcurrentHashMap<>();
+    this.keyMissMatchers = new ArrayList<>();
   }
 
   @Override
   public void addKeyMissMatcher(KeyMissMatcher<K> matcher, Function<K, Map<K, KeyedConsumer>> supplier) {
-    this.keyMissMatchers.put(matcher, supplier);
+    this.keyMissMatchers.add(Tuple.of(matcher, supplier));
   }
 
   @Override
@@ -120,14 +122,13 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
         if (old.containsKey(key)) {
           return old;
         } else {
-          return keyMissMatchers.entrySet()
-                                .stream()
+          return keyMissMatchers.stream()
                                 .filter((m) -> {
-                                  return m.getKey().test(key);
+                                  return m.getT1().test(key);
                                 })
                                 .map(
-                                  (Map.Entry<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>> m) -> {
-                                    return m.getValue();
+                                  (Tuple2<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>> m) -> {
+                                    return m.getT2();
                                   })
                                 .flatMap((Function<K, Map<K, KeyedConsumer>> m) -> {
                                   return m.apply(key).entrySet().stream();
