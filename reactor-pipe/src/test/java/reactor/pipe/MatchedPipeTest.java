@@ -1,10 +1,10 @@
 package reactor.pipe;
 
+import org.junit.Test;
+import org.pcollections.TreePVector;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
-import org.junit.Test;
-import org.pcollections.TreePVector;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,9 +21,9 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
-          .map(i -> i + 1)
-          .map(i -> i * 2)
-          .consume(res::set);
+        .map(i -> i + 1)
+        .map(i -> i * 2)
+        .consume(res::set);
 
     pipe.notify(Key.wrap("source", "first"), 1);
 
@@ -56,11 +56,11 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     AVar<Integer> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
-          .map(i -> i + 1)
-          .filter(i -> i % 2 != 0)
-          .map(i -> i * 2)
+        .map(i -> i + 1)
+        .filter(i -> i % 2 != 0)
+        .map(i -> i * 2)
 
-          .consume(res::set);
+        .consume(res::set);
 
 
     pipe.notify(Key.wrap("source"), 1);
@@ -75,10 +75,10 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     AVar<List<Integer>> res = new AVar<>();
 
     pipe.matched(key -> key.getPart(0).equals("source"))
-          .partition((i) -> {
-            return i.size() == 5;
-          })
-          .consume(res::set);
+        .partition((i) -> {
+          return i.size() == 5;
+        })
+        .consume(res::set);
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
@@ -96,12 +96,12 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
     AVar<List<Integer>> res = new AVar<>(6);
 
-    pipe.matched(key -> key.getPart(0).equals("source"))
-          .slide(i -> {
-            return i.subList(i.size() > 5 ? i.size() - 5 : 0,
-                             i.size());
-          })
-          .consume(res::set);
+    pipe.matched((key) -> key.getPart(0).equals("source"))
+        .slide(i -> {
+          return i.subList(i.size() > 5 ? i.size() - 5 : 0,
+                           i.size());
+        })
+        .consume(res::set);
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
@@ -110,7 +110,27 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     pipe.notify(Key.wrap("source"), 5);
     pipe.notify(Key.wrap("source"), 6);
 
-    assertThat(res.get(1, TimeUnit.SECONDS), is(TreePVector.from(Arrays.asList(2,3,4,5,6))));
+    assertThat(res.get(1, TimeUnit.SECONDS), is(TreePVector.from(Arrays.asList(2, 3, 4, 5, 6))));
+  }
+
+  @Test
+  public void testMatching() throws InterruptedException {
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
+    AVar<Integer> res1 = new AVar<>(1);
+    AVar<Integer> res2 = new AVar<>(1);
+
+    for (AVar<Integer> avar : new AVar[]{res1, res2}) {
+      pipe.matched(key -> {
+        boolean a = avar == null; // This lambda is capturing;
+        return key.getPart(0).equals("source");
+      })
+          .consume(avar::set);
+    }
+
+    firehose.notify(Key.wrap("source"), 100);
+
+    assertThat(res1.get(1, TimeUnit.SECONDS), is(100));
+    assertThat(res2.get(1, TimeUnit.SECONDS), is(100));
   }
 
 }
