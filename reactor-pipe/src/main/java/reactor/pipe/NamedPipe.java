@@ -87,7 +87,7 @@ public class NamedPipe<V> {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
-        firehose.notify(destination, mapper.apply(value));
+        firehose.notify(destination.clone(key), mapper.apply(value));
       }
     });
 
@@ -104,7 +104,8 @@ public class NamedPipe<V> {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
-        firehose.notify(destination, fn.apply(st, value));
+        firehose.notify(destination.clone(key),
+                        fn.apply(st, value));
       }
     });
 
@@ -121,7 +122,7 @@ public class NamedPipe<V> {
     firehose.on(source, new KeyedConsumer<SRC, V>() {
       @Override
       public void accept(SRC key, V value) {
-        firehose.notify(destination, mapper.apply(value));
+        firehose.notify(destination.clone(key), mapper.apply(value));
       }
     });
 
@@ -136,7 +137,7 @@ public class NamedPipe<V> {
       @Override
       public void accept(SRC key, V value) {
         if (predicate.test(value)) {
-          firehose.notify(destination, value);
+          firehose.notify(destination.clone(key), value);
         }
       }
     });
@@ -154,6 +155,7 @@ public class NamedPipe<V> {
     firehose.getTimer().schedule(discarded_ -> {
       V currentDebounced = debounced.updateAndReturnOld(old_ -> null);
       if (currentDebounced != null) {
+        // TODO: FIX METADATA!
         firehose.notify(destination, currentDebounced);
       }
     }, period, timeUnit);

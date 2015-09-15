@@ -47,6 +47,12 @@ public class Key {
     }
   }
 
+  public Key clone(Key metadataSource) {
+    Key k = Key.wrap(parts);
+    k.setMetadata(metadataSource.getMetadata());
+    return k;
+  }
+
   public boolean isDerivedFrom(Key other) {
     if (!isDerived || (this.parts.length <= other.parts.length)) {
       return false;
