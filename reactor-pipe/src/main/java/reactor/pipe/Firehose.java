@@ -27,7 +27,7 @@ import reactor.fn.Supplier;
 
 public class Firehose<K extends Key> {
 
-  private final static int DEFAULT_RING_BUFFER_SIZE = 2048;
+  private final static int DEFAULT_RING_BUFFER_SIZE = 65536;
 
   private final DefaultingRegistry<K>         consumerRegistry;
   private final Consumer<Throwable>           errorHandler;
