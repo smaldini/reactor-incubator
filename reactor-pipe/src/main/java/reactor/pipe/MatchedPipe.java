@@ -30,7 +30,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
                                                          DST dst,
                                                          NamedPipe<V1> pipe) {
         return (key, value) -> {
-          pipe.notify(dst, mapper.apply(value));
+          pipe.notify(dst.clone(key), mapper.apply(value));
         };
       }
     });
@@ -48,7 +48,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
         Atom<ST> st = pipe.stateProvider().makeAtom(src, init);
 
         return (key, value) -> {
-          pipe.notify(dst, mapper.apply(st, value));
+          pipe.notify(dst.clone(key), mapper.apply(st, value));
         };
       }
     });
@@ -64,7 +64,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
                                                          NamedPipe<V> pipe) {
         return (key, value) -> {
           if (predicate.test(value)) {
-            pipe.notify(dst, value);
+            pipe.notify(dst.clone(key), value);
           }
         };
       }
