@@ -262,5 +262,41 @@ public class NamedPipeTest extends AbstractFirehoseTest {
     assertThat(latch.getCount(), is(1L));
   }
 
+  @Test
+  public void testExceptionInLoading() throws InterruptedException {
+    Key k1 = Key.wrap("key1");
+
+    CountDownLatch latch = new CountDownLatch(2);
+    Firehose<Key> firehose = new Firehose<>(new Consumer<Throwable>() {
+      @Override
+      public void accept(Throwable throwable) {
+        latch.countDown();
+      }
+    });
+    NamedPipe<Integer> intPipe = new NamedPipe<>(firehose,
+                                                 new StateProvider<Key>() {
+                                                   @Override
+                                                   public <T> Atom<T> makeAtom(Key src, T init) {
+                                                     throw new RuntimeException();
+                                                   }
+                                                 });
+
+    intPipe.matched((k) -> true)
+           .map(new BiFunction<Atom<Integer>, Integer, Integer>() {
+                  @Override
+                  public Integer apply(Atom<Integer> st, Integer i) {
+                    return st.update((acc) -> acc + i);
+                  }
+                },
+                0)
+           .consume(System.out::println);
+
+    firehose.notify(k1, 1);
+    firehose.notify(k1, 1);
+
+    latch.await(10, TimeUnit.SECONDS);
+    assertThat(latch.getCount(), is(0L));
+  }
+
 
 }
