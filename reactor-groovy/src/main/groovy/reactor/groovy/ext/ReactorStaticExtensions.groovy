@@ -41,7 +41,7 @@ class ReactorStaticExtensions {
 	}
 
 	static <T> Promise<T> from(final Promise<T> selfType, Closure<T> callback) {
-		Promises.syncTask(new ClosureSupplier<T>(callback))
+		Promises.task(new ClosureSupplier<T>(callback))
 	}
 
 }

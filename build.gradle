@@ -186,7 +186,7 @@ project('reactor-groovy') {
 }
 
 
-project('reactor-chronicle') {
+/*project('reactor-chronicle') {
   description = 'Reactor Groovy Extensions'
 
   apply plugin: 'osgi'
@@ -204,8 +204,8 @@ project('reactor-chronicle') {
     compile "net.openhft:chronicle:$openHftChronicleVersion",
         "net.openhft:lang:$openHftLangVersion"
   }
-}
-
+}*/
+/*
 
 project('reactor-amqp') {
   description = 'Reactor Groovy Extensions'
@@ -228,4 +228,4 @@ project('reactor-amqp') {
     testRuntime "ch.qos.logback:logback-classic:$logbackVersion",
         "org.slf4j:jcl-over-slf4j:$slf4jVersion"
   }
-}
+}*/
