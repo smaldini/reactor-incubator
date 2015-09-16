@@ -27,7 +27,7 @@ import reactor.fn.Supplier;
 
 public class Firehose<K extends Key> {
 
-  private final static int DEFAULT_RING_BUFFER_SIZE = 2048;
+  private final static int DEFAULT_RING_BUFFER_SIZE = 65536;
 
   private final DefaultingRegistry<K>         consumerRegistry;
   private final Consumer<Throwable>           errorHandler;
@@ -40,7 +40,7 @@ public class Firehose<K extends Key> {
          new Consumer<Throwable>() {
            @Override
            public void accept(Throwable throwable) {
-             System.out.println(throwable.getMessage());
+             System.out.printf("Exception caught while dispatching: %s\n", throwable.getMessage());
              throwable.printStackTrace();
            }
          });
@@ -108,9 +108,18 @@ public class Firehose<K extends Key> {
     processor.onNext(new Runnable() {
       @Override
       public void run() {
-        for (Registration<K> reg : consumerRegistry.select(key)) {
-          reg.getObject().accept(key, ev);
+        try {
+          for (Registration<K> reg : consumerRegistry.select(key)) {
+            try {
+              reg.getObject().accept(key, ev);
+            } catch (Throwable inner){
+              errorHandler.accept(inner);
+            }
+          }
+        } catch (Throwable outer){
+          errorHandler.accept(outer);
         }
+
       }
     });
 
