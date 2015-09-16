@@ -27,6 +27,7 @@ public class AbstractFirehoseTest {
                                    new Consumer<Throwable>() {
                                      @Override
                                      public void accept(Throwable throwable) {
+                                       System.out.printf("Exception caught while dispatching: %s\n", throwable.getMessage());
                                        throwable.printStackTrace();
                                      }
                                    });
