@@ -1,10 +1,14 @@
 package reactor.pipe;
 
+import org.junit.Test;
+import org.pcollections.TreePVector;
+import reactor.fn.BiFunction;
+import reactor.fn.Consumer;
+import reactor.fn.Predicate;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
-import org.junit.Test;
-import org.pcollections.TreePVector;
+import reactor.pipe.state.StateProvider;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +17,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import reactor.fn.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -67,11 +70,11 @@ public class NamedPipeTest extends AbstractFirehoseTest {
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state) -> {
-                    return (i) -> {
-                      return state.update(old -> old + i);
-                    };
-                  },
-                  0);
+                  return (i) -> {
+                    return state.update(old -> old + i);
+                  };
+                },
+                0);
     intPipe.consume(Key.wrap("key3"), res::set);
 
     intPipe.notify(Key.wrap("key1"), 1);
@@ -88,9 +91,9 @@ public class NamedPipeTest extends AbstractFirehoseTest {
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
     intPipe.map(Key.wrap("key2"), Key.wrap("key3"), (Atom<Integer> state, Integer i) -> {
-                    return state.update(old -> old + i);
-                  },
-                  0);
+                  return state.update(old -> old + i);
+                },
+                0);
     intPipe.consume(Key.wrap("key3"), res::set);
 
     intPipe.notify(Key.wrap("key1"), 1);
@@ -128,9 +131,9 @@ public class NamedPipeTest extends AbstractFirehoseTest {
 
     NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
     intPipe.divide(numbersKey,
-                     (k, v) -> {
-                       return v % 2 == 0 ? evenKey : oddKey;
-                     });
+                   (k, v) -> {
+                     return v % 2 == 0 ? evenKey : oddKey;
+                   });
 
     intPipe.consume(evenKey, (Integer i) -> {
       even.add(i);
@@ -244,15 +247,15 @@ public class NamedPipeTest extends AbstractFirehoseTest {
     NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
 
     intPipe.fork(Executors.newFixedThreadPool(2),
-                   2048)
-             .map(k1, k2, (i) -> {
-               try {
-                 Thread.sleep(100);
-               } catch (InterruptedException e) {
-                 e.printStackTrace();
-               }
-               return i;
-             });
+                 2048)
+           .map(k1, k2, (i) -> {
+             try {
+               Thread.sleep(100);
+             } catch (InterruptedException e) {
+               e.printStackTrace();
+             }
+             return i;
+           });
 
     intPipe.consume(k2, (i) -> latch.countDown());
 
