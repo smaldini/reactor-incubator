@@ -21,6 +21,7 @@ public class Channel<T> implements Subscriber<T> {
   Channel(AnonymousPipe<T> stream,
           Atom<PVector<T>> state) {
     this.stream = stream;
+
     this.state = state;
     this.isDrained = new AtomicBoolean(false);
     stream.consume(e -> {

@@ -35,7 +35,6 @@ public class FirehoseTest extends AbstractFirehoseTest {
 
     assertThat(val.get(10, TimeUnit.SECONDS), is(1));
     assertThat(val2.get(10, TimeUnit.SECONDS), is(2));
-
   }
 
   @Test
@@ -250,5 +249,27 @@ public class FirehoseTest extends AbstractFirehoseTest {
     firehose.notify(Key.wrap("key1"), 3);
     latch2.await(1, TimeUnit.SECONDS);
     assertThat(tupleRef.get().getT2(), is(2));
+  }
+
+  @Test
+  public void smokeTest() throws InterruptedException {
+    int iterations = 10000;
+    CountDownLatch latch = new CountDownLatch(iterations);
+    CountDownLatch latch2 = new CountDownLatch(iterations);
+    CountDownLatch latch3 = new CountDownLatch(iterations);
+    firehose.on(Key.wrap("key1"), (i_) -> latch.countDown());
+    firehose.on(Key.wrap("key2"), (i_) -> latch2.countDown());
+    firehose.on(Key.wrap("key3"), (i_) -> latch3.countDown());
+
+    for (int i = 0; i < iterations; i++) {
+      firehose.notify(Key.wrap("key1"), i);
+      firehose.notify(Key.wrap("key2"), i);
+      firehose.notify(Key.wrap("key3"), i);
+    }
+
+    latch.await(30, TimeUnit.SECONDS);
+    assertThat(latch.getCount(), is(0L));
+    assertThat(latch2.getCount(), is(0L));
+    assertThat(latch3.getCount(), is(0L));
   }
 }
