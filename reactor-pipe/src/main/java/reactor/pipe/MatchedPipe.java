@@ -38,6 +38,22 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
+  public <SRC extends Key, V1> MatchedPipe<V1> map(Supplier<Function<V, V1>> supplier) {
+    this.suppliers.add(new StreamSupplier<SRC, V, V1>() {
+      @Override
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<V1> pipe) {
+        Function<V, V1> mapper = supplier.get();
+        return (key, value) -> {
+          pipe.notify(dst.clone(key), mapper.apply(value));
+        };
+      }
+    });
+    return new MatchedPipe<>(suppliers);
+  }
+
+  @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, ST, V1> MatchedPipe<V1> map(BiFunction<Atom<ST>, V, V1> mapper,
                                                        ST init) {
     this.suppliers.add(new StreamSupplier<SRC, V, V1>() {
@@ -54,6 +70,8 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
     });
     return new MatchedPipe<>(suppliers);
   }
+
+
 
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key> MatchedPipe<V> filter(Predicate<V> predicate) {
