@@ -25,9 +25,9 @@ import reactor.fn.Consumer
 import reactor.fn.Function
 import reactor.fn.Predicate
 import reactor.fn.tuple.Tuple2
-import reactor.io.codec.Codec
+//import reactor.io.codec.Codec
 import reactor.rx.BiStreams
-import reactor.rx.IOStreams
+//import reactor.rx.IOStreams
 import reactor.rx.Promise
 import reactor.rx.Stream
 import reactor.rx.action.Control
@@ -58,9 +58,9 @@ class StreamExtensions {
   }
 
   // IO Streams
-  static <SRC, IN> Stream<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
+  /*static <SRC, IN> Stream<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
     IOStreams.decode(codec, publisher)
-  }
+  }*/
 
   /**
    * Operator overloading
