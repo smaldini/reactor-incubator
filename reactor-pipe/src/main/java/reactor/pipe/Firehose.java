@@ -8,6 +8,7 @@ import reactor.Subscribers;
 import reactor.core.processor.RingBufferProcessor;
 import reactor.core.subscription.SubscriptionWithContext;
 import reactor.core.support.Assert;
+import reactor.core.support.SignalType;
 import reactor.fn.*;
 import reactor.fn.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
@@ -57,12 +58,14 @@ public class Firehose<K extends Key> {
     this.errorHandler = dispatchErrorHandler;
     this.processor = processor;
     this.processor.subscribe(Subscribers.unbounded(new BiConsumer<Runnable, SubscriptionWithContext<Void>>() {
-      @Override
-      public void accept(Runnable runnable, SubscriptionWithContext<Void> voidSubscriptionWithContext) {
-        runnable.run();
-      }
-    }));
-
+                                                     @Override
+                                                     public void accept(Runnable runnable,
+                                                                        SubscriptionWithContext<Void> voidSubscriptionWithContext) {
+                                                       runnable.run();
+                                                     }
+                                                   },
+                                                   dispatchErrorHandler));
+    this.processor.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
 
     this.timer = new LazyVar<>(new Supplier<HashWheelTimer>() {
       @Override
