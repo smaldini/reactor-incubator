@@ -120,9 +120,7 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     AVar<Integer> res2 = new AVar<>(1);
 
     for (AVar<Integer> avar : new AVar[]{res1, res2}) {
-      pipe.matched(key -> {
-        return key.getPart(0).equals("source");
-      })
+      pipe.matched(key -> key.getPart(0).equals("source"))
           .consume(avar::set);
     }
 
