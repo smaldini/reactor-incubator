@@ -168,4 +168,26 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
 
     assertThat(res.get(1, TimeUnit.SECONDS), is(4));
   }
+
+  @Test
+  public void testConsume() throws InterruptedException {
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
+    AVar<Integer> resValue = new AVar<>();
+    AVar<Key> resKey = new AVar<>();
+
+    AnonymousPipe<Integer> s = pipe.anonymous(Key.wrap("source"));
+
+    s.map((i) -> i + 1)
+     .map(i -> i * 2)
+     .consume((k, v) -> {
+       resKey.set(k);
+       resValue.set(v);
+     });
+
+
+    pipe.notify(Key.wrap("source"), 1);
+
+    assertThat(resKey.get(1, TimeUnit.SECONDS).getPart(0), is("source"));
+    assertThat(resValue.get(1, TimeUnit.SECONDS), is(4));
+  }
 }

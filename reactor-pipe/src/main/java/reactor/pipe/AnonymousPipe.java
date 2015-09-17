@@ -78,6 +78,12 @@ public class AnonymousPipe<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
+  public AnonymousPipe<V> consume(KeyedConsumer<Key, V> consumer) {
+    this.pipe.consume(upstream, consumer);
+    return this;
+  }
+
+  @SuppressWarnings(value = {"unchecked"})
   public AnonymousPipe<V> redirect(Key destination) {
     pipe.consume(upstream, new KeyedConsumer<Key, V>() {
       @Override
