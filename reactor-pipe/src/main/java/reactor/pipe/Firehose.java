@@ -4,9 +4,11 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.Subscribers;
 import reactor.core.processor.RingBufferProcessor;
+import reactor.core.subscription.SubscriptionWithContext;
 import reactor.core.support.Assert;
-import reactor.fn.Consumer;
+import reactor.fn.*;
 import reactor.fn.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
@@ -19,10 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongBinaryOperator;
-
-import reactor.fn.Function;
-import reactor.fn.Predicate;
-import reactor.fn.Supplier;
 
 
 public class Firehose<K extends Key> {
@@ -58,32 +56,12 @@ public class Firehose<K extends Key> {
     this.consumerRegistry = registry;
     this.errorHandler = dispatchErrorHandler;
     this.processor = processor;
-    this.processor.subscribe(new Subscriber<Runnable>() {
-
-      private volatile Subscription sub;
-
+    this.processor.subscribe(Subscribers.unbounded(new BiConsumer<Runnable, SubscriptionWithContext<Void>>() {
       @Override
-      public void onSubscribe(Subscription subscription) {
-        this.sub = subscription;
-        subscription.request(1);
-      }
-
-      @Override
-      public void onNext(Runnable runnable) {
+      public void accept(Runnable runnable, SubscriptionWithContext<Void> voidSubscriptionWithContext) {
         runnable.run();
-        sub.request(1);
       }
-
-      @Override
-      public void onError(Throwable throwable) {
-        errorHandler.accept(throwable);
-      }
-
-      @Override
-      public void onComplete() {
-        this.sub.cancel();
-      }
-    });
+    }));
 
 
     this.timer = new LazyVar<>(new Supplier<HashWheelTimer>() {
@@ -105,22 +83,19 @@ public class Firehose<K extends Key> {
     Assert.notNull(key, "Key cannot be null.");
     Assert.notNull(ev, "Event cannot be null.");
 
-    processor.onNext(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          for (Registration<K> reg : consumerRegistry.select(key)) {
-            try {
-              reg.getObject().accept(key, ev);
-            } catch (Throwable inner){
-              errorHandler.accept(inner);
-            }
+    processor.onNext(() -> {
+      try {
+        for (Registration<K> reg : consumerRegistry.select(key)) {
+          try {
+            reg.getObject().accept(key, ev);
+          } catch (Throwable inner) {
+            errorHandler.accept(inner);
           }
-        } catch (Throwable outer){
-          errorHandler.accept(outer);
         }
-
+      } catch (Throwable outer) {
+        errorHandler.accept(outer);
       }
+
     });
 
     return this;
