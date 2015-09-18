@@ -3,11 +3,14 @@ package reactor.pipe;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.processor.RingBufferWorkProcessor;
+import reactor.fn.Consumer;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.key.Key;
 import org.junit.Test;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
+import reactor.pipe.registry.ConcurrentRegistry;
 
 import java.util.Collections;
 import java.util.concurrent.*;
@@ -253,23 +256,42 @@ public class FirehoseTest extends AbstractFirehoseTest {
 
   @Test
   public void smokeTest() throws InterruptedException {
+    Firehose<Key> concurrentFirehose = new Firehose<>(new ConcurrentRegistry<>(),
+                                                      RingBufferWorkProcessor.create(Executors.newFixedThreadPool(4),
+                                                                                     2048),
+                                                      4,
+                                                      new Consumer<Throwable>() {
+                                                        @Override
+                                                        public void accept(Throwable throwable) {
+                                                          System.out.printf("Exception caught while dispatching: %s\n",
+                                                                            throwable.getMessage());
+                                                          throwable.printStackTrace();
+                                                        }
+                                                      });
     int iterations = 10000;
     CountDownLatch latch = new CountDownLatch(iterations);
     CountDownLatch latch2 = new CountDownLatch(iterations);
     CountDownLatch latch3 = new CountDownLatch(iterations);
-    firehose.on(Key.wrap("key1"), (i_) -> latch.countDown());
-    firehose.on(Key.wrap("key2"), (i_) -> latch2.countDown());
-    firehose.on(Key.wrap("key3"), (i_) -> latch3.countDown());
+    concurrentFirehose.on(Key.wrap("key1"), (i_) -> latch.countDown());
+    concurrentFirehose.on(Key.wrap("key2"), (i_) -> latch2.countDown());
+    concurrentFirehose.on(Key.wrap("key3"), (i_) -> latch3.countDown());
 
     for (int i = 0; i < iterations; i++) {
-      firehose.notify(Key.wrap("key1"), i);
-      firehose.notify(Key.wrap("key2"), i);
-      firehose.notify(Key.wrap("key3"), i);
+      concurrentFirehose.notify(Key.wrap("key1"), i);
+      concurrentFirehose.notify(Key.wrap("key2"), i);
+      concurrentFirehose.notify(Key.wrap("key3"), i);
+      if (i % 1000 == 0) {
+        System.out.println("Dispatched " + i + " keys");
+      }
     }
 
     latch.await(30, TimeUnit.SECONDS);
     assertThat(latch.getCount(), is(0L));
     assertThat(latch2.getCount(), is(0L));
     assertThat(latch3.getCount(), is(0L));
+
+    concurrentFirehose.shutdown();
   }
+
+
 }
