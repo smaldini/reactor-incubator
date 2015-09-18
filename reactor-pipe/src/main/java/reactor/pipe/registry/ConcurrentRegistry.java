@@ -154,7 +154,18 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
 
         }
-      }).getOrDefault(key, TreePVector.empty());
+				}).getOrDefault(key, TreePVector.singleton(new Registration<K>() {
+        @Override
+        public K getSelector() {
+          return key;
+        }
+
+        @Override
+        public KeyedConsumer getObject() {
+          return (k, v) -> {
+          };
+        }
+      }));
 
   }
 
