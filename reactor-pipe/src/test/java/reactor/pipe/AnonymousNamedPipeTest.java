@@ -1,15 +1,21 @@
 package reactor.pipe;
 
+import org.junit.Test;
+import org.pcollections.TreePVector;
+import reactor.core.processor.RingBufferWorkProcessor;
+import reactor.fn.Consumer;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
-import org.junit.Test;
-import org.pcollections.TreePVector;
+import reactor.pipe.registry.ConcurrentRegistry;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -22,9 +28,9 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     AVar<Integer> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
-          .map((i) -> i + 1)
-          .map(i -> i * 2)
-          .consume(res::set);
+        .map((i) -> i + 1)
+        .map(i -> i * 2)
+        .consume(res::set);
 
 
     pipe.notify(Key.wrap("source"), 1);
@@ -58,11 +64,11 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     AVar<Integer> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
-          .map(i -> i + 1)
-          .filter(i -> i % 2 != 0)
-          .map(i -> i * 2)
+        .map(i -> i + 1)
+        .filter(i -> i % 2 != 0)
+        .map(i -> i * 2)
 
-          .consume(res::set);
+        .consume(res::set);
 
 
     pipe.notify(Key.wrap("source"), 1);
@@ -77,10 +83,10 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     AVar<List<Integer>> res = new AVar<>();
 
     pipe.anonymous(Key.wrap("source"))
-          .partition((i) -> {
-            return i.size() == 5;
-          })
-          .consume(res::set);
+        .partition((i) -> {
+          return i.size() == 5;
+        })
+        .consume(res::set);
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
@@ -99,11 +105,11 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     AVar<List<Integer>> res = new AVar<>(6);
 
     pipe.anonymous(Key.wrap("source"))
-          .slide(i -> {
-            return i.subList(i.size() > 5 ? i.size() - 5 : 0,
-                             i.size());
-          })
-          .consume(res::set);
+        .slide(i -> {
+          return i.subList(i.size() > 5 ? i.size() - 5 : 0,
+                           i.size());
+        })
+        .consume(res::set);
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
