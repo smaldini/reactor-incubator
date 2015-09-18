@@ -10,12 +10,10 @@ import reactor.pipe.key.Key;
 import reactor.pipe.registry.ConcurrentRegistry;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -201,7 +199,7 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
   public void testSmoke() throws InterruptedException { // Tests backpressure and in-thread dispatches
     Firehose<Key> concurrentFirehose = new Firehose<>(new ConcurrentRegistry<>(),
                                                       RingBufferWorkProcessor.create(Executors.newFixedThreadPool(4),
-                                                                                     2048),
+                                                                                     256),
                                                       4,
                                                       new Consumer<Throwable>() {
                                                         @Override
@@ -212,7 +210,7 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
                                                         }
                                                       });
 
-    int iterations = 10000;
+    int iterations = 2000;
     CountDownLatch latch = new CountDownLatch(iterations);
 
     NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
@@ -230,7 +228,7 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
 
     for (int i = 0; i < iterations; i++) {
       firehose.notify(Key.wrap("key1"), i);
-      if (i % 1000 == 0) {
+      if (i % 500 == 0) {
         System.out.println("Processed " + i + " keys");
       }
     }
