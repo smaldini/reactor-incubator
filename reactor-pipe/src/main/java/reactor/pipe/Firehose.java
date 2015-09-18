@@ -4,7 +4,9 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.Subscribers;
 import reactor.core.processor.RingBufferWorkProcessor;
+import reactor.core.subscription.SubscriptionWithContext;
 import reactor.core.support.Assert;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
@@ -16,7 +18,6 @@ import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.*;
-import reactor.pipe.stream.FirehoseSubscriber;
 import reactor.pipe.stream.FirehoseSubscription;
 
 import java.util.Map;
@@ -39,7 +40,6 @@ public class Firehose<K extends Key> {
   private final LazyVar<HashWheelTimer>       timer;
   private final Processor<Runnable, Runnable> processor;
   private final ThreadLocal<Boolean>          inDispatcherContext;
-  private final Executor                      catchUpExecutor;
   private final FirehoseSubscription          firehoseSubscription;
 
   public Firehose() {
@@ -71,18 +71,6 @@ public class Firehose<K extends Key> {
     this.consumerRegistry = registry;
     this.errorHandler = dispatchErrorHandler;
     this.processor = processor;
-
-    this.catchUpExecutor = Executors.newFixedThreadPool(concurrency,
-                                                        new ThreadFactory() {
-                                                          private AtomicInteger i = new AtomicInteger(0);
-
-                                                          @Override
-                                                          public Thread newThread(Runnable r) {
-                                                            return new Thread(r,
-                                                                              "catchUpExecutorPool-" + i.getAndIncrement());
-                                                          }
-                                                        });
-
     this.inDispatcherContext = new ThreadLocal<>();
 
     {
@@ -93,10 +81,8 @@ public class Firehose<K extends Key> {
                                                        },
                                                        dispatchErrorHandler));
       }
-
       this.firehoseSubscription = new FirehoseSubscription();
       this.processor.onSubscribe(firehoseSubscription);
-      //this.processor.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
     }
 
 
@@ -122,12 +108,12 @@ public class Firehose<K extends Key> {
     Assert.notNull(ev, "Event cannot be null.");
 
 
+    // Backpressure
     while ((inDispatcherContext.get() == null || !inDispatcherContext.get()) &&
            !this.firehoseSubscription.maybeClaimSlot()) {
-      System.out.println("blocked publisher");
-      //LockSupport.parkNanos(10000);
       try {
-        Thread.sleep(500);
+        //LockSupport.parkNanos(10000);
+        Thread.sleep(500); // TODO: Obviously this is stupid use parknanos instead.
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -141,9 +127,6 @@ public class Firehose<K extends Key> {
       } catch (Throwable outer) {
         errorHandler.accept(outer);
       }
-//      catchUpExecutor.execute(() -> {
-//        notify(key, ev);
-//      });
     } else {
 
       processor.onNext(() -> {
@@ -157,7 +140,7 @@ public class Firehose<K extends Key> {
         }
       });
     }
-    //    }
+
 
     return this;
   }
