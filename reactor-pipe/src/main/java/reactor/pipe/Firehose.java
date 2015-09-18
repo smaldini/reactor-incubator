@@ -122,22 +122,55 @@ public class Firehose<K extends Key> {
     Assert.notNull(key, "Key cannot be null.");
     Assert.notNull(ev, "Event cannot be null.");
 
-    processor.onNext(() -> {
+
+    while ((inDispatcherContext.get() == null || !inDispatcherContext.get()) &&
+           !this.firehoseSubscription.maybeClaimSlot()) {
+      System.out.println("blocked publisher");
+      //LockSupport.parkNanos(10000);
       try {
-        for (Registration<K> reg : consumerRegistry.select(key)) {
-          try {
-            reg.getObject().accept(key, ev);
-          } catch (Throwable inner) {
-            errorHandler.accept(inner);
-          }
-        }
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+    Boolean inContext = inDispatcherContext.get();
+    if (inContext != null && inContext) {
+      // Since we're already in the context, we can dispatch syncronously
+      try {
+        dispatch(key, ev);
       } catch (Throwable outer) {
         errorHandler.accept(outer);
       }
+//      catchUpExecutor.execute(() -> {
+//        notify(key, ev);
+//      });
+    } else {
 
-    });
+      processor.onNext(() -> {
+        try {
+          inDispatcherContext.set(true);
+          dispatch(key, ev);
+        } catch (Throwable outer) {
+          errorHandler.accept(outer);
+        } finally {
+          inDispatcherContext.set(false);
+        }
+      });
+    }
+    //    }
 
     return this;
+  }
+
+  private <V> void dispatch(final K key, final V ev) {
+    for (Registration<K> reg : consumerRegistry.select(key)) {
+      try {
+        reg.getObject().accept(key, ev);
+      } catch (Throwable inner) {
+        errorHandler.accept(inner);
+      }
+    }
   }
 
   public <V> Firehose on(final K key, final KeyedConsumer<K, V> consumer) {
