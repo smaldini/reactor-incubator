@@ -288,6 +288,15 @@ consumingChannel.get();
 consumingChannel.get();
 // => 2
 ```
+
+## Order
+
+We do not guarantee any order on interleaved operations, since they're
+executed in a manner resembling tail calls. Although if some of your
+operations (for example, windowing) rely on the order of things, you
+have to use sequence ids or timestamps to restore order or use
+non-concurrent processors.
+
 # License
 
 Copyright © 2014 Alex Petrov 
