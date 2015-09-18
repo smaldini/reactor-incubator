@@ -87,12 +87,11 @@ public class Firehose<K extends Key> {
 
     {
       for (int i = 0; i < concurrency; i++) {
-        this.processor.subscribe(new FirehoseSubscriber());
-        //        this.processor.subscribe(Subscribers.unbounded((Runnable runnable,
-        //                                                        SubscriptionWithContext<Void> voidSubscriptionWithContext) -> {
-        //                                                         runnable.run();
-        //                                                       },
-        //                                                       dispatchErrorHandler));
+        this.processor.subscribe(Subscribers.unbounded((Runnable runnable,
+                                                        SubscriptionWithContext<Void> voidSubscriptionWithContext) -> {
+                                                         runnable.run();
+                                                       },
+                                                       dispatchErrorHandler));
       }
 
       this.firehoseSubscription = new FirehoseSubscription();
