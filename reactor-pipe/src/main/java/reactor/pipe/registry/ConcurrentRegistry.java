@@ -154,7 +154,8 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
 
 
         }
-				}).getOrDefault(key, TreePVector.singleton(new Registration<K>() {
+				// TODO: Also, what's stupid, we _always_ create Registration here, even if we could successfully do without
+				}).getOrDefault(key, TreePVector.singleton(new Registration<K>() { // Needs a WARN?
         @Override
         public K getSelector() {
           return key;
