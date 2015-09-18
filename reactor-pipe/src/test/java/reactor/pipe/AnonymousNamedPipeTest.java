@@ -190,4 +190,48 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     assertThat(resKey.get(1, TimeUnit.SECONDS).getPart(0), is("source"));
     assertThat(resValue.get(1, TimeUnit.SECONDS), is(4));
   }
+
+  @Test
+  public void testSmoke() throws InterruptedException { // Tests backpressure and in-thread dispatches
+    Firehose<Key> concurrentFirehose = new Firehose<>(new ConcurrentRegistry<>(),
+                                                      RingBufferWorkProcessor.create(Executors.newFixedThreadPool(4),
+                                                                                     2048),
+                                                      4,
+                                                      new Consumer<Throwable>() {
+                                                        @Override
+                                                        public void accept(Throwable throwable) {
+                                                          System.out.printf("Exception caught while dispatching: %s\n",
+                                                                            throwable.getMessage());
+                                                          throwable.printStackTrace();
+                                                        }
+                                                      });
+
+    int iterations = 10000;
+    CountDownLatch latch = new CountDownLatch(iterations);
+
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
+    pipe.anonymous(Key.wrap("key1"))
+        .map((i) -> i + 1)
+        .map(i -> {
+          try {
+            Thread.sleep(10);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          return i * 2;
+        })
+        .consume((i_) -> latch.countDown());
+
+    for (int i = 0; i < iterations; i++) {
+      firehose.notify(Key.wrap("key1"), i);
+      if (i % 1000 == 0) {
+        System.out.println("Processed " + i + " keys");
+      }
+    }
+
+    latch.await(30, TimeUnit.SECONDS);
+    assertThat(latch.getCount(), is(0L));
+
+    concurrentFirehose.shutdown();
+  }
 }

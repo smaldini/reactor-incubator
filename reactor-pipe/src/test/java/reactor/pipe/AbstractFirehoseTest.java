@@ -21,21 +21,16 @@ public class AbstractFirehoseTest {
   public void setup() {
     this.firehose = new Firehose<>(new ConcurrentRegistry<>(),
                                    RingBufferWorkProcessor.create(Executors.newFixedThreadPool(4),
-                                                                  2048),
-                                   4,
-                                   new Consumer<Throwable>() {
-                                     @Override
-                                     public void accept(Throwable throwable) {
-                                       System.out.printf("Exception caught while dispatching: %s\n",
-                                                         throwable.getMessage());
-                                       throwable.printStackTrace();
-                                     }
+                                                                  256),
+                                   1,
+                                   throwable -> {
                                    });
   }
 
   @After
   public void teardown() {
     firehose.shutdown();
+
   }
 
 }
