@@ -4,38 +4,49 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.Subscribers;
-import reactor.core.processor.RingBufferProcessor;
-import reactor.core.subscription.SubscriptionWithContext;
+import reactor.core.processor.RingBufferWorkProcessor;
 import reactor.core.support.Assert;
-import reactor.core.support.SignalType;
-import reactor.fn.*;
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.Supplier;
 import reactor.fn.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.*;
+import reactor.pipe.stream.FirehoseSubscriber;
+import reactor.pipe.stream.FirehoseSubscription;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongBinaryOperator;
 
 
 public class Firehose<K extends Key> {
 
+  private final static int DEFAULT_THREAD_POOL_SIZE = 4;
   private final static int DEFAULT_RING_BUFFER_SIZE = 65536;
 
   private final DefaultingRegistry<K>         consumerRegistry;
   private final Consumer<Throwable>           errorHandler;
   private final LazyVar<HashWheelTimer>       timer;
   private final Processor<Runnable, Runnable> processor;
+  private final ThreadLocal<Boolean>          inDispatcherContext;
+  private final Executor                      catchUpExecutor;
+  private final FirehoseSubscription          firehoseSubscription;
 
   public Firehose() {
     this(new ConcurrentRegistry<K>(),
-         RingBufferProcessor.<Runnable>create(Executors.newFixedThreadPool(2), DEFAULT_RING_BUFFER_SIZE),
+         RingBufferWorkProcessor.<Runnable>create(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE),
+                                                  DEFAULT_RING_BUFFER_SIZE),
+         DEFAULT_THREAD_POOL_SIZE,
          new Consumer<Throwable>() {
            @Override
            public void accept(Throwable throwable) {
@@ -47,25 +58,48 @@ public class Firehose<K extends Key> {
 
   public Firehose(Consumer<Throwable> errorHandler) {
     this(new ConcurrentRegistry<K>(),
-         RingBufferProcessor.<Runnable>create(Executors.newFixedThreadPool(2), DEFAULT_RING_BUFFER_SIZE),
+         RingBufferWorkProcessor.<Runnable>create(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE),
+                                                  DEFAULT_RING_BUFFER_SIZE),
+         DEFAULT_THREAD_POOL_SIZE,
          errorHandler);
   }
 
   public Firehose(DefaultingRegistry<K> registry,
                   Processor<Runnable, Runnable> processor,
+                  int concurrency,
                   Consumer<Throwable> dispatchErrorHandler) {
     this.consumerRegistry = registry;
     this.errorHandler = dispatchErrorHandler;
     this.processor = processor;
-    this.processor.subscribe(Subscribers.unbounded(new BiConsumer<Runnable, SubscriptionWithContext<Void>>() {
-                                                     @Override
-                                                     public void accept(Runnable runnable,
-                                                                        SubscriptionWithContext<Void> voidSubscriptionWithContext) {
-                                                       runnable.run();
-                                                     }
-                                                   },
-                                                   dispatchErrorHandler));
-    this.processor.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
+
+    this.catchUpExecutor = Executors.newFixedThreadPool(concurrency,
+                                                        new ThreadFactory() {
+                                                          private AtomicInteger i = new AtomicInteger(0);
+
+                                                          @Override
+                                                          public Thread newThread(Runnable r) {
+                                                            return new Thread(r,
+                                                                              "catchUpExecutorPool-" + i.getAndIncrement());
+                                                          }
+                                                        });
+
+    this.inDispatcherContext = new ThreadLocal<>();
+
+    {
+      for (int i = 0; i < concurrency; i++) {
+        this.processor.subscribe(new FirehoseSubscriber());
+        //        this.processor.subscribe(Subscribers.unbounded((Runnable runnable,
+        //                                                        SubscriptionWithContext<Void> voidSubscriptionWithContext) -> {
+        //                                                         runnable.run();
+        //                                                       },
+        //                                                       dispatchErrorHandler));
+      }
+
+      this.firehoseSubscription = new FirehoseSubscription();
+      this.processor.onSubscribe(firehoseSubscription);
+      //this.processor.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
+    }
+
 
     this.timer = new LazyVar<>(new Supplier<HashWheelTimer>() {
       @Override
@@ -76,9 +110,11 @@ public class Firehose<K extends Key> {
   }
 
   public Firehose<K> fork(ExecutorService executorService,
+                          int concurrency,
                           int ringBufferSize) {
     return new Firehose<K>(this.consumerRegistry,
-                           RingBufferProcessor.<Runnable>create(executorService, ringBufferSize),
+                           RingBufferWorkProcessor.<Runnable>create(executorService, ringBufferSize),
+                           concurrency,
                            this.errorHandler);
   }
 
