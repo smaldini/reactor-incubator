@@ -33,8 +33,10 @@ public class NamedPipe<V> {
   }
 
   public NamedPipe<V> fork(ExecutorService executorService,
+                           int concurrency,
                            int ringBufferSize) {
     return new NamedPipe<V>(firehose.fork(executorService,
+                                          concurrency,
                                           ringBufferSize));
   }
 

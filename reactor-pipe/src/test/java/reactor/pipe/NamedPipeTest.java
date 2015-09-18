@@ -247,6 +247,7 @@ public class NamedPipeTest extends AbstractFirehoseTest {
     NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
 
     intPipe.fork(Executors.newFixedThreadPool(2),
+                 2,
                  2048)
            .map(k1, k2, (i) -> {
              try {
