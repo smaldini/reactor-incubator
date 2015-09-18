@@ -17,7 +17,6 @@ public class FirehoseSubscription implements Subscription {
 
   @Override
   public void request(long l) {
-    System.out.println("Requesting + " + l);
     if (l < 1) {
       throw new RuntimeException("Can't request a non-positive number");
     }
@@ -47,7 +46,6 @@ public class FirehoseSubscription implements Subscription {
     return freeSlots.getAndUpdate(new LongUnaryOperator() {
       @Override
       public long applyAsLong(long i) {
-        System.out.println("Free slots: " + i);
         if (i > 0) {
           return i - 1;
         } else {
