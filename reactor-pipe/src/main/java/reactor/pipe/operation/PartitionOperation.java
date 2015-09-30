@@ -31,6 +31,7 @@ public class PartitionOperation<SRC extends Key, DST extends Key, V> implements 
   @SuppressWarnings(value = {"unchecked"})
   public void accept(SRC key, V value) {
     PVector<V> newv = buffer.update((old) -> old.plus(value));
+
     if (emit.test(newv)) {
       PVector<V> downstreamValue = buffer.updateAndReturnOld((old) -> TreePVector.empty());
       firehose.notify(destination.clone(key), downstreamValue);
