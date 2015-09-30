@@ -283,6 +283,11 @@ public class NamedPipeTest extends AbstractFirehoseTest {
                                                    public <T> Atom<T> makeAtom(Key src, T init) {
                                                      throw new RuntimeException();
                                                    }
+
+                                                   @Override
+                                                   public <T> Atom<T> makeAtom(T init) {
+                                                     throw new RuntimeException();
+                                                   }
                                                  });
 
     intPipe.matched((k) -> true)
