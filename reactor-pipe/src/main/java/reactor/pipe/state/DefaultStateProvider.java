@@ -8,4 +8,9 @@ public class DefaultStateProvider<K> implements StateProvider<K> {
   public <T> Atom<T> makeAtom(K src, T init) {
     return new Atom<>(init);
   }
+
+  @Override
+  public <T> Atom<T> makeAtom(T init) {
+    return new Atom<>(init);
+  }
 }
