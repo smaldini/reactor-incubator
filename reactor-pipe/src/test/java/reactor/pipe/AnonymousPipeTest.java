@@ -147,9 +147,9 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
      .consume(i -> latch.countDown());
 
     pipe.notify(Key.wrap("source"), 1);
-    s.unregister();
-
     latch.await(10, TimeUnit.SECONDS);
+    s.unregister();
+    
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(0L));
   }
 
