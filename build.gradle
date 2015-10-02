@@ -95,8 +95,6 @@ subprojects {
     testCompile group: "org.hamcrest", name: "hamcrest-all", version:"1.3"
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
   }
-
-  configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 }
 
 
@@ -177,12 +175,6 @@ project('reactor-groovy') {
 
   apply plugin: 'osgi'
   apply plugin: 'groovy'
-
-  artifacts {
-    archives sourcesJar
-    archives javadocJar
-    archives groovydocJar
-  }
 
   dependencies {
     compile("io.projectreactor:reactor-bus:$reactorVersion"){
