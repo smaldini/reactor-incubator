@@ -58,8 +58,8 @@ public class FirehoseTest extends AbstractFirehoseTest {
     firehose.notify(Key.wrap("key1"), 1);
     firehose.notify(Key.wrap("key2"), 2);
 
-    assertThat(val.get(10, TimeUnit.MILLISECONDS), is(1));
-    assertThat(val2.get(10, TimeUnit.MILLISECONDS), is(2));
+    assertThat(val.get(10, TimeUnit.SECONDS), is(1));
+    assertThat(val2.get(10, TimeUnit.SECONDS), is(2));
   }
 
   @Test
@@ -70,7 +70,7 @@ public class FirehoseTest extends AbstractFirehoseTest {
     });
     firehose.notify(Key.wrap("key1"), 1);
 
-    assertThat(val.get(10, TimeUnit.MILLISECONDS),
+    assertThat(val.get(10, TimeUnit.SECONDS),
                is(Tuple.of(Key.wrap("key1"), 1)));
   }
 
@@ -86,7 +86,8 @@ public class FirehoseTest extends AbstractFirehoseTest {
                   });
 
     firehose.notify(Key.wrap("key1"), 1);
-    assertThat(val.get(10, TimeUnit.MILLISECONDS), is(Tuple.of(Key.wrap("key1"), 1)));
+
+    assertThat(val.get(10, TimeUnit.SECONDS), is(Tuple.of(Key.wrap("key1"), 1)));
   }
 
   @Test

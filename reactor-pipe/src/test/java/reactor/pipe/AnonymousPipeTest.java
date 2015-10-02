@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
-public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
+public class AnonymousPipeTest extends AbstractFirehoseTest {
 
   @Test
   public void testMap() throws InterruptedException {
@@ -132,7 +132,7 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
 
     pipe.notify(Key.wrap("source"), 1);
 
-    assertThat(res.get(1, TimeUnit.SECONDS), is(4));
+    assertThat(res.get(10, TimeUnit.SECONDS), is(4));
   }
 
   @Test
@@ -150,6 +150,7 @@ public class AnonymousNamedPipeTest extends AbstractFirehoseTest {
     s.unregister();
     pipe.notify(Key.wrap("source"), 1);
 
+    latch.await(10, TimeUnit.SECONDS);
     assertThat(latch.getCount(), is(1L));
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(0L));
   }
