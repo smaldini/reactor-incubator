@@ -61,7 +61,7 @@ buildscript {
 apply from: "$gradleScriptDir/setup.gradle"
 
 configure(rootProject) {
-  configurations.archives.artifacts.removeAll()
+  configurations.artifacts.removeAll()
 }
 
 subprojects {
