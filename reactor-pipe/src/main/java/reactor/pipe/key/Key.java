@@ -53,6 +53,11 @@ public class Key {
     return k;
   }
 
+  @Override
+  public Key clone() {
+    return Key.wrap(parts);
+  }
+
   public boolean isDerivedFrom(Key other) {
     if (!isDerived || (this.parts.length <= other.parts.length)) {
       return false;
