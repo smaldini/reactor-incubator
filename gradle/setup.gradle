@@ -39,11 +39,6 @@ configure(subprojects) { subproject ->
 		from sourceSets.main.allSource
 	}
 
-	task groovydocJar(type: Jar) {
-		classifier = 'groovydoc'
-		from groovydoc
-	}
-
 	task javadocJar(type: Jar) {
 		classifier = 'javadoc'
 		from javadoc
