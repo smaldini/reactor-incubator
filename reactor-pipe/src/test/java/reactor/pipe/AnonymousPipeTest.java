@@ -138,7 +138,7 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
   @Test
   public void testUnregister() throws InterruptedException {
     NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
-    CountDownLatch latch = new CountDownLatch(2);
+    CountDownLatch latch = new CountDownLatch(1);
 
     AnonymousPipe<Integer> s = pipe.anonymous(Key.wrap("source"));
 
@@ -148,10 +148,8 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
 
     pipe.notify(Key.wrap("source"), 1);
     s.unregister();
-    pipe.notify(Key.wrap("source"), 1);
 
     latch.await(10, TimeUnit.SECONDS);
-    assertThat(latch.getCount(), is(1L));
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(0L));
   }
 
