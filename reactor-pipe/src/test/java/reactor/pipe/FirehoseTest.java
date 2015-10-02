@@ -286,7 +286,10 @@ public class FirehoseTest extends AbstractFirehoseTest {
       }
     }
 
-    latch.await(30, TimeUnit.SECONDS);
+    latch.await(5, TimeUnit.MINUTES);
+    latch2.await(5, TimeUnit.MINUTES);
+    latch3.await(5, TimeUnit.MINUTES);
+    
     assertThat(latch.getCount(), is(0L));
     assertThat(latch2.getCount(), is(0L));
     assertThat(latch3.getCount(), is(0L));

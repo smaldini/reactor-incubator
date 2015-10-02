@@ -149,7 +149,7 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
     pipe.notify(Key.wrap("source"), 1);
     latch.await(10, TimeUnit.SECONDS);
     s.unregister();
-    
+
     assertThat(pipe.firehose().getConsumerRegistry().stream().count(), is(0L));
   }
 
@@ -232,7 +232,7 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
       }
     }
 
-    latch.await(30, TimeUnit.SECONDS);
+    latch.await(5, TimeUnit.MINUTES);
     assertThat(latch.getCount(), is(0L));
 
     concurrentFirehose.shutdown();
