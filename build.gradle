@@ -60,6 +60,10 @@ buildscript {
 
 apply from: "$gradleScriptDir/setup.gradle"
 
+configure(rootProject) {
+  configurations.archives.artifacts.removeAll()
+}
+
 subprojects {
   apply plugin: "java"
   apply plugin: 'propdeps'
@@ -95,6 +99,8 @@ subprojects {
     testCompile group: "org.hamcrest", name: "hamcrest-all", version:"1.3"
     testCompile "org.spockframework:spock-core:1.0-groovy-2.4"
   }
+
+  configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 }
 
 
