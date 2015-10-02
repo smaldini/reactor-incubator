@@ -60,10 +60,6 @@ buildscript {
 
 apply from: "$gradleScriptDir/setup.gradle"
 
-configure(rootProject) {
-  configurations.all.artifacts.removeAll()
-}
-
 subprojects {
   apply plugin: "java"
   apply plugin: 'propdeps'
