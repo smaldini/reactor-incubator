@@ -64,6 +64,9 @@ subprojects {
   apply plugin: "java"
   apply plugin: 'propdeps'
 
+  group = 'io.projectreactor'
+  version = reactorVersion
+
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
 
@@ -100,9 +103,6 @@ project("reactor-pipe") {
 
   apply plugin: 'osgi'
   apply plugin: 'maven'
-
-  group = 'io.projectreactor'
-  version = '1.0.0-SNAPSHOT'
 
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorVersion"
