@@ -60,6 +60,11 @@ public class RedisStateProvider<K> implements StateProvider<K> {
     return atom;
   }
 
+  @Override
+  public <T> Atom<T> makeAtom(T init) {
+    return new Atom<T>(init);
+  }
+
   @SuppressWarnings("unchecked")
   protected <T> T initialLoad(K src, T init) {
     Codec<K, String> keyCodec = getCodec((Class<K>) src.getClass());
