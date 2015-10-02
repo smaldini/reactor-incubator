@@ -68,6 +68,12 @@ subprojects {
   targetCompatibility = 1.8
 
 
+  artifacts {
+    archives sourcesJar
+    archives javadocJar
+  }
+
+
   repositories {
     mavenLocal()
 
