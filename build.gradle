@@ -64,8 +64,16 @@ subprojects {
   apply plugin: "java"
   apply plugin: 'propdeps'
 
+  group = 'io.projectreactor'
+
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
+
+
+  artifacts {
+    archives sourcesJar
+    archives javadocJar
+  }
 
 
   repositories {
@@ -94,9 +102,6 @@ project("reactor-pipe") {
 
   apply plugin: 'osgi'
   apply plugin: 'maven'
-
-  group = 'io.projectreactor'
-  version = '1.0.0-SNAPSHOT'
 
   dependencies {
     compile "io.projectreactor:reactor-core:$reactorVersion"
@@ -169,12 +174,6 @@ project('reactor-groovy') {
 
   apply plugin: 'osgi'
   apply plugin: 'groovy'
-
-  artifacts {
-    archives sourcesJar
-    archives javadocJar
-    archives groovydocJar
-  }
 
   dependencies {
     compile("io.projectreactor:reactor-bus:$reactorVersion"){
