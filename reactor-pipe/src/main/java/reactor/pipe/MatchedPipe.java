@@ -1,12 +1,12 @@
 package reactor.pipe;
 
+import org.pcollections.PVector;
+import org.pcollections.TreePVector;
 import reactor.fn.*;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import reactor.pipe.operation.PartitionOperation;
 import reactor.pipe.operation.SlidingWindowOperation;
-import org.pcollections.PVector;
-import org.pcollections.TreePVector;
 
 import javax.lang.model.type.NullType;
 import java.util.LinkedList;
@@ -53,12 +53,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public <ST, V1> MatchedPipe<V1> map(BiFunction<Atom<ST>, V, V1> mapper,
-                                                       ST init) {
+                                      ST init) {
     this.suppliers.add(new StreamSupplier<Key, V, V1>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, V> get(DST dst,
                                                          NamedPipe<V1> pipe) {
-        Atom<ST> st = pipe.stateProvider().makeAtom(init);
+        Atom<ST> st = pipe.stateProvider().makeAtom(dst, init);
 
         return (key, value) -> {
           pipe.notify(dst.clone(key), mapper.apply(st, value));
@@ -67,7 +67,6 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
     });
     return new MatchedPipe<>(suppliers);
   }
-
 
 
   @SuppressWarnings(value = {"unchecked"})
@@ -93,7 +92,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
       @Override
       public <DST extends Key> KeyedConsumer<Key, V> get(DST dst,
                                                          NamedPipe<V> pipe) {
-        Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(TreePVector.empty());
+        Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(dst, TreePVector.empty());
 
         return new SlidingWindowOperation<Key, DST, V>(pipe.firehose(),
                                                        buffer,
