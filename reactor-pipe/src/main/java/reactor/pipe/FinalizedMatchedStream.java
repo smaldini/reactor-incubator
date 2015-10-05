@@ -23,7 +23,7 @@ class FinalizedMatchedStream<V> {
         Key currentKey = key;
         for (MatchedPipe.StreamSupplier supplier : suppliers) {
           Key nextKey = currentKey.derive();
-          consumers.put(currentKey, supplier.get(nextKey, pipe));
+          consumers.put(currentKey, supplier.get(currentKey, nextKey, pipe));
           currentKey = nextKey;
         }
         return consumers;
