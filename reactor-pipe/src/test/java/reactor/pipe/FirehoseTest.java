@@ -273,6 +273,8 @@ public class FirehoseTest extends AbstractFirehoseTest {
     CountDownLatch latch = new CountDownLatch(iterations);
     CountDownLatch latch2 = new CountDownLatch(iterations);
     CountDownLatch latch3 = new CountDownLatch(iterations);
+
+    long start = System.currentTimeMillis();
     concurrentFirehose.on(Key.wrap("key1"), (i_) -> latch.countDown());
     concurrentFirehose.on(Key.wrap("key2"), (i_) -> latch2.countDown());
     concurrentFirehose.on(Key.wrap("key3"), (i_) -> latch3.countDown());
@@ -289,7 +291,9 @@ public class FirehoseTest extends AbstractFirehoseTest {
     latch.await(5, TimeUnit.MINUTES);
     latch2.await(5, TimeUnit.MINUTES);
     latch3.await(5, TimeUnit.MINUTES);
-    
+
+    long end = System.currentTimeMillis();
+    System.out.println("Time elapsed: " + (end - start) + "ms");
     assertThat(latch.getCount(), is(0L));
     assertThat(latch2.getCount(), is(0L));
     assertThat(latch3.getCount(), is(0L));
