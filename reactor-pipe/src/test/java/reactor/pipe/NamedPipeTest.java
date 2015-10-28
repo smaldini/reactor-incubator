@@ -298,7 +298,7 @@ public class NamedPipeTest extends AbstractFirehoseTest {
                   }
                 },
                 0)
-           .consume(System.out::println);
+           .consume((i) -> System.out.println(i));
 
     firehose.notify(k1, 1);
     firehose.notify(k1, 1);
