@@ -22,6 +22,8 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
     super(suppliers);
   }
 
+  // TODO: add map with key
+
   @SuppressWarnings(value = {"unchecked"})
   public <V1> MatchedPipe<V1> map(Function<V, V1> mapper) {
     this.suppliers.add(new StreamSupplier<Key, V, V1>() {
@@ -153,6 +155,21 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
         return (key, value) -> consumer.accept(value);
       }
     });
+    return new FinalizedMatchedStream(suppliers);
+  }
+
+
+	@SuppressWarnings(value = {"unchecked"})
+  public <SRC extends Key> FinalizedMatchedStream consume(Supplier<Consumer<V>> consumerSupplier) {
+    this.suppliers.add(new StreamSupplier<SRC, V, NullType>() {
+				@Override
+				public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+																													 DST dst,
+																													 NamedPipe<NullType> pipe) {
+					Consumer<V> consumer = consumerSupplier.get();
+					return (key, value) -> consumer.accept(value);
+				}
+			});
     return new FinalizedMatchedStream(suppliers);
   }
 
