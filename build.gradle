@@ -195,10 +195,12 @@ project('reactor-net-0mq') {
 
   dependencies {
     compile "io.projectreactor:reactor-net:$reactorVersion"
+    compile "io.projectreactor:reactor-stream:$reactorVersion"
     compile "org.zeromq:jeromq:$jeromqVersion"
 
     optional "org.slf4j:slf4j-api:$slf4jVersion"
     testCompile "com.esotericsoftware:kryo:$kryoVersion"
+    testCompile "io.projectreactor:reactor-codec:$reactorVersion"
     testCompile "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
   }
 }
