@@ -8,6 +8,7 @@ import reactor.Subscribers;
 import reactor.core.processor.RingBufferWorkProcessor;
 import reactor.core.subscription.SubscriptionWithContext;
 import reactor.core.support.Assert;
+import reactor.core.support.wait.SleepingWaitStrategy;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
 import reactor.fn.Predicate;
@@ -21,11 +22,8 @@ import reactor.pipe.registry.*;
 import reactor.pipe.stream.FirehoseSubscription;
 
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongBinaryOperator;
 
@@ -89,7 +87,11 @@ public class Firehose<K extends Key> {
     this.timer = new LazyVar<>(new Supplier<HashWheelTimer>() {
       @Override
       public HashWheelTimer get() {
-        return new HashWheelTimer(10); // TODO: configurable hash wheel size!
+        return
+          new HashWheelTimer(10,
+                             512,
+                             new SleepingWaitStrategy());
+        // TODO: configurable hash wheel size!
       }
     });
   }
@@ -106,7 +108,6 @@ public class Firehose<K extends Key> {
   public <V> Firehose notify(final K key, final V ev) {
     Assert.notNull(key, "Key cannot be null.");
     Assert.notNull(ev, "Event cannot be null.");
-
 
     // Backpressure
     while ((inDispatcherContext.get() == null || !inDispatcherContext.get()) &&
