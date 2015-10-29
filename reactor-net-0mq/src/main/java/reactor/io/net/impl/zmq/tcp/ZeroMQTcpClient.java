@@ -34,15 +34,12 @@ import reactor.fn.Consumer;
 import reactor.fn.timer.Timer;
 import reactor.fn.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
-import reactor.io.codec.Codec;
-import reactor.io.net.ChannelStream;
-import reactor.io.net.ReactorChannelHandler;
+import reactor.io.net.ReactiveChannel;
+import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.Reconnect;
 import reactor.io.net.config.ClientSocketOptions;
 import reactor.io.net.config.SslOptions;
-import reactor.io.net.impl.zmq.ZeroMQChannelStream;
 import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
-import reactor.io.net.impl.zmq.ZeroMQWorker;
 import reactor.io.net.tcp.TcpClient;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -55,7 +52,7 @@ import reactor.rx.broadcast.SerializedBroadcaster;
  * @author Jon Brisbin
  * @author Stephane Maldini
  */
-public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
+public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 
 	private final static Logger log = LoggerFactory.getLogger(ZeroMQTcpClient.class);
 
@@ -70,9 +67,8 @@ public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
 	public ZeroMQTcpClient(Timer timer,
 			InetSocketAddress connectAddress,
 			ClientSocketOptions options,
-			SslOptions sslOptions,
-			Codec<Buffer, IN, OUT> codec) {
-		super(timer, connectAddress, options == null ? new ClientSocketOptions() : options, sslOptions, codec);
+			SslOptions sslOptions) {
+		super(timer, connectAddress, options == null ? new ClientSocketOptions() : options, sslOptions);
 
 		this.ioThreadCount = DEFAULT_ZMQ_THREAD_COUNT;
 
@@ -86,7 +82,7 @@ public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
 	}
 
 	@Override
-	protected Stream<Tuple2<InetSocketAddress, Integer>> doStart(ReactorChannelHandler handler, Reconnect reconnect) {
+	protected Stream<Tuple2<InetSocketAddress, Integer>> doStart(ReactiveChannelHandler handler, Reconnect reconnect) {
 		throw new IllegalStateException("Reconnects are handled transparently by the ZeroMQ network library");
 	}
 
@@ -100,18 +96,15 @@ public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
 		return promise;
 	}
 
-	protected ZeroMQChannelStream<IN, OUT> bindChannel() {
+	protected ZeroMQChannel bindChannel() {
 
-		return new ZeroMQChannelStream<IN, OUT>(
-				getDefaultTimer(),
-				getDefaultPrefetchSize(),
-				getConnectAddress(),
-				getDefaultCodec()
+		return new ZeroMQChannel(
+				getConnectAddress()
 		);
 	}
 
 	@Override
-	protected Promise<Void> doStart(final ReactorChannelHandler<IN, OUT, ChannelStream<IN, OUT>> handler) {
+	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
 		final UUID id = UUIDUtils.random();
 
 		final Promise<Void> p = Promises.ready();
@@ -146,7 +139,7 @@ public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
 
 					socket.connect(addr);
 
-					final ZeroMQChannelStream<IN, OUT> netChannel =
+					final ZeroMQChannel netChannel =
 							bindChannel()
 									.setConnectionId(id.toString())
 									.setSocket(socket);
@@ -175,11 +168,7 @@ public class ZeroMQTcpClient<IN, OUT> extends TcpClient<IN, OUT> {
 						public void accept(ZMsg msg) {
 							ZFrame content;
 							while (null != (content = msg.pop())) {
-								if (netChannel.getDecoder() != null) {
-									netChannel.getDecoder().apply(Buffer.wrap(content.getData()));
-								} else {
-									netChannel.doDecoded((IN) Buffer.wrap(content.getData()));
-								}
+								netChannel.inputSub.onNext(Buffer.wrap(content.getData()));
 							}
 							msg.destroy();
 						}

@@ -32,6 +32,9 @@ import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.codec.StandardCodecs;
 import reactor.io.net.NetStreams;
+import reactor.io.net.preprocessor.CodecPreprocessor;
+import reactor.io.net.tcp.ReactorTcpClient;
+import reactor.io.net.tcp.ReactorTcpServer;
 import reactor.io.net.tcp.TcpClient;
 import reactor.io.net.tcp.TcpServer;
 import reactor.io.net.Spec;
@@ -123,14 +126,14 @@ public class AbstractNetClientServerTest {
 		final Codec<Buffer, T, T> elCodec = codec == null ? (Codec<Buffer, T, T>) StandardCodecs.PASS_THROUGH_CODEC :
 		  codec;
 
-		TcpServer<T, T> server = NetStreams.tcpServer(serverType, s -> s.listen(LOCALHOST, getPort())
-		                                                                .codec(elCodec));
+		ReactorTcpServer<T, T> server = NetStreams.tcpServer(serverType, s -> s.listen(LOCALHOST, getPort())
+		                                                                       .preprocessor(CodecPreprocessor.from(elCodec)));
 
 		server.start(ch -> ch.writeWith(ch.take(1))).await();
 
-		TcpClient<T, T> client = NetStreams.tcpClient(clientType, s -> s
+		ReactorTcpClient<T, T> client = NetStreams.tcpClient(clientType, s -> s
 			.connect(LOCALHOST, getPort())
-			.codec(elCodec)
+			.preprocessor(CodecPreprocessor.from(elCodec))
 		);
 
 		final Promise<T> p = Promises.ready();

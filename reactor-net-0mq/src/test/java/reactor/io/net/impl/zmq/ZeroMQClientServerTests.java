@@ -34,14 +34,15 @@ import org.zeromq.ZMsg;
 import reactor.Timers;
 import reactor.core.support.UUIDUtils;
 import reactor.io.buffer.Buffer;
-import reactor.io.codec.json.JacksonJsonCodec;
+import reactor.io.codec.json.JsonCodec;
 import reactor.io.codec.kryo.KryoCodec;
 import reactor.io.net.NetStreams;
 import reactor.io.net.impl.zmq.tcp.ZeroMQ;
 import reactor.io.net.impl.zmq.tcp.ZeroMQTcpClient;
 import reactor.io.net.impl.zmq.tcp.ZeroMQTcpServer;
-import reactor.io.net.tcp.TcpClient;
-import reactor.io.net.tcp.TcpServer;
+import reactor.io.net.preprocessor.CodecPreprocessor;
+import reactor.io.net.tcp.ReactorTcpClient;
+import reactor.io.net.tcp.ReactorTcpServer;
 import reactor.io.net.tcp.support.SocketUtils;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -71,7 +72,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	public static void classSetup() {
 		KRYO = new Kryo();
 		KRYO_CODEC = new KryoCodec<>(KRYO, false);
-		ZEROMQ = new ZeroMQ<Data>(Timers.global()).codec(KRYO_CODEC);
+		ZEROMQ = new ZeroMQ<>(Timers.global(), CodecPreprocessor.from(KRYO_CODEC));
 	}
 
 	@AfterClass
@@ -106,7 +107,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 
 	@Test(timeout = 60000)
 	public void clientSendsDataToServerUsingJson() throws InterruptedException {
-		assertTcpClientServerExchangedData(ZeroMQTcpServer.class, ZeroMQTcpClient.class, new JacksonJsonCodec<>(), data, d -> d.equals(data));
+		assertTcpClientServerExchangedData(ZeroMQTcpServer.class, ZeroMQTcpClient.class, new JsonCodec<>(Data.class), data, d -> d.equals(data));
 	}
 
 	@Test(timeout = 60000)
@@ -180,7 +181,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		final CountDownLatch latch = new CountDownLatch(2);
 		ZContext zmq = new ZContext();
 
-		TcpServer<Buffer, Buffer> server = NetStreams.tcpServer(ZeroMQTcpServer.class, spec -> spec
+		ReactorTcpServer<Buffer, Buffer> server = NetStreams.tcpServer(ZeroMQTcpServer.class, spec -> spec
 						.listen("127.0.0.1", port)
 		);
 
@@ -212,7 +213,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		final int port = SocketUtils.findAvailableTcpPort();
 		final CountDownLatch latch = new CountDownLatch(2);
 
-		TcpServer<Buffer, Buffer>
+		ReactorTcpServer<Buffer, Buffer>
 				zmqs = NetStreams.tcpServer(ZeroMQTcpServer.class, spec -> spec.listen(port));
 
 		zmqs.start(ch ->
@@ -224,7 +225,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 						}))
 		).await(5, TimeUnit.SECONDS);
 
-		TcpClient<Buffer, Buffer> zmqc = NetStreams.<Buffer, Buffer>tcpClient(ZeroMQTcpClient.class, s -> s
+		ReactorTcpClient<Buffer, Buffer> zmqc = NetStreams.<Buffer, Buffer>tcpClient(ZeroMQTcpClient.class, s -> s
 						.connect("127.0.0.1", port)
 		);
 

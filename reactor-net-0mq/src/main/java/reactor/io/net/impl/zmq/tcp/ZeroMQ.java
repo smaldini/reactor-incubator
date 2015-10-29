@@ -18,31 +18,31 @@ package reactor.io.net.impl.zmq.tcp;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.reactivestreams.Publisher;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import reactor.bus.registry.Registration;
-import reactor.bus.registry.Registries;
-import reactor.bus.registry.Registry;
-import reactor.bus.selector.Selectors;
 import reactor.core.support.Assert;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
 import reactor.fn.timer.Timer;
 import reactor.io.buffer.Buffer;
-import reactor.io.codec.Codec;
-import reactor.io.codec.StandardCodecs;
 import reactor.io.net.ChannelStream;
 import reactor.io.net.NetStreams;
+import reactor.io.net.Preprocessor;
+import reactor.io.net.ReactiveChannel;
+import reactor.io.net.ReactiveNet;
+import reactor.io.net.ReactivePeer;
 import reactor.io.net.ReactorChannelHandler;
-import reactor.io.net.ReactorPeer;
 import reactor.io.net.Spec;
 import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
 import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
-import reactor.io.net.tcp.TcpClient;
-import reactor.io.net.tcp.TcpServer;
+import reactor.io.net.tcp.ReactorTcpClient;
+import reactor.io.net.tcp.ReactorTcpServer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Streams;
@@ -53,7 +53,7 @@ import reactor.rx.Streams;
  */
 public class ZeroMQ<T> {
 
-	private final static Registry<Integer, String> SOCKET_TYPES = Registries.create();
+	private final static Map<Integer, String> SOCKET_TYPES = new HashMap<>();
 
 	static {
 		for (Field f : ZMQ.class.getDeclaredFields()) {
@@ -61,8 +61,9 @@ public class ZeroMQ<T> {
 				f.setAccessible(true);
 				try {
 					int val = f.getInt(null);
-					SOCKET_TYPES.register(Selectors.$(val), f.getName());
-				} catch (IllegalAccessException e) {
+					SOCKET_TYPES.put(val, f.getName());
+				}
+				catch (IllegalAccessException e) {
 				}
 			}
 		}
@@ -70,36 +71,35 @@ public class ZeroMQ<T> {
 
 	private final Timer    timer;
 	private final ZContext zmqCtx;
+	private final Preprocessor<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>, T, T, ReactiveChannel<T, T>>
+	                       preprocessor;
 
-	private final List<ReactorPeer<T, T, ChannelStream<T, T>>> peers = new ArrayList<>();
+	private final List<ReactivePeer<T, T, ReactiveChannel<T, T>>> peers = new ArrayList<>();
 
-	@SuppressWarnings("unchecked")
-	private volatile Codec<Buffer, T, T> codec    =
-			(Codec<Buffer, T, T>) StandardCodecs.PASS_THROUGH_CODEC;
-	private volatile boolean             shutdown = false;
+	private volatile boolean shutdown = false;
 
 	public ZeroMQ(Timer env) {
+		this(env, null);
+	}
+
+	public ZeroMQ(Timer env,
+			Preprocessor<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>, T, T, ReactiveChannel<T, T>> preprocessor) {
 		this.timer = env;
 		this.zmqCtx = new ZContext();
+		this.preprocessor = preprocessor;
 		this.zmqCtx.setLinger(100);
 	}
 
 	public static String findSocketTypeName(final int socketType) {
-		List<Registration<Integer, ? extends String>> registrations =
-				SOCKET_TYPES.select(socketType);
-		if (registrations.isEmpty()) {
+
+		String type = SOCKET_TYPES.get(socketType);
+		if (type == null || type.isEmpty()) {
 			return "";
 		}
 		else {
-			return registrations.get(0)
-			                    .getObject();
+			return type;
 		}
 
-	}
-
-	public ZeroMQ<T> codec(Codec<Buffer, T, T> codec) {
-		this.codec = codec;
-		return this;
 	}
 
 	public Promise<ChannelStream<T, T>> dealer(String addrs) {
@@ -130,22 +130,21 @@ public class ZeroMQ<T> {
 			final int socketType) {
 		Assert.isTrue(!shutdown, "This ZeroMQ instance has been shut down");
 
-		TcpClient<T, T> client =
-				NetStreams.tcpClient(ZeroMQTcpClient.class, new NetStreams.TcpClientFactory<T, T>() {
+		ReactorTcpClient<T, T> client =
+				NetStreams.tcpClient(ZeroMQTcpClient.class, new ReactiveNet.TcpClientFactory<T, T>() {
 
-							@Override
-							public Spec.TcpClientSpec<T, T> apply(
-									Spec.TcpClientSpec<T, T> spec) {
-								return spec.timer(timer)
-								           .codec(codec)
-								           .options(new ZeroMQClientSocketOptions().context(zmqCtx)
-								                                                   .connectAddresses(addrs)
-								                                                   .socketType(socketType));
-							}
-						});
+					@Override
+					public Spec.TcpClientSpec<T, T> apply(Spec.TcpClientSpec<T, T> spec) {
+						return spec.timer(timer)
+						           .preprocessor(preprocessor)
+						           .options(new ZeroMQClientSocketOptions().context(zmqCtx)
+						                                                   .connectAddresses(addrs)
+						                                                   .socketType(socketType));
+					}
+				});
 
 		final Promise<ChannelStream<T, T>> promise = Promises.ready(timer);
-		client.start(new ReactorChannelHandler<T, T, ChannelStream<T, T>>() {
+		client.start(new ReactorChannelHandler<T, T>() {
 			@Override
 			public Publisher<Void> apply(ChannelStream<T, T> ttChannelStream) {
 				promise.onNext(ttChannelStream);
@@ -154,21 +153,23 @@ public class ZeroMQ<T> {
 		});
 
 		synchronized (peers) {
-			peers.add(client);
+			peers.add(client.delegate());
 		}
 
 		return promise;
 	}
 
-	public Promise<ChannelStream<T, T>> createServer(final String addrs, final int socketType) {
+	public Promise<ChannelStream<T, T>> createServer(final String addrs,
+			final int socketType) {
 		Assert.isTrue(!shutdown, "This ZeroMQ instance has been shut down");
 
-		final TcpServer<T, T> server = NetStreams.tcpServer(ZeroMQTcpServer.class, new NetStreams.TcpServerFactory<T, T>() {
+		final ReactorTcpServer<T, T> server =
+				NetStreams.tcpServer(ZeroMQTcpServer.class, new ReactiveNet.TcpServerFactory<T, T>() {
 
 					@Override
 					public Spec.TcpServerSpec<T, T> apply(Spec.TcpServerSpec<T, T> spec) {
 						return spec.timer(timer)
-						           .codec(codec)
+						           .preprocessor(preprocessor)
 						           .options(new ZeroMQServerSocketOptions().context(zmqCtx)
 						                                                   .listenAddresses(addrs)
 						                                                   .socketType(socketType));
@@ -176,7 +177,7 @@ public class ZeroMQ<T> {
 				});
 
 		final Promise<ChannelStream<T, T>> promise = Promises.ready(timer);
-		server.start(new ReactorChannelHandler<T, T, ChannelStream<T, T>>() {
+		server.start(new ReactorChannelHandler<T, T>() {
 			@Override
 			public Publisher<Void> apply(ChannelStream<T, T> ttChannelStream) {
 				promise.onNext(ttChannelStream);
@@ -185,7 +186,7 @@ public class ZeroMQ<T> {
 		});
 
 		synchronized (peers) {
-			peers.add(server);
+			peers.add(server.delegate());
 		}
 
 		return promise;
@@ -197,23 +198,27 @@ public class ZeroMQ<T> {
 		}
 		shutdown = true;
 
-		List<ReactorPeer<T, T, ChannelStream<T, T>>> _peers;
+		List<ReactivePeer<T, T, ReactiveChannel<T, T>>> _peers;
 		synchronized (peers) {
 			_peers = new ArrayList<>(peers);
 		}
 
-		Streams.from(_peers).flatMap(new Function<ReactorPeer, Publisher<Void>>() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public Publisher<Void> apply(final ReactorPeer ttChannelStreamReactorPeer) {
-				return ttChannelStreamReactorPeer.shutdown().onSuccess(new Consumer() {
-					@Override
-					public void accept(Object o) {
-						peers.remove(ttChannelStreamReactorPeer);
-					}
-				});
-			}
-		}).consume();
+		Streams.from(_peers)
+		       .flatMap(new Function<ReactivePeer, Publisher<Void>>() {
+			       @Override
+			       @SuppressWarnings("unchecked")
+			       public Publisher<Void> apply(
+					       final ReactivePeer ttChannelStreamReactorPeer) {
+				       return Promises.from(ttChannelStreamReactorPeer.shutdown())
+				                      .onSuccess(new Consumer() {
+					                      @Override
+					                      public void accept(Object o) {
+						                      peers.remove(ttChannelStreamReactorPeer);
+					                      }
+				                      });
+			       }
+		       })
+		       .consume();
 
 //		if (log.isDebugEnabled()) {
 //			log.debug("Destroying {} on {}", zmqCtx, this);

@@ -36,14 +36,11 @@ import reactor.fn.Consumer;
 import reactor.fn.Function;
 import reactor.fn.timer.Timer;
 import reactor.io.buffer.Buffer;
-import reactor.io.codec.Codec;
-import reactor.io.net.ChannelStream;
-import reactor.io.net.ReactorChannelHandler;
+import reactor.io.net.ReactiveChannel;
+import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.config.ServerSocketOptions;
 import reactor.io.net.config.SslOptions;
-import reactor.io.net.impl.zmq.ZeroMQChannelStream;
 import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
-import reactor.io.net.impl.zmq.ZeroMQWorker;
 import reactor.io.net.tcp.TcpServer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -57,7 +54,7 @@ import reactor.rx.stream.GroupedStream;
  * @author Jon Brisbin
  * @author Stephane Maldini
  */
-public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
+public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 
 	private static final Logger log = LoggerFactory.getLogger(ZeroMQTcpServer.class);
 
@@ -71,9 +68,8 @@ public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
 	public ZeroMQTcpServer(Timer timer,
 			InetSocketAddress listenAddress,
 			ServerSocketOptions options,
-			SslOptions sslOptions,
-			Codec<Buffer, IN, OUT> codec) {
-		super(timer, listenAddress, options == null ? new ServerSocketOptions() : options, sslOptions, codec);
+			SslOptions sslOptions) {
+		super(timer, listenAddress, options == null ? new ServerSocketOptions() : options, sslOptions);
 
 		this.ioThreadCount = Integer.parseInt(System.getProperty("reactor.zmq.ioThreadCount", "1"));
 
@@ -87,7 +83,7 @@ public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
 	}
 
 	@Override
-	protected Promise<Void> doStart(final ReactorChannelHandler<IN, OUT, ChannelStream<IN, OUT>> handler) {
+	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
 		Assert.isNull(worker, "This ZeroMQ server has already been started");
 
 		final Promise<Void> promise = Promises.ready(getDefaultTimer());
@@ -147,7 +143,7 @@ public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
 						@Override
 						public void accept(final GroupedStream<String, ZMsg> stringZMsgGroupedStream) {
 
-							final ZeroMQChannelStream<IN, OUT> netChannel =
+							final ZeroMQChannel netChannel =
 									bindChannel()
 											.setConnectionId(stringZMsgGroupedStream.key())
 											.setSocket(socket);
@@ -176,11 +172,7 @@ public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
 								public void accept(ZMsg msg) {
 									ZFrame content;
 									while (null != (content = msg.pop())) {
-										if (netChannel.getDecoder() != null) {
-											netChannel.getDecoder().apply(Buffer.wrap(content.getData()));
-										} else {
-											netChannel.doDecoded((IN) Buffer.wrap(content.getData()));
-										}
+											netChannel.inputSub.onNext(Buffer.wrap(content.getData()));
 									}
 									msg.destroy();
 								}
@@ -203,13 +195,8 @@ public class ZeroMQTcpServer<IN, OUT> extends TcpServer<IN, OUT> {
 		return promise;
 	}
 
-	protected ZeroMQChannelStream<IN, OUT> bindChannel() {
-		return new ZeroMQChannelStream<IN, OUT>(
-				getDefaultTimer(),
-				getDefaultPrefetchSize(),
-				null,
-				getDefaultCodec()
-		);
+	protected ZeroMQChannel bindChannel() {
+		return new ZeroMQChannel(null);
 	}
 
 	@Override
