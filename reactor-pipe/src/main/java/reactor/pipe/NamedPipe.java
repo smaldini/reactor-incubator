@@ -154,7 +154,7 @@ public class NamedPipe<V> {
                                                                   TimeUnit timeUnit) {
     final Atom<V> debounced = stateProvider.makeAtom(source, null);
 
-    firehose.getTimer().schedule(discarded_ -> {
+    firehose().getTimer().submit(discarded_ -> {
       V currentDebounced = debounced.updateAndReturnOld(old_ -> null);
       if (currentDebounced != null) {
         // TODO: FIX METADATA!

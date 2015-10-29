@@ -43,7 +43,7 @@ public class NamedPipeTest extends AbstractFirehoseTest {
 
 
     intPipe.map(Key.wrap("key1"), Key.wrap("key2"), (i) -> i + 1);
-    intPipe.debounce(Key.wrap("key2"), Key.wrap("key3"), 100, TimeUnit.MILLISECONDS);
+    intPipe.debounce(Key.wrap("key2"), Key.wrap("key3"), 1, TimeUnit.SECONDS);
 
     {
       CountDownLatch latch = new CountDownLatch(1);
@@ -57,7 +57,8 @@ public class NamedPipeTest extends AbstractFirehoseTest {
       intPipe.notify(Key.wrap("key1"), 1);
       intPipe.notify(Key.wrap("key1"), 2);
       intPipe.notify(Key.wrap("key1"), 3);
-      latch.await(1, TimeUnit.SECONDS);
+      latch.await(10, TimeUnit.SECONDS);
+      assertThat(latch.getCount(), is(0L));
       assertThat(counter.get(), is(1));
     }
     assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(4));
