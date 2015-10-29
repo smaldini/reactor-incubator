@@ -31,6 +31,21 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
   }
 
   @Test
+  public void consumeWithSupplierTest() throws InterruptedException {
+    NamedPipe<Integer> pipe = new NamedPipe<>(firehose);
+    AVar<Integer> res = new AVar<>();
+
+    pipe.matched(key -> key.getPart(0).equals("source"))
+        .map(i -> i + 1)
+        .map(i -> i * 2)
+        .consume(() -> res::set);
+
+    pipe.notify(Key.wrap("source", "first"), 1);
+
+    assertThat(res.get(1, TimeUnit.SECONDS), is(4));
+  }
+
+  @Test
   public void statefulMapTest() throws InterruptedException {
     AVar<Integer> res = new AVar<>(3);
     NamedPipe<Integer> intPipe = new NamedPipe<>(firehose);
@@ -129,5 +144,6 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     assertThat(res1.get(1, TimeUnit.SECONDS), is(100));
     assertThat(res2.get(1, TimeUnit.SECONDS), is(100));
   }
+
 
 }
