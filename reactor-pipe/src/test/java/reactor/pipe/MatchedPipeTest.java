@@ -38,7 +38,7 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     pipe.matched(key -> key.getPart(0).equals("source"))
         .map(i -> i + 1)
         .map(i -> i * 2)
-        .consume(() -> res::set);
+        .consume(() -> (k, v) -> res.set(v));
 
     pipe.notify(Key.wrap("source", "first"), 1);
 

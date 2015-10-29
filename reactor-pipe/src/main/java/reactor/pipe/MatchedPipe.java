@@ -159,17 +159,18 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
 
-	@SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key> FinalizedMatchedStream consume(Supplier<Consumer<V>> consumerSupplier) {
+  @SuppressWarnings(value = {"unchecked"})
+  public <SRC extends Key> FinalizedMatchedStream consume(Supplier<KeyedConsumer<SRC, V>> consumerSupplier) {
     this.suppliers.add(new StreamSupplier<SRC, V, NullType>() {
-				@Override
-				public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-																													 DST dst,
-																													 NamedPipe<NullType> pipe) {
-					Consumer<V> consumer = consumerSupplier.get();
-					return (key, value) -> consumer.accept(value);
-				}
-			});
+
+      @Override
+      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
+                                                         DST dst,
+                                                         NamedPipe<NullType> pipe) {
+        return consumerSupplier.get();
+      }
+
+    });
     return new FinalizedMatchedStream(suppliers);
   }
 
