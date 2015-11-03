@@ -135,7 +135,7 @@ public class Firehose<K extends Key> {
           inDispatcherContext.set(true);
           dispatch(key, ev);
         } catch (Throwable outer) {
-          errorHandler.accept(outer);
+          errorHandler.accept(new RuntimeException("Exception in key: " + key.toString(), outer));
         } finally {
           inDispatcherContext.set(false);
         }
