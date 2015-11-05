@@ -30,6 +30,7 @@ import reactor.rx.BiStreams
 //import reactor.rx.IOStreams
 import reactor.rx.Promise
 import reactor.rx.Stream
+import reactor.rx.Streams
 import reactor.rx.action.Control
 
 /**
@@ -98,6 +99,11 @@ class StreamExtensions {
 
   static <T> Promise<T> leftShift(final Promise<T> selfType, final Consumer<T> other) {
     selfType.onSuccess other
+  }
+
+  static <T> void rightShift(final Stream<T> selfType, final List<T> other) {
+    selfType.consume { other.add(it) }
+    Streams.await(selfType)
   }
 
   //Consuming
