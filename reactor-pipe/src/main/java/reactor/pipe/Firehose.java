@@ -87,10 +87,11 @@ public class Firehose<K extends Key> {
     this.timer = new LazyVar<>(new Supplier<HashWheelTimer>() {
       @Override
       public HashWheelTimer get() {
-        return
-          new HashWheelTimer(10,
-                             512,
-                             new SleepingWaitStrategy());
+        HashWheelTimer timer = new HashWheelTimer(10,
+                                                  512,
+                                                  new SleepingWaitStrategy());
+        timer.start();
+        return timer;
         // TODO: configurable hash wheel size!
       }
     });
