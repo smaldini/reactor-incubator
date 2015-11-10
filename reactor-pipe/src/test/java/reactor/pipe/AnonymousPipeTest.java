@@ -116,7 +116,7 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
     pipe.notify(Key.wrap("source"), 5);
     pipe.notify(Key.wrap("source"), 6);
 
-    assertThat(res.get(1, TimeUnit.SECONDS), is(TreePVector.from(Arrays.asList(2,3,4,5,6))));
+    assertThat(res.get(1, TimeUnit.SECONDS), is(TreePVector.from(Arrays.asList(2, 3, 4, 5, 6))));
   }
 
   @Test
@@ -163,7 +163,7 @@ public class AnonymousPipeTest extends AbstractFirehoseTest {
 
     s.map((i) -> i + 1)
      .map(i -> i * 2)
-     .redirect(destination);
+     .redirect((k, v) -> destination);
 
     pipe.consume(destination, (Integer i) -> res.set(i));
 
