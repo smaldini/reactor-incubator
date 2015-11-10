@@ -79,16 +79,21 @@ public class AnonymousPipe<V> {
 
   @SuppressWarnings(value = {"unchecked"})
   public AnonymousPipe<V> consume(KeyedConsumer<Key, V> consumer) {
-    this.pipe.consume(upstream, consumer);
+    this.pipe.consume(upstream, new KeyedConsumer<Key, V>() {
+      @Override
+      public void accept(Key k, V value) {
+        consumer.accept(rootKey.clone(k), value);
+      }
+    });
     return this;
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public AnonymousPipe<V> redirect(Key destination) {
+  public AnonymousPipe<V> redirect(BiFunction<Key, V, Key>  destination) {
     pipe.consume(upstream, new KeyedConsumer<Key, V>() {
       @Override
-      public void accept(Key key, V value) {
-        pipe.notify(destination, value);
+      public void accept(Key k, V value) {
+        pipe.notify(destination.apply(rootKey.clone(k), value), value);
       }
     });
 
