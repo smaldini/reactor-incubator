@@ -291,15 +291,16 @@ public class NamedPipeTest extends AbstractFirehoseTest {
                                                    }
                                                  });
 
-    intPipe.matched((k) -> true)
-           .map(new BiFunction<Atom<Integer>, Integer, Integer>() {
-                  @Override
-                  public Integer apply(Atom<Integer> st, Integer i) {
-                    return st.update((acc) -> acc + i);
-                  }
-                },
-                0)
-           .consume((i) -> System.out.println(i));
+    intPipe.matched((k) -> true,
+                    MatchedPipe.<Integer>build()
+                               .map(new BiFunction<Atom<Integer>, Integer, Integer>() {
+                                      @Override
+                                      public Integer apply(Atom<Integer> st, Integer i) {
+                                        return st.update((acc) -> acc + i);
+                                      }
+                                    },
+                                    0)
+                               .consume((i) -> System.out.println(i)));
 
     firehose.notify(k1, 1);
     firehose.notify(k1, 1);
