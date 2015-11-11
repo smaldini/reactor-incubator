@@ -9,10 +9,9 @@ import reactor.pipe.operation.PartitionOperation;
 import reactor.pipe.operation.SlidingWindowOperation;
 
 import javax.lang.model.type.NullType;
-import java.util.LinkedList;
 import java.util.List;
 
-public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
+public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRENT> {
 
   protected MatchedPipe() {
     super(TreePVector.empty());
@@ -25,12 +24,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   // TODO: add map with key
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> MatchedPipe<V1> map(Function<V, V1> mapper) {
-    return next(new StreamSupplier<Key, V, V1>() {
+  public <V1> MatchedPipe<FROM, V1> map(Function<CURRENT, V1> mapper) {
+    return next(new StreamSupplier<Key, CURRENT, V1>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V1> pipe) {
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<V1> pipe) {
         return (key, value) -> {
           pipe.notify(dst.clone(key), mapper.apply(value));
         };
@@ -39,13 +38,13 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> MatchedPipe<V1> map(Supplier<Function<V, V1>> supplier) {
-    return next(new StreamSupplier<Key, V, V1>() {
+  public <V1> MatchedPipe<FROM, V1> map(Supplier<Function<CURRENT, V1>> supplier) {
+    return next(new StreamSupplier<Key, CURRENT, V1>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V1> pipe) {
-        Function<V, V1> mapper = supplier.get();
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<V1> pipe) {
+        Function<CURRENT, V1> mapper = supplier.get();
         return (key, value) -> {
           pipe.notify(dst.clone(key), mapper.apply(value));
         };
@@ -54,13 +53,13 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <ST, V1> MatchedPipe<V1> map(BiFunction<Atom<ST>, V, V1> mapper,
+  public <ST, V1> MatchedPipe<FROM, V1> map(BiFunction<Atom<ST>, CURRENT, V1> mapper,
                                       ST init) {
-    return next(new StreamSupplier<Key, V, V1>() {
+    return next(new StreamSupplier<Key, CURRENT, V1>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V1> pipe) {
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<V1> pipe) {
         Atom<ST> st = pipe.stateProvider().makeAtom(src, init);
 
         return (key, value) -> {
@@ -72,12 +71,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<V> filter(Predicate<V> predicate) {
-    return next(new StreamSupplier<Key, V, V>() {
+  public MatchedPipe<FROM, CURRENT> filter(Predicate<CURRENT> predicate) {
+    return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V> pipe) {
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<CURRENT> pipe) {
         return (key, value) -> {
           if (predicate.test(value)) {
             pipe.notify(dst.clone(key), value);
@@ -88,35 +87,35 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<List<V>> slide(UnaryOperator<List<V>> drop) {
-    return next(new StreamSupplier<Key, V, V>() {
+  public MatchedPipe<FROM, List<CURRENT>> slide(UnaryOperator<List<CURRENT>> drop) {
+    return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V> pipe) {
-        Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<CURRENT> pipe) {
+        Atom<PVector<CURRENT>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
 
-        return new SlidingWindowOperation<Key, DST, V>(pipe.firehose(),
-                                                       buffer,
-                                                       drop,
-                                                       dst);
+        return new SlidingWindowOperation<Key, DST, CURRENT>(pipe.firehose(),
+                                                             buffer,
+                                                             drop,
+                                                             dst);
       }
     });
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<List<V>> partition(Predicate<List<V>> emit) {
-    return next(new StreamSupplier<Key, V, V>() {
+  public MatchedPipe<FROM, List<CURRENT>> partition(Predicate<List<CURRENT>> emit) {
+    return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
-      public <DST extends Key> KeyedConsumer<Key, V> get(Key src,
-                                                         DST dst,
-                                                         NamedPipe<V> pipe) {
-        Atom<PVector<V>> buffer = pipe.stateProvider().makeAtom(dst, TreePVector.empty());
+      public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
+                                                               DST dst,
+                                                               NamedPipe<CURRENT> pipe) {
+        Atom<PVector<CURRENT>> buffer = pipe.stateProvider().makeAtom(dst, TreePVector.empty());
 
-        return new PartitionOperation<Key, DST, V>(pipe.firehose(),
-                                                   buffer,
-                                                   emit,
-                                                   dst);
+        return new PartitionOperation<Key, DST, CURRENT>(pipe.firehose(),
+                                                         buffer,
+                                                         emit,
+                                                         dst);
       }
     });
   }
@@ -126,12 +125,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
    */
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, T> FinalizedMatchedStream<T> consume(KeyedConsumer<SRC, V> consumer) {
-    return end(new StreamSupplier<SRC, V, NullType>() {
+  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(KeyedConsumer<SRC, CURRENT> consumer) {
+    return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
-      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                         DST dst,
-                                                         NamedPipe<NullType> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
+                                                               DST dst,
+                                                               NamedPipe<NullType> pipe) {
         return consumer;
       }
 
@@ -139,12 +138,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, T> FinalizedMatchedStream<T> consume(Consumer<V> consumer) {
-    return end(new StreamSupplier<SRC, V, NullType>() {
+  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(Consumer<CURRENT> consumer) {
+    return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
-      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                         DST dst,
-                                                         NamedPipe<NullType> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
+                                                               DST dst,
+                                                               NamedPipe<NullType> pipe) {
         return (key, value) -> consumer.accept(value);
       }
     });
@@ -152,12 +151,12 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, T> FinalizedMatchedStream<T> consume(Supplier<KeyedConsumer<SRC, V>> consumerSupplier) {
-    return end(new StreamSupplier<SRC, V, NullType>() {
+  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(Supplier<KeyedConsumer<SRC, CURRENT>> consumerSupplier) {
+    return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
-      public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                         DST dst,
-                                                         NamedPipe<NullType> pipe) {
+      public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
+                                                               DST dst,
+                                                               NamedPipe<NullType> pipe) {
         return consumerSupplier.get();
       }
 
@@ -171,7 +170,7 @@ public class MatchedPipe<V> extends FinalizedMatchedStream<V> {
                                                        NamedPipe<V1> pipe);
   }
 
-  public static <V> MatchedPipe<V> build() {
+  public static <V> MatchedPipe<V, V> build() {
     return new MatchedPipe<>();
   }
 

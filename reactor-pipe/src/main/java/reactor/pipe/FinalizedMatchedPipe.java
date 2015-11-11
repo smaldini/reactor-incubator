@@ -7,20 +7,20 @@ import reactor.pipe.key.Key;
 import java.util.*;
 import reactor.fn.Function;
 
-class FinalizedMatchedStream<V> {
+public class FinalizedMatchedPipe<FROM, V> {
 
   protected final PVector<MatchedPipe.StreamSupplier> suppliers;
 
-  protected FinalizedMatchedStream(PVector<MatchedPipe.StreamSupplier> suppliers) {
+  protected FinalizedMatchedPipe(PVector<MatchedPipe.StreamSupplier> suppliers) {
     this.suppliers = suppliers;
   }
 
-  protected <V1> MatchedPipe<V1> next(MatchedPipe.StreamSupplier supplier) {
+  protected <FROM, V1> MatchedPipe<FROM, V1> next(MatchedPipe.StreamSupplier supplier) {
     return new MatchedPipe<>(suppliers.plus(supplier));
   }
 
-  protected <V1> FinalizedMatchedStream<V1> end(MatchedPipe.StreamSupplier supplier) {
-    return new FinalizedMatchedStream<>(suppliers.plus(supplier));
+  protected <FROM, V1> FinalizedMatchedPipe<FROM, V1> end(MatchedPipe.StreamSupplier supplier) {
+    return new FinalizedMatchedPipe<>(suppliers.plus(supplier));
   }
 
   public Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>> subscribers(NamedPipe pipe) {
