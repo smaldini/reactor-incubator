@@ -197,8 +197,8 @@ public class NamedPipe<V> {
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key> void matched(KeyMissMatcher<SRC> keyMatcher,
-                                                  FinalizedMatchedStream<V> downstream) {
+  public <SRC extends Key, TO> void matched(KeyMissMatcher<SRC> keyMatcher,
+                                            FinalizedMatchedPipe<V, TO> downstream) {
     firehose.miss(keyMatcher, downstream.subscribers(this));
   }
 

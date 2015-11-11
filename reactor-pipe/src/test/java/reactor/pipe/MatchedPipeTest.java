@@ -22,9 +22,9 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     pipe.matched(key -> key.getPart(0).equals("source"),
                  MatchedPipe.<Integer>build()
-                            .map(i -> i + 1)
-                            .map(i -> i * 2)
-                            .consume(res::set));
+                   .map(i -> i + 1)
+                   .map(i -> i * 2)
+                   .consume(res::set));
 
     pipe.notify(Key.wrap("source", "first"), 1);
 
@@ -38,9 +38,9 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     pipe.matched(key -> key.getPart(0).equals("source"),
                  MatchedPipe.<Integer>build()
-                            .map(i -> i + 1)
-                            .map(i -> i * 2)
-                            .consume(() -> (k, v) -> res.set(v)));
+                   .map(i -> i + 1)
+                   .map(i -> i * 2)
+                   .consume(() -> (k, v) -> res.set(v)));
 
     pipe.notify(Key.wrap("source", "first"), 1);
 
@@ -54,11 +54,11 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     intPipe.matched((key) -> key.getPart(0).equals("source"),
                     MatchedPipe.<Integer>build().map((i) -> i + 1)
-                               .map((Atom<Integer> state, Integer i) -> {
-                                      return state.update(old -> old + i);
-                                    },
-                                    0)
-                               .consume(res::set));
+                                                .map((Atom<Integer> state, Integer i) -> {
+                                                       return state.update(old -> old + i);
+                                                     },
+                                                     0)
+                                                .consume(res::set));
 
     intPipe.notify(Key.wrap("source", "1"), 1);
     intPipe.notify(Key.wrap("source", "1"), 2);
@@ -74,10 +74,10 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     pipe.matched(key -> key.getPart(0).equals("source"),
                  MatchedPipe.<Integer>build()
-                            .map(i -> i + 1)
-                            .filter(i -> i % 2 != 0)
-                            .map(i -> i * 2)
-                            .consume(res::set));
+                   .map(i -> i + 1)
+                   .filter(i -> i % 2 != 0)
+                   .map(i -> i * 2)
+                   .consume(res::set));
 
 
     pipe.notify(Key.wrap("source"), 1);
@@ -93,10 +93,10 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     pipe.matched(key -> key.getPart(0).equals("source"),
                  MatchedPipe.<Integer>build()
-                            .partition((i) -> {
-                              return i.size() == 5;
-                            })
-                            .consume(res::set));
+                   .partition((i) -> {
+                     return i.size() == 5;
+                   })
+                   .consume(res::set));
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
@@ -116,9 +116,9 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
 
     pipe.matched((key) -> key.getPart(0).equals("source"),
                  MatchedPipe.<Integer>build()
-                            .slide(i -> i.subList(i.size() > 5 ? i.size() - 5 : 0,
-                                                  i.size()))
-                            .consume(res::set));
+                   .slide(i -> i.subList(i.size() > 5 ? i.size() - 5 : 0,
+                                         i.size()))
+                   .consume(res::set));
 
     pipe.notify(Key.wrap("source"), 1);
     pipe.notify(Key.wrap("source"), 2);
@@ -139,7 +139,7 @@ public class MatchedPipeTest extends AbstractFirehoseTest {
     for (AVar<Integer> avar : new AVar[]{res1, res2}) {
       pipe.matched(key -> key.getPart(0).equals("source"),
                    MatchedPipe.<Integer>build()
-                              .consume(avar::set));
+                     .consume(avar::set));
     }
 
     firehose.notify(Key.wrap("source"), 100);
