@@ -6,8 +6,8 @@ import reactor.pipe.KeyedConsumer;
 import reactor.pipe.key.Key;
 
 @FunctionalInterface
-public interface StreamSupplier<SRC extends Key, V, V1> {
-  public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                     DST dst,
-                                                     Firehose pipe);
+public interface StreamSupplier<K extends Key, V> {
+  public KeyedConsumer<K, V> get(K src,
+                                 Key dst,
+                                 Firehose firehose);
 }
