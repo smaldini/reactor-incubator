@@ -7,63 +7,71 @@ import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import reactor.pipe.operation.PartitionOperation;
 import reactor.pipe.operation.SlidingWindowOperation;
+import reactor.pipe.state.DefaultStateProvider;
+import reactor.pipe.state.StateProvider;
+import reactor.pipe.stream.StreamSupplier;
 
 import javax.lang.model.type.NullType;
 import java.util.List;
 
-public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRENT> {
+/**
+ * Matched pipe represents a (possibly multi-step) transformation from `INIT` type,
+ * which is an initial type of the topolgy, to the `CURRENT` type.
+ */
+public class MatchedPipe<INIT, CURRENT> extends FinalizedMatchedPipe<INIT, CURRENT> {
 
   protected MatchedPipe() {
-    super(TreePVector.empty());
+    this(TreePVector.empty(), new DefaultStateProvider<>());
   }
 
-  protected MatchedPipe(PVector<StreamSupplier> suppliers) {
-    super(suppliers);
+  protected MatchedPipe(PVector<StreamSupplier> suppliers,
+                        StateProvider<Key> stateProvider) {
+    super(suppliers, stateProvider);
   }
 
   // TODO: add map with key
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> MatchedPipe<FROM, V1> map(Function<CURRENT, V1> mapper) {
-    return next(new StreamSupplier<Key, CURRENT, V1>() {
+  public <NEXT> MatchedPipe<INIT, NEXT> map(Function<CURRENT, NEXT> mapper) {
+    return next(new StreamSupplier<Key, CURRENT, NEXT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<V1> pipe) {
+                                                               Firehose firehose) {
         return (key, value) -> {
-          pipe.notify(dst.clone(key), mapper.apply(value));
+          firehose.notify(dst.clone(key), mapper.apply(value));
         };
       }
     });
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <V1> MatchedPipe<FROM, V1> map(Supplier<Function<CURRENT, V1>> supplier) {
-    return next(new StreamSupplier<Key, CURRENT, V1>() {
+  public <NEXT> MatchedPipe<INIT, NEXT> map(Supplier<Function<CURRENT, NEXT>> supplier) {
+    return next(new StreamSupplier<Key, CURRENT, NEXT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<V1> pipe) {
-        Function<CURRENT, V1> mapper = supplier.get();
+                                                               Firehose firehose) {
+        Function<CURRENT, NEXT> mapper = supplier.get();
         return (key, value) -> {
-          pipe.notify(dst.clone(key), mapper.apply(value));
+          firehose.notify(dst.clone(key), mapper.apply(value));
         };
       }
     });
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <ST, V1> MatchedPipe<FROM, V1> map(BiFunction<Atom<ST>, CURRENT, V1> mapper,
-                                      ST init) {
-    return next(new StreamSupplier<Key, CURRENT, V1>() {
+  public <ST, NEXT> MatchedPipe<INIT, NEXT> map(BiFunction<Atom<ST>, CURRENT, NEXT> mapper,
+                                                ST init) {
+    return next(new StreamSupplier<Key, CURRENT, NEXT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<V1> pipe) {
-        Atom<ST> st = pipe.stateProvider().makeAtom(src, init);
+                                                               Firehose firehose) {
+        Atom<ST> st = stateProvider.makeAtom(src, init);
 
         return (key, value) -> {
-          pipe.notify(dst.clone(key), mapper.apply(st, value));
+          firehose.notify(dst.clone(key), mapper.apply(st, value));
         };
       }
     });
@@ -71,15 +79,15 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<FROM, CURRENT> filter(Predicate<CURRENT> predicate) {
+  public MatchedPipe<INIT, CURRENT> filter(Predicate<CURRENT> predicate) {
     return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<CURRENT> pipe) {
+                                                               Firehose firehose) {
         return (key, value) -> {
           if (predicate.test(value)) {
-            pipe.notify(dst.clone(key), value);
+            firehose.notify(dst.clone(key), value);
           }
         };
       }
@@ -87,15 +95,15 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<FROM, List<CURRENT>> slide(UnaryOperator<List<CURRENT>> drop) {
+  public MatchedPipe<INIT, List<CURRENT>> slide(UnaryOperator<List<CURRENT>> drop) {
     return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<CURRENT> pipe) {
-        Atom<PVector<CURRENT>> buffer = pipe.stateProvider().makeAtom(src, TreePVector.empty());
+                                                               Firehose firehose) {
+        Atom<PVector<CURRENT>> buffer = stateProvider.makeAtom(src, TreePVector.empty());
 
-        return new SlidingWindowOperation<Key, DST, CURRENT>(pipe.firehose(),
+        return new SlidingWindowOperation<Key, DST, CURRENT>(firehose,
                                                              buffer,
                                                              drop,
                                                              dst);
@@ -104,15 +112,15 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public MatchedPipe<FROM, List<CURRENT>> partition(Predicate<List<CURRENT>> emit) {
+  public MatchedPipe<INIT, List<CURRENT>> partition(Predicate<List<CURRENT>> emit) {
     return next(new StreamSupplier<Key, CURRENT, CURRENT>() {
       @Override
       public <DST extends Key> KeyedConsumer<Key, CURRENT> get(Key src,
                                                                DST dst,
-                                                               NamedPipe<CURRENT> pipe) {
-        Atom<PVector<CURRENT>> buffer = pipe.stateProvider().makeAtom(dst, TreePVector.empty());
+                                                               Firehose firehose) {
+        Atom<PVector<CURRENT>> buffer = stateProvider.makeAtom(dst, TreePVector.empty());
 
-        return new PartitionOperation<Key, DST, CURRENT>(pipe.firehose(),
+        return new PartitionOperation<Key, DST, CURRENT>(firehose,
                                                          buffer,
                                                          emit,
                                                          dst);
@@ -125,12 +133,12 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
    */
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(KeyedConsumer<SRC, CURRENT> consumer) {
+  public <SRC extends Key> FinalizedMatchedPipe<INIT, CURRENT> consume(KeyedConsumer<SRC, CURRENT> consumer) {
     return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
       public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
                                                                DST dst,
-                                                               NamedPipe<NullType> pipe) {
+                                                               Firehose pipe) {
         return consumer;
       }
 
@@ -138,12 +146,12 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
   }
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(Consumer<CURRENT> consumer) {
+  public <SRC extends Key> FinalizedMatchedPipe<INIT, CURRENT> consume(Consumer<CURRENT> consumer) {
     return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
       public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
                                                                DST dst,
-                                                               NamedPipe<NullType> pipe) {
+                                                               Firehose pipe) {
         return (key, value) -> consumer.accept(value);
       }
     });
@@ -151,23 +159,16 @@ public class MatchedPipe<FROM, CURRENT> extends FinalizedMatchedPipe<FROM, CURRE
 
 
   @SuppressWarnings(value = {"unchecked"})
-  public <SRC extends Key, TO> FinalizedMatchedPipe<FROM, TO> consume(Supplier<KeyedConsumer<SRC, CURRENT>> consumerSupplier) {
+  public <SRC extends Key> FinalizedMatchedPipe<INIT, CURRENT> consume(Supplier<KeyedConsumer<SRC, CURRENT>> consumerSupplier) {
     return end(new StreamSupplier<SRC, CURRENT, NullType>() {
       @Override
       public <DST extends Key> KeyedConsumer<SRC, CURRENT> get(SRC src,
                                                                DST dst,
-                                                               NamedPipe<NullType> pipe) {
+                                                               Firehose pipe) {
         return consumerSupplier.get();
       }
 
     });
-  }
-
-  @FunctionalInterface
-  public static interface StreamSupplier<SRC extends Key, V, V1> {
-    public <DST extends Key> KeyedConsumer<SRC, V> get(SRC src,
-                                                       DST dst,
-                                                       NamedPipe<V1> pipe);
   }
 
   public static <V> MatchedPipe<V, V> build() {

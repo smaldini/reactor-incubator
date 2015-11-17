@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+// TODO: change named pipe to be just a builder
 public class NamedPipe<V> {
 
   private final Firehose           firehose;
@@ -196,10 +197,11 @@ public class NamedPipe<V> {
     return new AnonymousPipe<>(source, this);
   }
 
+  // TODO: remove
   @SuppressWarnings(value = {"unchecked"})
   public <SRC extends Key, TO> void matched(KeyMissMatcher<SRC> keyMatcher,
                                             FinalizedMatchedPipe<V, TO> downstream) {
-    firehose.miss(keyMatcher, downstream.subscribers(this));
+    firehose.miss(keyMatcher, downstream.subscribers(firehose));
   }
 
   @SuppressWarnings(value = {"unchecked"})

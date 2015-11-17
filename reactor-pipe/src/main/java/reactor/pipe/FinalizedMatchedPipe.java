@@ -2,35 +2,47 @@ package reactor.pipe;
 
 
 import org.pcollections.PVector;
-import reactor.pipe.key.Key;
-
-import java.util.*;
 import reactor.fn.Function;
+import reactor.pipe.key.Key;
+import reactor.pipe.state.StateProvider;
+import reactor.pipe.stream.StreamSupplier;
 
-public class FinalizedMatchedPipe<FROM, V> {
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-  protected final PVector<MatchedPipe.StreamSupplier> suppliers;
+/**
+ * FinalizedMatchedPipe represents a stream builder that can take values
+ * of `INIT` and transform them via the pipeline to `FINAL` type.
+ */
+public class FinalizedMatchedPipe<INIT, FINAL> {
 
-  protected FinalizedMatchedPipe(PVector<MatchedPipe.StreamSupplier> suppliers) {
+  protected final StateProvider<Key>      stateProvider;
+  protected final PVector<StreamSupplier> suppliers;
+
+  protected FinalizedMatchedPipe(PVector<StreamSupplier> suppliers,
+                                 StateProvider<Key> stateProvider) {
     this.suppliers = suppliers;
+    this.stateProvider = stateProvider;
   }
 
-  protected <FROM, V1> MatchedPipe<FROM, V1> next(MatchedPipe.StreamSupplier supplier) {
-    return new MatchedPipe<>(suppliers.plus(supplier));
+  protected <NEXT> MatchedPipe<INIT, NEXT> next(StreamSupplier supplier) {
+    return new MatchedPipe<>(suppliers.plus(supplier),
+                             stateProvider);
   }
 
-  protected <FROM, V1> FinalizedMatchedPipe<FROM, V1> end(MatchedPipe.StreamSupplier supplier) {
-    return new FinalizedMatchedPipe<>(suppliers.plus(supplier));
+  protected <NEXT> FinalizedMatchedPipe<INIT, NEXT> end(StreamSupplier supplier) {
+    return new FinalizedMatchedPipe<>(suppliers.plus(supplier),
+                                      stateProvider);
   }
 
-  public Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>> subscribers(NamedPipe pipe) {
-    return new Function<Key, Map<Key, KeyedConsumer<? extends Key, V>>>() {
+  public Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>> subscribers(Firehose pipe) {
+    return new Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>>() {
       @Override
-      public Map<Key, KeyedConsumer<? extends Key, V>> apply(Key key) {
-        Map<Key, KeyedConsumer<? extends Key, V>> consumers = new LinkedHashMap<>();
+      public Map<Key, KeyedConsumer<? extends Key, FINAL>> apply(Key key) {
+        Map<Key, KeyedConsumer<? extends Key, FINAL>> consumers = new LinkedHashMap<>();
 
         Key currentKey = key;
-        for (MatchedPipe.StreamSupplier supplier : suppliers) {
+        for (StreamSupplier supplier : suppliers) {
           Key nextKey = currentKey.derive();
           consumers.put(currentKey, supplier.get(currentKey, nextKey, pipe));
           currentKey = nextKey;
