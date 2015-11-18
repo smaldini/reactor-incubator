@@ -1,6 +1,6 @@
 package reactor.pipe.registry;
 
-import reactor.pipe.KeyedConsumer;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.fn.Consumer;
 
 public class SimpleRegistration<K, V extends KeyedConsumer> implements Registration<K> {

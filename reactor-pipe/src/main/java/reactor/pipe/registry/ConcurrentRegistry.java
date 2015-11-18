@@ -10,7 +10,7 @@ import reactor.fn.Predicate;
 import reactor.fn.UnaryOperator;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
-import reactor.pipe.KeyedConsumer;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 

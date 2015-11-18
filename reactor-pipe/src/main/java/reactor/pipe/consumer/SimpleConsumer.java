@@ -1,4 +1,4 @@
-package reactor.pipe;
+package reactor.pipe.consumer;
 
 @FunctionalInterface
 public interface SimpleConsumer<V> {

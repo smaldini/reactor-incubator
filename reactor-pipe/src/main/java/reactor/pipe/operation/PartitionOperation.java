@@ -1,7 +1,7 @@
 package reactor.pipe.operation;
 
 import reactor.pipe.Firehose;
-import reactor.pipe.KeyedConsumer;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.key.Key;
 import org.pcollections.PVector;

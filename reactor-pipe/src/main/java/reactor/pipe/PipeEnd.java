@@ -3,7 +3,9 @@ package reactor.pipe;
 
 import org.pcollections.PVector;
 import reactor.fn.Function;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
+import reactor.pipe.registry.KeyMissMatcher;
 import reactor.pipe.state.StateProvider;
 import reactor.pipe.stream.StreamSupplier;
 
@@ -14,28 +16,32 @@ import java.util.Map;
  * FinalizedMatchedPipe represents a stream builder that can take values
  * of `INIT` and transform them via the pipeline to `FINAL` type.
  */
-public class FinalizedMatchedPipe<INIT, FINAL> {
+public class PipeEnd<INIT, FINAL> implements IPipe.PipeEnd<INIT, FINAL> {
 
-  protected final StateProvider<Key>      stateProvider;
-  protected final PVector<StreamSupplier> suppliers;
+  private final PVector<StreamSupplier> suppliers;
 
-  protected FinalizedMatchedPipe(PVector<StreamSupplier> suppliers,
-                                 StateProvider<Key> stateProvider) {
+  protected PipeEnd(PVector<StreamSupplier> suppliers) {
     this.suppliers = suppliers;
-    this.stateProvider = stateProvider;
   }
 
-  protected <NEXT> MatchedPipe<INIT, NEXT> next(StreamSupplier supplier) {
-    return new MatchedPipe<>(suppliers.plus(supplier),
-                             stateProvider);
+
+  @Override
+  public void subscribe(Key key, Firehose firehose) {
+    Key currentKey = key;
+    for (StreamSupplier supplier : suppliers) {
+      Key nextKey = currentKey.derive();
+      firehose.on(currentKey, supplier.get(currentKey, nextKey, firehose));
+      currentKey = nextKey;
+    }
   }
 
-  protected <NEXT> FinalizedMatchedPipe<INIT, NEXT> end(StreamSupplier supplier) {
-    return new FinalizedMatchedPipe<>(suppliers.plus(supplier),
-                                      stateProvider);
+  @Override
+  public <K extends Key> void subscribe(KeyMissMatcher<K> matcher, Firehose firehose) {
+    firehose.miss(matcher,
+                  subscribers(firehose));
   }
 
-  public Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>> subscribers(Firehose pipe) {
+  private Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>> subscribers(Firehose firehose) {
     return new Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>>() {
       @Override
       public Map<Key, KeyedConsumer<? extends Key, FINAL>> apply(Key key) {
@@ -44,12 +50,11 @@ public class FinalizedMatchedPipe<INIT, FINAL> {
         Key currentKey = key;
         for (StreamSupplier supplier : suppliers) {
           Key nextKey = currentKey.derive();
-          consumers.put(currentKey, supplier.get(currentKey, nextKey, pipe));
+          consumers.put(currentKey, supplier.get(currentKey, nextKey, firehose));
           currentKey = nextKey;
         }
         return consumers;
       }
     };
-
   }
 }

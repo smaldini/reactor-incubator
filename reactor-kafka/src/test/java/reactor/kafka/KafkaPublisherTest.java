@@ -5,12 +5,9 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.Firehose;
-import reactor.pipe.SimpleConsumer;
 import reactor.pipe.key.Key;
 
 import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;

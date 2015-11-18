@@ -1,6 +1,6 @@
 package reactor.pipe.registry;
 
-import reactor.pipe.KeyedConsumer;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
 
 import java.util.List;

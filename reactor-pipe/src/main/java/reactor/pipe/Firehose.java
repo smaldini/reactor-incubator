@@ -17,6 +17,8 @@ import reactor.fn.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
+import reactor.pipe.consumer.KeyedConsumer;
+import reactor.pipe.consumer.SimpleConsumer;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.*;
 import reactor.pipe.stream.FirehoseSubscription;
@@ -198,6 +200,10 @@ public class Firehose<K extends Key> {
     processor.onComplete();
 
   }
+
+  /**
+   * Reactive Streams API
+   */
 
   public <V> Subscriber<Tuple2<K, V>> makeSubscriber() {
     Firehose<K> ref = this;
