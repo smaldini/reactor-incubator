@@ -23,6 +23,8 @@ public interface IPipe<INIT, CURRENT> {
 
   IPipe<INIT, CURRENT> debounce(long period, TimeUnit timeUnit);
 
+  IPipe<INIT, CURRENT> throttle(long period, TimeUnit timeUnit);
+
   IPipe<INIT, CURRENT> filter(Predicate<CURRENT> predicate);
 
   IPipe<INIT, List<CURRENT>> slide(UnaryOperator<List<CURRENT>> drop);

@@ -111,7 +111,29 @@ public abstract class AbstractPipeTest extends AbstractFirehoseTest {
                end.get() - start < 1500);
   }
 
+  @Test
+  public void throttleTest() throws InterruptedException {
+    AVar<Integer> res = new AVar<>(1);
+
+    long start = System.currentTimeMillis();
+    AtomicLong end = new AtomicLong();
+    subscribeAndDispatch(
+      Pipe.<Integer>build().throttle(1, TimeUnit.SECONDS)
+                           .consume((v) -> {
+                             res.set(v);
+                             end.set(System.currentTimeMillis());
+                           }),
+      Arrays.asList(1, 2));
+
+    Thread.sleep(500);
+
+    firehose.notify(Key.wrap("source", "first"),
+                    3);
+
     assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
+
+    assertTrue(end.get() - start > 1500 &&
+               end.get() - start < 2000);
   }
 
   @Test

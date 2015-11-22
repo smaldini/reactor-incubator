@@ -14,6 +14,7 @@ import reactor.pipe.stream.StreamSupplier;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Matched pipe represents a (possibly multi-step) transformation from `INIT` type,
@@ -124,9 +125,28 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
     });
   }
 
+  @Override
+  public IPipe<INIT, CURRENT> throttle(long period, TimeUnit timeUnit) {
+    return next(new StreamSupplier<Key, CURRENT>() {
+      @Override
+      public KeyedConsumer<Key, CURRENT> get(Key src, Key dst, Firehose firehose) {
+        final Atom<CURRENT> debounced = stateProvider.makeAtom(src, null);
+        final AtomicReference<Pausable> pausable = new AtomicReference<>(null);
 
         return (key, value) -> {
+          Pausable oldScheduled = pausable.getAndUpdate((p) -> null);
+          if (oldScheduled != null) {
+            oldScheduled.cancel();
+          }
+
           debounced.update(current -> value);
+
+          pausable.set(firehose.getTimer().submit(new Consumer<Long>() {
+            @Override
+            public void accept(Long v) {
+              firehose.notify(dst, debounced.deref());
+            }
+          }, period, timeUnit));
         };
       }
     });
