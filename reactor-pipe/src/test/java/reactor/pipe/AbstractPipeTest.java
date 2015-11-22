@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
@@ -86,12 +88,28 @@ public abstract class AbstractPipeTest extends AbstractFirehoseTest {
 
   @Test
   public void debounceTest() throws InterruptedException {
-    AVar<Integer> res = new AVar<>(3);
+    AVar<Integer> res = new AVar<>(1);
 
+    long start = System.currentTimeMillis();
+    AtomicLong end = new AtomicLong();
     subscribeAndDispatch(
       Pipe.<Integer>build().debounce(1, TimeUnit.SECONDS)
-                           .consume(res::set),
-      Arrays.asList(1, 2, 3));
+                           .consume((v) -> {
+                             res.set(v);
+                             end.set(System.currentTimeMillis());
+                           }),
+      Arrays.asList(1, 2));
+
+    Thread.sleep(500);
+
+    firehose.notify(Key.wrap("source", "first"),
+                    3);
+
+    assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
+
+    assertTrue(end.get() - start > 1000 &&
+               end.get() - start < 1500);
+  }
 
     assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
   }

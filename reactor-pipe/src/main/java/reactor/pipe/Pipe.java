@@ -104,13 +104,26 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
       @Override
       public KeyedConsumer<Key, CURRENT> get(Key src, Key dst, Firehose firehose) {
         final Atom<CURRENT> debounced = stateProvider.makeAtom(src, null);
+        final AtomicReference<Pausable> pausable = new AtomicReference<>(null);
 
-        firehose.getTimer().schedule(new Consumer<Long>() {
-          @Override
-          public void accept(Long v) {
-            firehose.notify(dst, debounced.deref());
+        return (key, value) -> {
+          debounced.update(current -> value);
+
+          if (pausable.get() == null) {
+            pausable.set(
+              firehose.getTimer().submit(new Consumer<Long>() {
+                @Override
+                public void accept(Long v) {
+                  firehose.notify(dst, debounced.deref());
+                  pausable.set(null);
+                }
+              }, period, timeUnit));
           }
-        }, period, timeUnit);
+        };
+      }
+    });
+  }
+
 
         return (key, value) -> {
           debounced.update(current -> value);
