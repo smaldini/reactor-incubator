@@ -79,6 +79,23 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
     });
   }
 
+  @SuppressWarnings(value = {"unchecked"})
+  public <ST> IPipe<INIT, ST> scan(BiFunction<ST, CURRENT, ST> mapper,
+                                   ST init) {
+    return next(new StreamSupplier<Key, CURRENT>() {
+      @Override
+      public KeyedConsumer<Key, CURRENT> get(Key src,
+                                             Key dst,
+                                             Firehose firehose) {
+        Atom<ST> st = stateProvider.makeAtom(src, init);
+
+        return (key, value) -> {
+          ST newSt = st.update((old) -> mapper.apply(old, value));
+          firehose.notify(dst.clone(key), mapper.apply(newSt, value));
+        };
+      }
+    });
+  }
 
   @SuppressWarnings(value = {"unchecked"})
   public IPipe<INIT, CURRENT> filter(Predicate<CURRENT> predicate) {

@@ -11,9 +11,9 @@ import java.util.function.BiFunction;
 
 /**
  * Flow is a higher-level abstraction for composing streams together.
- * <p>
+ *
  * Every Flow can have multiple upstreams, multiple processing parts
- * each of which may have one or multiple downstreams
+ * each of which may have one or multiple downstreams.
  */
 public interface FlowBuilder {
 

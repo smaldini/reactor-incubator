@@ -18,6 +18,9 @@ public interface IPipe<INIT, CURRENT> {
   <ST, NEXT> IPipe<INIT, NEXT> map(BiFunction<Atom<ST>, CURRENT, NEXT> mapper,
                                    ST init);
 
+  <ST> IPipe<INIT, ST> scan(BiFunction<ST, CURRENT, ST> mapper,
+                            ST init);
+
   IPipe<INIT, CURRENT> filter(Predicate<CURRENT> predicate);
 
   IPipe<INIT, List<CURRENT>> slide(UnaryOperator<List<CURRENT>> drop);
