@@ -13,6 +13,7 @@ import reactor.pipe.state.StateProvider;
 import reactor.pipe.stream.StreamSupplier;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Matched pipe represents a (possibly multi-step) transformation from `INIT` type,
@@ -92,6 +93,27 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
         return (key, value) -> {
           ST newSt = st.update((old) -> mapper.apply(old, value));
           firehose.notify(dst.clone(key), mapper.apply(newSt, value));
+        };
+      }
+    });
+  }
+
+  @Override
+  public IPipe<INIT, CURRENT> debounce(long period, TimeUnit timeUnit) {
+    return next(new StreamSupplier<Key, CURRENT>() {
+      @Override
+      public KeyedConsumer<Key, CURRENT> get(Key src, Key dst, Firehose firehose) {
+        final Atom<CURRENT> debounced = stateProvider.makeAtom(src, null);
+
+        firehose.getTimer().schedule(new Consumer<Long>() {
+          @Override
+          public void accept(Long v) {
+            firehose.notify(dst, debounced.deref());
+          }
+        }, period, timeUnit);
+
+        return (key, value) -> {
+          debounced.update(current -> value);
         };
       }
     });

@@ -85,6 +85,18 @@ public abstract class AbstractPipeTest extends AbstractFirehoseTest {
   }
 
   @Test
+  public void debounceTest() throws InterruptedException {
+    AVar<Integer> res = new AVar<>(3);
+
+    subscribeAndDispatch(
+      Pipe.<Integer>build().debounce(1, TimeUnit.SECONDS)
+                           .consume(res::set),
+      Arrays.asList(1, 2, 3));
+
+    assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
+  }
+
+  @Test
   public void testFilter() throws InterruptedException {
     AVar<Integer> res = new AVar<>();
 

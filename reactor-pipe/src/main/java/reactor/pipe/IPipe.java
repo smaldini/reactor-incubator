@@ -7,12 +7,12 @@ import reactor.pipe.key.Key;
 import reactor.pipe.registry.KeyMissMatcher;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public interface IPipe<INIT, CURRENT> {
 
   <NEXT> IPipe<INIT, NEXT> map(Function<CURRENT, NEXT> mapper);
 
-  // TODO: rename to scan in RX terms
   <NEXT> IPipe<INIT, NEXT> map(Supplier<Function<CURRENT, NEXT>> supplier);
 
   <ST, NEXT> IPipe<INIT, NEXT> map(BiFunction<Atom<ST>, CURRENT, NEXT> mapper,
@@ -20,6 +20,8 @@ public interface IPipe<INIT, CURRENT> {
 
   <ST> IPipe<INIT, ST> scan(BiFunction<ST, CURRENT, ST> mapper,
                             ST init);
+
+  IPipe<INIT, CURRENT> debounce(long period, TimeUnit timeUnit);
 
   IPipe<INIT, CURRENT> filter(Predicate<CURRENT> predicate);
 
