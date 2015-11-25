@@ -101,14 +101,11 @@ public abstract class AbstractPipeTest extends AbstractFirehoseTest {
       Arrays.asList(1, 2));
 
     Thread.sleep(500);
-
     firehose.notify(Key.wrap("source", "first"),
                     3);
 
     assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
-
-    assertTrue(end.get() - start > 1000 &&
-               end.get() - start < 1500);
+    assertTrue(end.get() - start > 1000);
   }
 
   @Test
@@ -131,9 +128,7 @@ public abstract class AbstractPipeTest extends AbstractFirehoseTest {
                     3);
 
     assertThat(res.get(LATCH_TIMEOUT, LATCH_TIME_UNIT), is(3));
-
-    assertTrue(end.get() - start > 1500 &&
-               end.get() - start < 2000);
+    assertTrue(end.get() - start > 1500);
   }
 
   @Test

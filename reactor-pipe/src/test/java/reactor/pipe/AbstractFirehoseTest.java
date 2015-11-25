@@ -30,7 +30,6 @@ public class AbstractFirehoseTest {
   @After
   public void teardown() {
     firehose.shutdown();
-
   }
 
 }
