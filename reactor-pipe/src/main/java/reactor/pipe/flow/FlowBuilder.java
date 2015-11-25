@@ -2,9 +2,11 @@ package reactor.pipe.flow;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+import reactor.fn.Consumer;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.IPipe;
 import reactor.pipe.Pipe;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.KeyMissMatcher;
 
@@ -18,19 +20,29 @@ import java.util.function.BiFunction;
  */
 public interface FlowBuilder {
 
-  <K extends Key, V> Flow<K, V> flow(String name);
+  <K, V> Flow flow(String name);
 
-  interface Flow<K extends Key, V> {
-    <K1 extends Key> Flow<K1, V> upstream(Publisher<Tuple2<K, V>> subscriber,
-                                          BiFunction<K, V, K1> keyTransposition);
+  void start();
 
+  interface Flow {
+    <K, V, K1 extends Key> Flow upstream(BiFunction<K, V, K1> keyTransposition,
+                                         Publisher<Tuple2<K, V>> subscriber);
 
-    <TO> Downstream<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
-                                     IPipe<V, TO> matchedPipe);
+    public <K extends Key, TO> Downstream<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
+                                                           IPipe<?, TO> matchedPipe);
+
+    public <K extends Key, TO> Downstream<K, TO> subscribe(Key key,
+                                                           IPipe<?, TO> anonymousPipe);
+
+//    <TO> Flow<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
+//                               IPipe.PipeEnd<V, TO> matchedPipe);
 
   }
 
   public interface Downstream<K extends Key, V> {
+    <K1 extends Key> void downstream(Consumer<V> consumer);
+    void downstream(KeyedConsumer<K, V> consumer);
+
     <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition);
 
     <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition,
