@@ -88,7 +88,7 @@ public class LocalFlowBuilder implements FlowBuilder {
     }
 
     @Override
-    public <K1 extends Key> void downstream(Consumer<V> consumer) {
+    public void downstream(Consumer<V> consumer) {
       upstreamPipe.consume(consumer).subscribe(matcher, firehose);
     }
 
@@ -134,7 +134,7 @@ public class LocalFlowBuilder implements FlowBuilder {
     }
 
     @Override
-    public <K1 extends Key> void downstream(Consumer<V> consumer) {
+    public void downstream(Consumer<V> consumer) {
       upstreamPipe.consume(consumer).subscribe(key, firehose);
     }
 

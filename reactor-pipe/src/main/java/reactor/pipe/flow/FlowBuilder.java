@@ -40,7 +40,7 @@ public interface FlowBuilder {
   }
 
   public interface Downstream<K extends Key, V> {
-    <K1 extends Key> void downstream(Consumer<V> consumer);
+    void downstream(Consumer<V> consumer);
     void downstream(KeyedConsumer<K, V> consumer);
 
     <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition);
