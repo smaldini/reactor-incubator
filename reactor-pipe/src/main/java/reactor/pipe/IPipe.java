@@ -9,6 +9,10 @@ import reactor.pipe.registry.KeyMissMatcher;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Pipe represents a streaming transformation from `INIT` type,
+ * which is an initial type of the topolgy, to the `CURRENT` type.
+ */
 public interface IPipe<INIT, CURRENT> {
 
   <NEXT> IPipe<INIT, NEXT> map(Function<CURRENT, NEXT> mapper);

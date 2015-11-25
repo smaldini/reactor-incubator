@@ -13,14 +13,15 @@ import reactor.pipe.registry.KeyMissMatcher;
 import java.util.function.BiFunction;
 
 /**
- * Flow is a higher-level abstraction for composing streams together.
+ * Flow is a higher-level abstraction for composing streams.
  *
- * Every Flow can have multiple upstreams, multiple processing parts
- * each of which may have one or multiple downstreams.
+ * Flow can be local or distributed, every Flow can have
+ * multiple upstreams, multiple processing parts each of which
+ * may have one or multiple downstreams.
  */
 public interface FlowBuilder {
 
-  <K, V> Flow flow(String name);
+  Flow flow(String name);
 
   void start();
 

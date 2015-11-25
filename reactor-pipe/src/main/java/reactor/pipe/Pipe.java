@@ -16,10 +16,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Matched pipe represents a (possibly multi-step) transformation from `INIT` type,
- * which is an initial type of the topolgy, to the `CURRENT` type.
- */
 public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
 
   private final StateProvider<Key>      stateProvider;
