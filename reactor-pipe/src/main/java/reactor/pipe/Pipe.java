@@ -145,6 +145,7 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
             @Override
             public void accept(Long v) {
               firehose.notify(dst, debounced.deref());
+              pausable.set(null);
             }
           }, period, timeUnit));
         };

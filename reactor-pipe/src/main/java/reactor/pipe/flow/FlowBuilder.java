@@ -3,6 +3,7 @@ package reactor.pipe.flow;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.fn.tuple.Tuple2;
+import reactor.pipe.IPipe;
 import reactor.pipe.Pipe;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.KeyMissMatcher;
@@ -20,12 +21,12 @@ public interface FlowBuilder {
   <K extends Key, V> Flow<K, V> flow(String name);
 
   interface Flow<K extends Key, V> {
-    <K1 extends Key> Flow<K1, V> upstream(Subscriber<Tuple2<K, V>> subscriber,
+    <K1 extends Key> Flow<K1, V> upstream(Publisher<Tuple2<K, V>> subscriber,
                                           BiFunction<K, V, K1> keyTransposition);
 
 
     <TO> Downstream<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
-                                     Pipe<V, TO> matchedPipe);
+                                     IPipe<V, TO> matchedPipe);
 
   }
 
@@ -33,7 +34,7 @@ public interface FlowBuilder {
     <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition);
 
     <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition,
-                                     Publisher<Tuple2<K1, V>> publisher);
+                                     Subscriber<Tuple2<K1, V>> publisher);
 
   }
 
