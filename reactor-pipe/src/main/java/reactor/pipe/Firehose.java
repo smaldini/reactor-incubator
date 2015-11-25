@@ -198,7 +198,6 @@ public class Firehose<K extends Key> {
 
   public void shutdown() {
     processor.onComplete();
-
   }
 
   /**

@@ -93,7 +93,7 @@ public class Pipe<INIT, CURRENT> implements IPipe<INIT, CURRENT> {
 
         return (key, value) -> {
           ST newSt = st.update((old) -> mapper.apply(old, value));
-          firehose.notify(dst.clone(key), mapper.apply(newSt, value));
+          firehose.notify(dst.clone(key), newSt);
         };
       }
     });
