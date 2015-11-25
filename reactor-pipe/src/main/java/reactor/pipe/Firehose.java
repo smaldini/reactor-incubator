@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 import java.util.function.LongBinaryOperator;
 
 
@@ -219,6 +220,36 @@ public class Firehose<K extends Key> {
       @Override
       public void onNext(Tuple2<K, V> tuple) {
         ref.notify(tuple.getT1(), tuple.getT2());
+        subscription.request(1L);
+      }
+
+      @Override
+      public void onError(Throwable throwable) {
+        ref.errorHandler.accept(throwable);
+      }
+
+      @Override
+      public void onComplete() {
+        subscription.cancel();
+      }
+    };
+  }
+
+  public <V, K1 extends Key> Subscriber<Tuple2<K, V>> makeSubscriber(BiFunction<K, V, K1> keyTransposition) {
+    Firehose ref = this;
+
+    return new Subscriber<Tuple2<K, V>>() {
+      private volatile Subscription subscription;
+
+      @Override
+      public void onSubscribe(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1L);
+      }
+
+      @Override
+      public void onNext(Tuple2<K, V> tuple) {
+        ref.notify(keyTransposition.apply(tuple.getT1(), tuple.getT2()), tuple.getT2());
         subscription.request(1L);
       }
 
