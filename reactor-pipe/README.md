@@ -82,11 +82,11 @@ firehose.on(Key.wrap("key1"),
 // Push some values to "key1"
 firehose.notify(Key.wrap("key1"),
                 1);
-;; => 1
+// => 1
 
 firehose.notify(Key.wrap("key1"),
                 2);
-;; => 2
+// => 2
 ```
 
 You can have multiple `consumers` for each key. Also, you can build
@@ -105,10 +105,10 @@ firehose.on(Key.wrap("key2"), System.out::println);
 
 // Push some values to "key1"
 firehose.notify(Key.wrap("key1"), 1);
-;; => 2
+// => 2
 
 firehose.notify(Key.wrap("key1"), 2);
-;; => 3
+// => 3
 ```
 
 However useful this is, code based entirely on the callbacks might
