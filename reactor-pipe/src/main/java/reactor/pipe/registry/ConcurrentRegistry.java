@@ -124,6 +124,15 @@ public class ConcurrentRegistry<K> implements Registry<K> {
   }
 
   @Override
+  public boolean unregister(Selector<K> key) {
+    return lookupMap.updateAndReturnOther((map) -> {
+      PMap<K, PVector<Registration<K>>> newMap = map.minus(key);
+      return Tuple.of(newMap,
+                      newMap.size() == map.size());
+    });
+  }
+
+  @Override
   public List<Registration<K>> select(final K key) {
     return
       lookupMap.update(old -> {

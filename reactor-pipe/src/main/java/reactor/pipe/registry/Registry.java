@@ -17,6 +17,7 @@ public interface Registry<K> extends Iterable<Registration<K>> {
 
   boolean unregister(K key);
   boolean unregister(Predicate<K> key);
+  boolean unregister(Selector<K> key);
 
   List<Registration<K>> select(K key);
 
