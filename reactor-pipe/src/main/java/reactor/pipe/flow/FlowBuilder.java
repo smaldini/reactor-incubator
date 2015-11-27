@@ -5,10 +5,9 @@ import org.reactivestreams.Subscriber;
 import reactor.fn.Consumer;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.IPipe;
-import reactor.pipe.Pipe;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.KeyMissMatcher;
+import reactor.pipe.registry.Selector;
 
 import java.util.function.BiFunction;
 
@@ -29,8 +28,8 @@ public interface FlowBuilder {
     <K, V, K1 extends Key> Flow upstream(BiFunction<K, V, K1> keyTransposition,
                                          Publisher<Tuple2<K, V>> subscriber);
 
-    public <K extends Key, TO> Downstream<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
-                                                           IPipe<?, TO> matchedPipe);
+    public <TO> Downstream<Key, TO> subscribe(Selector<Key> keyMatcher,
+                                              IPipe<?, TO> matchedPipe);
 
     public <K extends Key, TO> Downstream<K, TO> subscribe(Key key,
                                                            IPipe<?, TO> anonymousPipe);

@@ -78,7 +78,7 @@ public class FirehoseTest extends AbstractFirehoseTest {
   public void keyMissTest() throws InterruptedException {
     AVar<Tuple2> val = new AVar<>();
 
-    firehose.miss((k_) -> true,
+    firehose.on((k_) -> true,
                   (k) -> {
                     return Collections.singletonMap(k, (key, value) -> {
                       val.set(Tuple.of(key, value));

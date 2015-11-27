@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
 import java.util.function.LongBinaryOperator;
 
 
-public class Firehose<K extends Key> {
+public class Firehose<K> {
 
   private final static int DEFAULT_THREAD_POOL_SIZE = 4;
   private final static int DEFAULT_RING_BUFFER_SIZE = 65536;
@@ -175,8 +175,8 @@ public class Firehose<K extends Key> {
     return this;
   }
 
-  public Firehose miss(final KeyMissMatcher<K> matcher,
-                       Function<K, Map<K, KeyedConsumer>> supplier) {
+  public Firehose<K> on(final Selector<K> matcher,
+                        Function<K, Map<K, KeyedConsumer>> supplier) {
     consumerRegistry.addKeyMissMatcher(matcher, supplier);
     return this;
   }

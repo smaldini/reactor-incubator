@@ -9,7 +9,7 @@ import reactor.pipe.Firehose;
 import reactor.pipe.IPipe;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.KeyMissMatcher;
+import reactor.pipe.registry.Selector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +59,8 @@ public class LocalFlowBuilder implements FlowBuilder {
     }
 
     @Override
-    public <K extends Key, TO> Downstream<K, TO> subscribe(KeyMissMatcher<K> keyMatcher,
-                                                           IPipe<?, TO> matchedPipe) {
+    public <TO> Downstream<Key, TO> subscribe(Selector<Key> keyMatcher,
+                                              IPipe<?, TO> matchedPipe) {
       return new MatchedLocalDownstream<>(firehose, matchedPipe, keyMatcher);
     }
 
@@ -73,15 +73,15 @@ public class LocalFlowBuilder implements FlowBuilder {
 
   }
 
-  private class MatchedLocalDownstream<K extends Key, V> implements Downstream<K, V> {
+  private class MatchedLocalDownstream<V> implements Downstream<Key, V> {
 
-    private final Firehose          firehose;
-    private final IPipe<?, V>       upstreamPipe;
-    private final KeyMissMatcher<K> matcher;
+    private final Firehose    firehose;
+    private final IPipe<?, V> upstreamPipe;
+    private final Selector<Key> matcher;
 
     public MatchedLocalDownstream(Firehose firehose,
                                   IPipe<?, V> upstreamPipe,
-                                  KeyMissMatcher<K> matcher) {
+                                  Selector<Key> matcher) {
       this.firehose = firehose;
       this.upstreamPipe = upstreamPipe;
       this.matcher = matcher;
@@ -93,26 +93,26 @@ public class LocalFlowBuilder implements FlowBuilder {
     }
 
     @Override
-    public void downstream(KeyedConsumer<K, V> consumer) {
+    public void downstream(KeyedConsumer<Key, V> consumer) {
       upstreamPipe.consume(consumer).subscribe(matcher, firehose);
     }
 
     @Override
-    public <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition) {
-      upstreamPipe.consume(new KeyedConsumer<K, V>() {
+    public <K1 extends Key> void downstream(BiFunction<Key, V, K1> keyTransposition) {
+      upstreamPipe.consume(new KeyedConsumer<Key, V>() {
         @Override
-        public void accept(K key, V value) {
+        public void accept(Key key, V value) {
           firehose.notify(keyTransposition.apply(key, value), value);
         }
       }).subscribe(matcher, firehose);
     }
 
     @Override
-    public <K1 extends Key> void downstream(BiFunction<K, V, K1> keyTransposition,
+    public <K1 extends Key> void downstream(BiFunction<Key, V, K1> keyTransposition,
                                             Subscriber<Tuple2<K1, V>> publisher) {
-      upstreamPipe.consume(new KeyedConsumer<K, V>() {
+      upstreamPipe.consume(new KeyedConsumer<Key, V>() {
         @Override
-        public void accept(K key, V value) {
+        public void accept(Key key, V value) {
           publisher.onNext(Tuple.of(keyTransposition.apply(key, value), value));
         }
       }).subscribe(matcher, firehose);

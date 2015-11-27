@@ -5,8 +5,7 @@ import org.pcollections.PVector;
 import reactor.fn.Function;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.KeyMissMatcher;
-import reactor.pipe.state.StateProvider;
+import reactor.pipe.registry.Selector;
 import reactor.pipe.stream.StreamSupplier;
 
 import java.util.LinkedHashMap;
@@ -26,7 +25,7 @@ public class PipeEnd<INIT, FINAL> implements IPipe.PipeEnd<INIT, FINAL> {
 
 
   @Override
-  public void subscribe(Key key, Firehose firehose) {
+  public void subscribe(Key key, Firehose<Key> firehose) {
     Key currentKey = key;
     for (StreamSupplier supplier : suppliers) {
       Key nextKey = currentKey.derive();
@@ -36,16 +35,16 @@ public class PipeEnd<INIT, FINAL> implements IPipe.PipeEnd<INIT, FINAL> {
   }
 
   @Override
-  public <K extends Key> void subscribe(KeyMissMatcher<K> matcher, Firehose firehose) {
-    firehose.miss(matcher,
-                  subscribers(firehose));
+  public void subscribe(Selector<Key> matcher, Firehose<Key> firehose) {
+    firehose.on(matcher,
+                subscribers(firehose));
   }
 
-  private Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>> subscribers(Firehose firehose) {
-    return new Function<Key, Map<Key, KeyedConsumer<? extends Key, FINAL>>>() {
+  private Function<Key, Map<Key, KeyedConsumer>> subscribers(Firehose firehose) {
+    return new Function<Key, Map<Key, KeyedConsumer>>() {
       @Override
-      public Map<Key, KeyedConsumer<? extends Key, FINAL>> apply(Key key) {
-        Map<Key, KeyedConsumer<? extends Key, FINAL>> consumers = new LinkedHashMap<>();
+      public Map<Key, KeyedConsumer> apply(Key key) {
+        Map<Key, KeyedConsumer> consumers = new LinkedHashMap<>();
 
         Key currentKey = key;
         for (StreamSupplier supplier : suppliers) {

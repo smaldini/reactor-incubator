@@ -12,7 +12,6 @@ import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.concurrent.Atom;
-import reactor.pipe.key.Key;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,12 +20,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> {
+public class ConcurrentRegistry<K> implements DefaultingRegistry<K> {
 
-  private final Atom<PMap<K, PVector<Registration<K>>>>                             lookupMap;
+  private final Atom<PMap<K, PVector<Registration<K>>>>                       lookupMap;
   // This one can't be map, since key miss matcher is a possibly non-capturing lambda,
   // So we have no other means to work around the uniqueness
-  private final List<Tuple2<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>>> keyMissMatchers;
+  private final List<Tuple2<Selector<K>, Function<K, Map<K, KeyedConsumer>>>> keyMissMatchers;
 
   public ConcurrentRegistry() {
     this.lookupMap = new Atom<>(HashTreePMap.empty());
@@ -34,7 +33,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
   }
 
   @Override
-  public void addKeyMissMatcher(KeyMissMatcher<K> matcher, Function<K, Map<K, KeyedConsumer>> supplier) {
+  public void addKeyMissMatcher(Selector<K> matcher, Function<K, Map<K, KeyedConsumer>> supplier) {
     this.keyMissMatchers.add(Tuple.of(matcher, supplier));
   }
 
@@ -127,7 +126,7 @@ public class ConcurrentRegistry<K extends Key> implements DefaultingRegistry<K> 
                                   return m.getT1().test(key);
                                 })
                                 .map(
-                                  (Tuple2<KeyMissMatcher<K>, Function<K, Map<K, KeyedConsumer>>> m) -> {
+                                  (Tuple2<Selector<K>, Function<K, Map<K, KeyedConsumer>>> m) -> {
                                     return m.getT2();
                                   })
                                 .flatMap((Function<K, Map<K, KeyedConsumer>> m) -> {

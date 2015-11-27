@@ -7,7 +7,7 @@ import java.util.List;
 import reactor.fn.Predicate;
 import java.util.stream.Stream;
 
-public interface Registry<K extends Key> {
+public interface Registry<K> {
 
   <V extends KeyedConsumer> Registration<K> register(K sel, V obj);
 

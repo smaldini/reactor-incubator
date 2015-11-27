@@ -4,7 +4,7 @@ import reactor.fn.*;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.KeyMissMatcher;
+import reactor.pipe.registry.Selector;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -43,8 +43,7 @@ public interface IPipe<INIT, CURRENT> {
 
 
   public interface PipeEnd<INIT, CURRENT> {
-    void subscribe(Key key, Firehose firehose);
-
-    <K extends Key> void subscribe(KeyMissMatcher<K> matcher, Firehose firehose);
+    void subscribe(Key key, Firehose<Key> firehose);
+    void subscribe(Selector<Key> matcher, Firehose<Key> firehose);
   }
 }
