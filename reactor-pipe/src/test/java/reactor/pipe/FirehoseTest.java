@@ -1,16 +1,16 @@
 package reactor.pipe;
 
+import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.Processors;
 import reactor.core.processor.RingBufferWorkProcessor;
 import reactor.fn.Consumer;
-import reactor.pipe.concurrent.AVar;
-import reactor.pipe.key.Key;
-import org.junit.Test;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
+import reactor.pipe.concurrent.AVar;
+import reactor.pipe.key.Key;
 import reactor.pipe.registry.ConcurrentRegistry;
 import reactor.pipe.registry.Selectors;
 
@@ -81,11 +81,11 @@ public class FirehoseTest extends AbstractFirehoseTest {
     AVar<Tuple2> val = new AVar<>();
 
     firehose.on((k_) -> true,
-                  (k) -> {
-                    return Collections.singletonMap(k, (key, value) -> {
-                      val.set(Tuple.of(key, value));
-                    });
+                (k) -> {
+                  return Collections.singletonMap(k, (key, value) -> {
+                    val.set(Tuple.of(key, value));
                   });
+                });
 
     firehose.notify(Key.wrap("key1"), 1);
 
@@ -210,6 +210,7 @@ public class FirehoseTest extends AbstractFirehoseTest {
 
     Subscriber<Tuple2<Key, Integer>> subscriber = new Subscriber<Tuple2<Key, Integer>>() {
       private volatile Subscription subscription;
+
       @Override
       public void onSubscribe(Subscription subscription) {
         this.subscription = subscription;
@@ -309,23 +310,17 @@ public class FirehoseTest extends AbstractFirehoseTest {
     CountDownLatch latch = new CountDownLatch(3);
 
     firehose.on(Selectors.$("worker"), o -> {
-      if (latch.getCount() > 0) {
-        System.out.println(latch.getCount());
-        System.out.println(Thread.currentThread().getName() + " worker " + o);
-        latch.countDown();
-        firehose.notify("orchestrator", 1000);
-
-        System.out.println(Thread.currentThread().getName() + " ok");
-      }
+      System.out.println(Thread.currentThread().getName() + " worker " + o);
+      latch.countDown();
+      firehose.notify("orchestrator", 1000);
+      System.out.println(Thread.currentThread().getName() + " ok");
     });
 
     firehose.on(Selectors.$("orchestrator"), new Consumer<Integer>() {
       @Override
       public void accept(Integer i) {
-        if (latch.getCount() > 0) {
-          latch.countDown();
-          firehose.notify("worker", latch.getCount());
-        }
+        latch.countDown();
+        firehose.notify("worker", latch.getCount());
       }
     });
 
