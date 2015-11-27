@@ -13,7 +13,7 @@ import reactor.pipe.selector.Selector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
+import reactor.fn.BiFunction;
 
 public class LocalFlowBuilder implements FlowBuilder {
 
@@ -75,8 +75,8 @@ public class LocalFlowBuilder implements FlowBuilder {
 
   private class MatchedLocalDownstream<V> implements Downstream<Key, V> {
 
-    private final Firehose    firehose;
-    private final IPipe<?, V> upstreamPipe;
+    private final Firehose      firehose;
+    private final IPipe<?, V>   upstreamPipe;
     private final Selector<Key> matcher;
 
     public MatchedLocalDownstream(Firehose firehose,

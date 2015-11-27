@@ -9,16 +9,16 @@ import reactor.core.processor.RingBufferWorkProcessor;
 import reactor.core.subscription.SubscriptionWithContext;
 import reactor.core.support.Assert;
 import reactor.core.support.wait.SleepingWaitStrategy;
-import reactor.fn.Consumer;
-import reactor.fn.Function;
-import reactor.fn.Predicate;
+import reactor.fn.BiFunction;
 import reactor.fn.Supplier;
 import reactor.fn.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.consumer.KeyedConsumer;
-import reactor.pipe.registry.*;
+import reactor.pipe.registry.ConcurrentRegistry;
+import reactor.pipe.registry.Registration;
+import reactor.pipe.registry.Registry;
 import reactor.pipe.selector.Selector;
 import reactor.pipe.stream.FirehoseSubscription;
 
@@ -27,8 +27,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
 import java.util.function.LongBinaryOperator;
+
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
 
 
 public class Firehose<K> {
@@ -43,7 +46,7 @@ public class Firehose<K> {
     }
   };
 
-  private final DefaultingRegistry<K>         consumerRegistry;
+  private final Registry<K>                   consumerRegistry;
   private final Consumer<Throwable>           errorHandler;
   private final LazyVar<HashWheelTimer>       timer;
   private final Processor<Runnable, Runnable> processor;
@@ -74,7 +77,7 @@ public class Firehose<K> {
          DEFAULT_THROWABLE_CONSUMER);
   }
 
-  public Firehose(DefaultingRegistry<K> registry,
+  public Firehose(Registry<K> registry,
                   Processor<Runnable, Runnable> processor,
                   int concurrency,
                   Consumer<Throwable> dispatchErrorHandler) {
@@ -186,7 +189,7 @@ public class Firehose<K> {
 
   public <V> Firehose<K> on(final Selector<K> matcher,
                             Consumer<V> consumer) {
-    consumerRegistry.addKeyMissMatcher(matcher, new Function<K, Map<K, KeyedConsumer>>() {
+    consumerRegistry.register(matcher, new Function<K, Map<K, KeyedConsumer>>() {
       @Override
       public Map<K, KeyedConsumer> apply(K k) {
         return Collections.singletonMap(k, new KeyedConsumer<K, V>() {
@@ -202,7 +205,7 @@ public class Firehose<K> {
 
   public Firehose<K> on(final Selector<K> matcher,
                         Function<K, Map<K, KeyedConsumer>> supplier) {
-    consumerRegistry.addKeyMissMatcher(matcher, supplier);
+    consumerRegistry.register(matcher, supplier);
     return this;
   }
 

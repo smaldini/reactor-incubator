@@ -1,6 +1,6 @@
 package reactor.pipe.codec;
 
-import java.util.function.Function;
+import reactor.fn.Function;
 
 public class Codec<IN, OUT> {
 

@@ -19,7 +19,7 @@ package reactor.pipe.selector;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import reactor.fn.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

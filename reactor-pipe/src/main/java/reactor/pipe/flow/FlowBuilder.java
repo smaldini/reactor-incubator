@@ -8,8 +8,7 @@ import reactor.pipe.IPipe;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
 import reactor.pipe.selector.Selector;
-
-import java.util.function.BiFunction;
+import reactor.fn.BiFunction;
 
 /**
  * Flow is a higher-level abstraction for composing streams.

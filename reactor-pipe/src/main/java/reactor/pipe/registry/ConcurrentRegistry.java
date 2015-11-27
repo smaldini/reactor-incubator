@@ -4,24 +4,24 @@ import org.pcollections.HashTreePMap;
 import org.pcollections.PMap;
 import org.pcollections.PVector;
 import org.pcollections.TreePVector;
-import reactor.fn.Consumer;
-import reactor.fn.Function;
-import reactor.fn.Predicate;
-import reactor.fn.UnaryOperator;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
-import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.concurrent.Atom;
+import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.selector.Selector;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import reactor.fn.Consumer;
+import reactor.fn.Function;
+import reactor.fn.Predicate;
+import reactor.fn.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ConcurrentRegistry<K> implements DefaultingRegistry<K> {
+public class ConcurrentRegistry<K> implements Registry<K> {
 
   private final Atom<PMap<K, PVector<Registration<K>>>>                       lookupMap;
   // This one can't be map, since key miss matcher is a possibly non-capturing lambda,
@@ -34,8 +34,15 @@ public class ConcurrentRegistry<K> implements DefaultingRegistry<K> {
   }
 
   @Override
-  public void addKeyMissMatcher(Selector<K> matcher, Function<K, Map<K, KeyedConsumer>> supplier) {
+  public void register(Selector<K> matcher, Function<K, Map<K, KeyedConsumer>> supplier) {
     this.keyMissMatchers.add(Tuple.of(matcher, supplier));
+    lookupMap.deref().keySet().forEach(k -> {
+      if (matcher.test(k)) {
+        supplier.apply(k).forEach((kk, consumer) -> {
+          register(kk, consumer);
+        });
+      }
+    });
   }
 
   @Override
@@ -89,6 +96,7 @@ public class ConcurrentRegistry<K> implements DefaultingRegistry<K> {
     }
 
   }
+
 
   @Override
   public boolean unregister(K key) {
@@ -154,8 +162,8 @@ public class ConcurrentRegistry<K> implements DefaultingRegistry<K> {
 
 
         }
-				// TODO: Also, what's stupid, we _always_ create Registration here, even if we could successfully do without
-				}).getOrDefault(key, TreePVector.singleton(new Registration<K>() { // Needs a WARN?
+        // TODO: Also, what's stupid, we _always_ create Registration here, even if we could successfully do without
+      }).getOrDefault(key, TreePVector.singleton(new Registration<K>() { // Needs a WARN?
         @Override
         public K getSelector() {
           return key;

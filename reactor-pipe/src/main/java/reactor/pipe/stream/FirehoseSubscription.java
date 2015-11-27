@@ -37,7 +37,6 @@ public class FirehoseSubscription implements Subscription {
   @Override
   public void cancel() {
 
-
   }
 
 

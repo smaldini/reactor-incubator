@@ -18,7 +18,7 @@ package reactor.pipe.selector;
 
 import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.function.Function;
+import reactor.fn.Function;
 
 /**
  * A {@link Selector} implementation based on a {@link UriPathTemplate}.

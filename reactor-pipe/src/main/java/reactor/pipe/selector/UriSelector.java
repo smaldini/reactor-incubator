@@ -22,7 +22,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import reactor.fn.Function;
 
 /**
  * A {@link Selector} implementation that matches on various components of a full URI.

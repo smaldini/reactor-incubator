@@ -1,12 +1,13 @@
 package reactor.pipe.registry;
 
 import reactor.pipe.consumer.KeyedConsumer;
+
 import reactor.fn.Consumer;
 
 public class SimpleRegistration<K, V extends KeyedConsumer> implements Registration<K> {
 
-  private final K selector;
-  private final V object;
+  private final K                         selector;
+  private final V                         object;
   private final Consumer<Registration<K>> expireFn;
 
   public SimpleRegistration(K selector, V object, Consumer<Registration<K>> expireFn) {
