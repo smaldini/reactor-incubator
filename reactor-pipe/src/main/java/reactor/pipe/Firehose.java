@@ -18,11 +18,10 @@ import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.consumer.KeyedConsumer;
-import reactor.pipe.consumer.SimpleConsumer;
-import reactor.pipe.key.Key;
 import reactor.pipe.registry.*;
 import reactor.pipe.stream.FirehoseSubscription;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,8 +32,15 @@ import java.util.function.LongBinaryOperator;
 
 public class Firehose<K> {
 
-  private final static int DEFAULT_THREAD_POOL_SIZE = 4;
-  private final static int DEFAULT_RING_BUFFER_SIZE = 65536;
+  private final static int                 DEFAULT_THREAD_POOL_SIZE   = 4;
+  private final static int                 DEFAULT_RING_BUFFER_SIZE   = 65536;
+  private final static Consumer<Throwable> DEFAULT_THROWABLE_CONSUMER = new Consumer<Throwable>() {
+    @Override
+    public void accept(Throwable throwable) {
+      System.out.printf("Exception caught while dispatching: %s\n", throwable.getMessage());
+      throwable.printStackTrace();
+    }
+  };
 
   private final DefaultingRegistry<K>         consumerRegistry;
   private final Consumer<Throwable>           errorHandler;
@@ -48,13 +54,7 @@ public class Firehose<K> {
          RingBufferWorkProcessor.<Runnable>create(Executors.newFixedThreadPool(DEFAULT_THREAD_POOL_SIZE),
                                                   DEFAULT_RING_BUFFER_SIZE),
          DEFAULT_THREAD_POOL_SIZE,
-         new Consumer<Throwable>() {
-           @Override
-           public void accept(Throwable throwable) {
-             System.out.printf("Exception caught while dispatching: %s\n", throwable.getMessage());
-             throwable.printStackTrace();
-           }
-         });
+         DEFAULT_THROWABLE_CONSUMER);
   }
 
   public Firehose(Consumer<Throwable> errorHandler) {
@@ -63,6 +63,14 @@ public class Firehose<K> {
                                                   DEFAULT_RING_BUFFER_SIZE),
          DEFAULT_THREAD_POOL_SIZE,
          errorHandler);
+  }
+
+  public Firehose(Processor<Runnable, Runnable> processor,
+                  int concurrency) {
+    this(new ConcurrentRegistry<>(),
+         processor,
+         concurrency,
+         DEFAULT_THROWABLE_CONSUMER);
   }
 
   public Firehose(DefaultingRegistry<K> registry,
@@ -165,11 +173,27 @@ public class Firehose<K> {
     return this;
   }
 
-  public <V> Firehose on(final K key, final SimpleConsumer<V> consumer) {
+  public <V> Firehose on(final K key, final Consumer<V> consumer) {
     consumerRegistry.register(key, new KeyedConsumer<K, V>() {
       @Override
       public void accept(final K key, final V value) {
         consumer.accept(value);
+      }
+    });
+    return this;
+  }
+
+  public <V> Firehose<K> on(final Selector<K> matcher,
+                            Consumer<V> consumer) {
+    consumerRegistry.addKeyMissMatcher(matcher, new Function<K, Map<K, KeyedConsumer>>() {
+      @Override
+      public Map<K, KeyedConsumer> apply(K k) {
+        return Collections.singletonMap(k, new KeyedConsumer<K, V>() {
+          @Override
+          public void accept(K key, V value) {
+            consumer.accept(value);
+          }
+        });
       }
     });
     return this;
@@ -235,7 +259,7 @@ public class Firehose<K> {
     };
   }
 
-  public <V, K1 extends Key> Subscriber<Tuple2<K, V>> makeSubscriber(BiFunction<K, V, K1> keyTransposition) {
+  public <V, K1 extends K> Subscriber<Tuple2<K, V>> makeSubscriber(BiFunction<K, V, K1> keyTransposition) {
     Firehose ref = this;
 
     return new Subscriber<Tuple2<K, V>>() {
@@ -303,7 +327,7 @@ public class Firehose<K> {
 
         subscriber.onSubscribe(subscription);
 
-        ref.on(subscriptionKey, new SimpleConsumer<V>() {
+        ref.on(subscriptionKey, new Consumer<V>() {
           @Override
           public void accept(V value) {
             long r = requested.accumulateAndGet(-1, new LongBinaryOperator() {

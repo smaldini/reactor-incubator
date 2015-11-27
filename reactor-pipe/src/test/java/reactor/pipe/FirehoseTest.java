@@ -3,6 +3,7 @@ package reactor.pipe;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.Processors;
 import reactor.core.processor.RingBufferWorkProcessor;
 import reactor.fn.Consumer;
 import reactor.pipe.concurrent.AVar;
@@ -11,6 +12,7 @@ import org.junit.Test;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.registry.ConcurrentRegistry;
+import reactor.pipe.registry.Selectors;
 
 import java.util.Collections;
 import java.util.concurrent.*;
@@ -301,5 +303,35 @@ public class FirehoseTest extends AbstractFirehoseTest {
     concurrentFirehose.shutdown();
   }
 
+  @Test
+  public void workerOrchestrator() throws InterruptedException {
+    Firehose firehose = new Firehose(Processors.queue(), 4);
+    CountDownLatch latch = new CountDownLatch(3);
 
+    firehose.on(Selectors.$("worker"), o -> {
+      if (latch.getCount() > 0) {
+        System.out.println(latch.getCount());
+        System.out.println(Thread.currentThread().getName() + " worker " + o);
+        latch.countDown();
+        firehose.notify("orchestrator", 1000);
+
+        System.out.println(Thread.currentThread().getName() + " ok");
+      }
+    });
+
+    firehose.on(Selectors.$("orchestrator"), new Consumer<Integer>() {
+      @Override
+      public void accept(Integer i) {
+        if (latch.getCount() > 0) {
+          latch.countDown();
+          firehose.notify("worker", latch.getCount());
+        }
+      }
+    });
+
+    firehose.notify("orchestrator", 1000);
+
+    assertTrue(latch.await(10, TimeUnit.SECONDS));
+    firehose.shutdown();
+  }
 }

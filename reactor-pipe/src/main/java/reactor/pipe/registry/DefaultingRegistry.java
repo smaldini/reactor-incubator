@@ -8,7 +8,7 @@ import reactor.fn.Function;
 
 public interface DefaultingRegistry<K> extends Registry<K>, Iterable<Registration<K>> {
 
-  public void addKeyMissMatcher(Selector<K> matcher,
-                                Function<K, Map<K, KeyedConsumer>> supplier);
+  void addKeyMissMatcher(Selector<K> matcher,
+                         Function<K, Map<K, KeyedConsumer>> supplier);
 
 }
