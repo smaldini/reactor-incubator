@@ -7,7 +7,7 @@ import reactor.fn.tuple.Tuple2;
 import reactor.pipe.IPipe;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.Selector;
+import reactor.pipe.selector.Selector;
 
 import java.util.function.BiFunction;
 

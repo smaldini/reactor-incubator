@@ -1,10 +1,10 @@
 package reactor.pipe.registry;
 
 import reactor.pipe.consumer.KeyedConsumer;
-import reactor.pipe.key.Key;
 
 import java.util.Map;
 import reactor.fn.Function;
+import reactor.pipe.selector.Selector;
 
 public interface DefaultingRegistry<K> extends Registry<K>, Iterable<Registration<K>> {
 

@@ -4,7 +4,7 @@ import reactor.fn.*;
 import reactor.pipe.concurrent.Atom;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.Selector;
+import reactor.pipe.selector.Selector;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

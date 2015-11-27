@@ -12,7 +12,7 @@ import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.AVar;
 import reactor.pipe.key.Key;
 import reactor.pipe.registry.ConcurrentRegistry;
-import reactor.pipe.registry.Selectors;
+import reactor.pipe.selector.Selectors;
 
 import java.util.Collections;
 import java.util.concurrent.*;

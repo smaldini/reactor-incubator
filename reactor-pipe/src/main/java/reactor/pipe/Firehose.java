@@ -19,6 +19,7 @@ import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.registry.*;
+import reactor.pipe.selector.Selector;
 import reactor.pipe.stream.FirehoseSubscription;
 
 import java.util.Collections;

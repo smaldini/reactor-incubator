@@ -9,7 +9,7 @@ import reactor.pipe.Firehose;
 import reactor.pipe.IPipe;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.Selector;
+import reactor.pipe.selector.Selector;
 
 import java.util.ArrayList;
 import java.util.List;

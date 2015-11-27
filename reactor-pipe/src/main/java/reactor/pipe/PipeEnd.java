@@ -5,7 +5,7 @@ import org.pcollections.PVector;
 import reactor.fn.Function;
 import reactor.pipe.consumer.KeyedConsumer;
 import reactor.pipe.key.Key;
-import reactor.pipe.registry.Selector;
+import reactor.pipe.selector.Selector;
 import reactor.pipe.stream.StreamSupplier;
 
 import java.util.LinkedHashMap;
