@@ -120,7 +120,7 @@ public class Firehose<K> {
 
   public <V> Firehose notify(final K key, final V ev) {
     Assert.notNull(key, "Key cannot be null.");
-    Assert.notNull(ev, "Event cannot be null for key " + key.toString());
+    Assert.notNull(ev, "Event cannot be null.");
 
     // Backpressure
     while ((inDispatcherContext.get() == null || !inDispatcherContext.get()) &&
