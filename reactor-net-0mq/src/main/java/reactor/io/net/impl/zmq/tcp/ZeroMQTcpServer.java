@@ -29,6 +29,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.Assert;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
@@ -45,7 +46,6 @@ import reactor.io.net.tcp.TcpServer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Stream;
-import reactor.rx.action.support.DefaultSubscriber;
 import reactor.rx.broadcast.Broadcaster;
 import reactor.rx.broadcast.SerializedBroadcaster;
 import reactor.rx.stream.GroupedStream;
@@ -148,7 +148,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 											.setConnectionId(stringZMsgGroupedStream.key())
 											.setSocket(socket);
 
-							handler.apply(netChannel).subscribe(new DefaultSubscriber<Void>(){
+							handler.apply(netChannel).subscribe(new BaseSubscriber<Void>(){
 								@Override
 								public void onSubscribe(Subscription s) {
 									s.request(Long.MAX_VALUE);
