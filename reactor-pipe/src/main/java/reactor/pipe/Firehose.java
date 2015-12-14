@@ -13,7 +13,7 @@ import reactor.fn.Consumer;
 import reactor.fn.Function;
 import reactor.fn.Predicate;
 import reactor.fn.Supplier;
-import reactor.fn.timer.HashWheelTimer;
+import reactor.core.timer.HashWheelTimer;
 import reactor.fn.tuple.Tuple;
 import reactor.fn.tuple.Tuple2;
 import reactor.pipe.concurrent.LazyVar;

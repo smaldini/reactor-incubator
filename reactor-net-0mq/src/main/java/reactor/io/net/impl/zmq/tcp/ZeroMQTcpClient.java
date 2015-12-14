@@ -32,7 +32,7 @@ import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
 import reactor.fn.Consumer;
-import reactor.fn.timer.Timer;
+import reactor.core.timer.Timer;
 import reactor.fn.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
