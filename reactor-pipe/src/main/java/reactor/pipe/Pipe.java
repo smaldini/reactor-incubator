@@ -11,6 +11,7 @@ import reactor.pipe.operation.SlidingWindowOperation;
 import reactor.pipe.state.DefaultStateProvider;
 import reactor.pipe.state.StateProvider;
 import reactor.pipe.stream.StreamSupplier;
+import reactor.core.support.ReactiveState.Pausable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
