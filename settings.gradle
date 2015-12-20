@@ -1,9 +1,5 @@
 rootProject.name = 'reactor-extensions'
 
-include 'reactor-pipe'
-include 'reactor-pipe-examples'
-include 'reactor-pipe-redis'
-include 'reactor-kafka'
 //include 'reactor-chronicle'
 //include 'reactor-amqp'
 include 'reactor-groovy'
