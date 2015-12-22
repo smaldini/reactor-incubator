@@ -31,7 +31,7 @@ import reactor.rx.BiStreams
 import reactor.rx.Promise
 import reactor.rx.Stream
 import reactor.rx.Streams
-import reactor.rx.action.Control
+import reactor.rx.subscriber.Control
 
 /**
  * Glue for Groovy closures and operator overloading applied to Stream, Composable,
