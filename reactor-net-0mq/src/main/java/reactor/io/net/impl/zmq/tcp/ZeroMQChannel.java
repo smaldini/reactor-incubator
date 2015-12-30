@@ -28,7 +28,7 @@ import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 import reactor.core.subscriber.BaseSubscriber;
-import reactor.core.support.SignalType;
+import reactor.core.subscription.EmptySubscription;
 import reactor.fn.Consumer;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
@@ -80,7 +80,7 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 							}
 						});
 						subscription.request(Long.MAX_VALUE);
-						postWriter.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
+						postWriter.onSubscribe(EmptySubscription.INSTANCE);
 					}
 
 					@Override
@@ -141,7 +141,7 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 			inputSub = subscriber;
 		}
 
-		inputSub.onSubscribe(SignalType.NOOP_SUBSCRIPTION);
+		inputSub.onSubscribe(EmptySubscription.INSTANCE);
 	}
 
 	public ZeroMQChannel setConnectionId(String connectionId) {
