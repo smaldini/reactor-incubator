@@ -33,9 +33,9 @@ import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.Assert;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
+import reactor.core.timer.Timer;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
-import reactor.core.timer.Timer;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
 import reactor.io.net.ReactiveChannelHandler;
@@ -47,7 +47,6 @@ import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.broadcast.Broadcaster;
-import reactor.rx.broadcast.SerializedBroadcaster;
 import reactor.rx.stream.GroupedStream;
 
 /**
@@ -92,7 +91,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 		final int socketType = (null != zmqOpts ? zmqOpts.socketType() : ZMQ.ROUTER);
 		ZContext zmq = (null != zmqOpts ? zmqOpts.context() : null);
 
-		Broadcaster<ZMsg> broadcaster = SerializedBroadcaster.create(getDefaultTimer());
+		Broadcaster<ZMsg> broadcaster = Broadcaster.serialize(getDefaultTimer());
 
 		final Stream<GroupedStream<String, ZMsg>> grouped = broadcaster.groupBy(new Function<ZMsg, String>() {
 			@Override
