@@ -31,8 +31,8 @@ import org.zeromq.ZMsg;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
-import reactor.fn.Consumer;
 import reactor.core.timer.Timer;
+import reactor.fn.Consumer;
 import reactor.fn.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
@@ -46,7 +46,6 @@ import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.broadcast.Broadcaster;
-import reactor.rx.broadcast.SerializedBroadcaster;
 
 /**
  * @author Jon Brisbin
@@ -112,7 +111,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 		final int socketType = (null != zmqOpts ? zmqOpts.socketType() : ZMQ.DEALER);
 		final ZContext zmq = (null != zmqOpts ? zmqOpts.context() : null);
 
-		final Broadcaster<ZMsg> broadcaster = SerializedBroadcaster.create(getDefaultTimer());
+		final Broadcaster<ZMsg> broadcaster = Broadcaster.serialize(getDefaultTimer());
 
 		ZeroMQWorker worker = new ZeroMQWorker(id, socketType, ioThreadCount, zmq, broadcaster) {
 			@Override
