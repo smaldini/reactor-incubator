@@ -36,17 +36,16 @@ import reactor.core.support.UUIDUtils;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.json.JsonCodec;
 import reactor.io.codec.kryo.KryoCodec;
-import reactor.rx.net.NetStreams;
 import reactor.io.net.impl.zmq.tcp.ZeroMQ;
 import reactor.io.net.impl.zmq.tcp.ZeroMQTcpClient;
 import reactor.io.net.impl.zmq.tcp.ZeroMQTcpServer;
 import reactor.io.net.preprocessor.CodecPreprocessor;
-import reactor.rx.net.tcp.ReactorTcpClient;
-import reactor.rx.net.tcp.ReactorTcpServer;
 import reactor.io.net.tcp.support.SocketUtils;
 import reactor.rx.Promise;
-import reactor.rx.Promises;
 import reactor.rx.Streams;
+import reactor.rx.net.NetStreams;
+import reactor.rx.net.tcp.ReactorTcpClient;
+import reactor.rx.net.tcp.ReactorTcpServer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -229,7 +228,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 						.connect("127.0.0.1", port)
 		);
 
-		final Promise<Buffer> promise = Promises.ready();
+		final Promise<Buffer> promise = Promise.ready();
 
 		zmqc.start(ch -> {
 			ch.log("zmq-c").subscribe(promise);

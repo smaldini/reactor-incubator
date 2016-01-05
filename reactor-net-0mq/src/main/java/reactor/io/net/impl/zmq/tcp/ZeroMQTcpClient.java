@@ -43,7 +43,6 @@ import reactor.io.net.config.SslOptions;
 import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
 import reactor.io.net.tcp.TcpClient;
 import reactor.rx.Promise;
-import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.broadcast.Broadcaster;
 
@@ -87,7 +86,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 
 	@Override
 	protected Promise<Void> doShutdown() {
-		final Promise<Void> promise = Promises.ready();
+		final Promise<Void> promise = Promise.ready();
 
 		threadPool.shutdownNow();
 		promise.onComplete();
@@ -106,7 +105,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
 		final UUID id = UUIDUtils.random();
 
-		final Promise<Void> p = Promises.ready();
+		final Promise<Void> p = Promise.ready();
 
 		final int socketType = (null != zmqOpts ? zmqOpts.socketType() : ZMQ.DEALER);
 		final ZContext zmq = (null != zmqOpts ? zmqOpts.context() : null);

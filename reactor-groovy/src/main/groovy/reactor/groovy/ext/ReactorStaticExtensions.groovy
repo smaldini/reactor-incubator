@@ -19,11 +19,9 @@
 package reactor.groovy.ext
 
 import groovy.transform.CompileStatic
+import reactor.Mono
 import reactor.bus.EventBus
 import reactor.groovy.support.ClosureConsumer
-import reactor.groovy.support.ClosureSupplier
-import reactor.rx.Promise
-import reactor.rx.Promises
 
 /**
  * Static extensions for reactor-core classes, main purpose is to bind closure when required
@@ -40,8 +38,8 @@ class ReactorStaticExtensions {
 		selfType.schedule new ClosureConsumer(closure), value
 	}
 
-	static <T> Promise<T> from(final Promise<T> selfType, Closure<T> callback) {
-		Promises.task(new ClosureSupplier<T>(callback))
+	static <T> Mono<T> from(final Mono<T> selfType, Closure<T> callback) {
+		Mono.fromCallable(callback)
 	}
 
 }

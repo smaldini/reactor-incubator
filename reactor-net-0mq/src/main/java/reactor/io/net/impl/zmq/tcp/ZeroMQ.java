@@ -21,31 +21,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.reactivestreams.Publisher;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import reactor.core.support.Assert;
+import reactor.core.timer.Timer;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
-import reactor.core.timer.Timer;
 import reactor.io.buffer.Buffer;
-import reactor.rx.net.ChannelStream;
-import reactor.rx.net.NetStreams;
 import reactor.io.net.Preprocessor;
 import reactor.io.net.ReactiveChannel;
 import reactor.io.net.ReactiveNet;
 import reactor.io.net.ReactivePeer;
-import reactor.rx.net.ReactorChannelHandler;
 import reactor.io.net.Spec;
 import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
 import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
+import reactor.rx.Promise;
+import reactor.rx.Streams;
+import reactor.rx.net.ChannelStream;
+import reactor.rx.net.NetStreams;
+import reactor.rx.net.ReactorChannelHandler;
 import reactor.rx.net.tcp.ReactorTcpClient;
 import reactor.rx.net.tcp.ReactorTcpServer;
-import reactor.rx.Promise;
-import reactor.rx.Promises;
-import reactor.rx.Streams;
 
 /**
  * @author Jon Brisbin
@@ -143,7 +141,7 @@ public class ZeroMQ<T> {
 					}
 				});
 
-		final Promise<ChannelStream<T, T>> promise = Promises.ready(timer);
+		final Promise<ChannelStream<T, T>> promise = Promise.ready(timer);
 		client.start(new ReactorChannelHandler<T, T>() {
 			@Override
 			public Publisher<Void> apply(ChannelStream<T, T> ttChannelStream) {
@@ -176,7 +174,7 @@ public class ZeroMQ<T> {
 					}
 				});
 
-		final Promise<ChannelStream<T, T>> promise = Promises.ready(timer);
+		final Promise<ChannelStream<T, T>> promise = Promise.ready(timer);
 		server.start(new ReactorChannelHandler<T, T>() {
 			@Override
 			public Publisher<Void> apply(ChannelStream<T, T> ttChannelStream) {
@@ -209,8 +207,8 @@ public class ZeroMQ<T> {
 			       @SuppressWarnings("unchecked")
 			       public Publisher<Void> apply(
 					       final ReactivePeer ttChannelStreamReactorPeer) {
-				       return Promises.from(ttChannelStreamReactorPeer.shutdown())
-				                      .onSuccess(new Consumer() {
+				       return ttChannelStreamReactorPeer.shutdown()
+				                      .doOnSuccess(new Consumer() {
 					                      @Override
 					                      public void accept(Object o) {
 						                      peers.remove(ttChannelStreamReactorPeer);

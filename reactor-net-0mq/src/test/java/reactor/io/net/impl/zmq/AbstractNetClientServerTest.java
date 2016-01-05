@@ -31,17 +31,13 @@ import reactor.fn.Predicate;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.codec.StandardCodecs;
-import reactor.rx.net.NetStreams;
 import reactor.io.net.preprocessor.CodecPreprocessor;
-import reactor.rx.net.tcp.ReactorTcpClient;
-import reactor.rx.net.tcp.ReactorTcpServer;
-import reactor.io.net.tcp.TcpClient;
-import reactor.io.net.tcp.TcpServer;
-import reactor.io.net.Spec;
 import reactor.io.net.tcp.support.SocketUtils;
 import reactor.rx.Promise;
-import reactor.rx.Promises;
 import reactor.rx.Streams;
+import reactor.rx.net.NetStreams;
+import reactor.rx.net.tcp.ReactorTcpClient;
+import reactor.rx.net.tcp.ReactorTcpServer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -136,7 +132,7 @@ public class AbstractNetClientServerTest {
 			.preprocessor(CodecPreprocessor.from(elCodec))
 		);
 
-		final Promise<T> p = Promises.ready();
+		final Promise<T> p = Promise.ready();
 
 		client.start(input -> {
 			input.log("echo-in").subscribe(p);

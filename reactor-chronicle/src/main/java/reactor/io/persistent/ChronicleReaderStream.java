@@ -55,6 +55,30 @@ import static reactor.rx.stream.MapStream.Operation.*;
 public class ChronicleReaderStream<K, V> extends MapStream<K, V> {
 
 
+
+	final static class MutableSignal<K, V> extends Signal<K, V> {
+		public MutableSignal() {
+			super(null, null, null, null);
+		}
+
+		public void op(Operation op) {
+			this.op = op;
+		}
+
+		public void key(K key) {
+			this.key = key;
+		}
+
+		public void previous(V previous) {
+			this.previous = previous;
+		}
+
+		public void value(V value) {
+			this.value = value;
+		}
+	}
+
+
 	//private final Logger log = LoggerFactory.getLogger(getClass());
 	private final ExecutorService executor;
   protected final String name;
@@ -125,7 +149,7 @@ public class ChronicleReaderStream<K, V> extends MapStream<K, V> {
 
 	class ChronicleSubscription extends PushSubscription<MapStream.Signal<K, V>> {
 
-		final MapStream.MutableSignal<K, V> signalContainer = new MapStream.MutableSignal<>();
+		final MutableSignal<K, V> signalContainer = new MutableSignal<>();
 
 		public ChronicleSubscription(Stream<MapStream.Signal<K, V>> publisher,
 		                             Subscriber<? super MapStream.Signal<K, V>> subscriber) {

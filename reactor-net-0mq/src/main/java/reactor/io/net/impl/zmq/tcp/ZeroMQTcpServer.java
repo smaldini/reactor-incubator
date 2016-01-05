@@ -85,7 +85,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
 		Assert.isNull(worker, "This ZeroMQ server has already been started");
 
-		final Promise<Void> promise = Promises.ready(getDefaultTimer());
+		final Promise<Void> promise = Promise.ready(getDefaultTimer());
 
 		final UUID id = UUIDUtils.random();
 		final int socketType = (null != zmqOpts ? zmqOpts.socketType() : ZMQ.ROUTER);
