@@ -125,7 +125,7 @@ public class AbstractNetClientServerTest {
 		ReactorTcpServer<T, T> server = NetStreams.tcpServer(serverType, s -> s.listen(LOCALHOST, getPort())
 		                                                                       .preprocessor(CodecPreprocessor.from(elCodec)));
 
-		server.start(ch -> ch.writeWith(ch.take(1))).await();
+		server.start(ch -> ch.writeWith(ch.take(1))).get();
 
 		ReactorTcpClient<T, T> client = NetStreams.tcpClient(clientType, s -> s
 			.connect(LOCALHOST, getPort())
@@ -137,7 +137,7 @@ public class AbstractNetClientServerTest {
 		client.start(input -> {
 			input.log("echo-in").subscribe(p);
 			return input.writeWith(Streams.just(data).log("echo-out")).log("echo.close");
-		}).await();
+		}).get();
 
 
 		T reply = p.await(50, TimeUnit.SECONDS);
@@ -193,9 +193,8 @@ public class AbstractNetClientServerTest {
 
 			if (count != data.count) return false;
 			if (length != data.length) return false;
-			if (!name.equals(data.name)) return false;
+			return name.equals(data.name);
 
-			return true;
 		}
 
 		@Override

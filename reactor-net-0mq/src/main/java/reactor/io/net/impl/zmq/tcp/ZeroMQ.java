@@ -201,7 +201,7 @@ public class ZeroMQ<T> {
 			_peers = new ArrayList<>(peers);
 		}
 
-		Streams.from(_peers)
+		Streams.fromIterable(_peers)
 		       .flatMap(new Function<ReactivePeer, Publisher<Void>>() {
 			       @Override
 			       @SuppressWarnings("unchecked")

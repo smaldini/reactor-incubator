@@ -28,6 +28,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import reactor.Flux;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
@@ -43,7 +44,6 @@ import reactor.io.net.config.SslOptions;
 import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
 import reactor.io.net.tcp.TcpClient;
 import reactor.rx.Promise;
-import reactor.rx.Stream;
 import reactor.rx.broadcast.Broadcaster;
 
 /**
@@ -80,7 +80,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Stream<Tuple2<InetSocketAddress, Integer>> doStart(ReactiveChannelHandler handler, Reconnect reconnect) {
+	protected Flux<Tuple2<InetSocketAddress, Integer>> doStart(ReactiveChannelHandler handler, Reconnect reconnect) {
 		throw new IllegalStateException("Reconnects are handled transparently by the ZeroMQ network library");
 	}
 

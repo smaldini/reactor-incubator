@@ -29,6 +29,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import reactor.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.Assert;
 import reactor.core.support.NamedDaemonThreadFactory;
@@ -44,7 +45,6 @@ import reactor.io.net.config.SslOptions;
 import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
 import reactor.io.net.tcp.TcpServer;
 import reactor.rx.Promise;
-import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.broadcast.Broadcaster;
 import reactor.rx.stream.GroupedStream;
@@ -82,7 +82,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
+	protected Mono<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
 		Assert.isNull(worker, "This ZeroMQ server has already been started");
 
 		final Promise<Void> promise = Promise.ready(getDefaultTimer());
@@ -175,9 +175,9 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 									}
 									msg.destroy();
 								}
-							}, null, new Consumer<Void>() {
+							}, null, new Runnable() {
 								@Override
-								public void accept(Void aVoid) {
+								public void run() {
 									netChannel.close();
 								}
 							});
@@ -199,9 +199,9 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Promise<Void> doShutdown() {
+	protected Mono<Void> doShutdown() {
 		if (null == worker) {
-			return Promises.<Void>error(new IllegalStateException("This ZeroMQ server has not been started"));
+			return Promise.<Void>error(new IllegalStateException("This ZeroMQ server has not been started"));
 		}
 
 		worker.shutdown();
@@ -210,7 +210,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 		}
 		threadPool.shutdownNow();
 
-		return Promises.success();
+		return Promise.success();
 	}
 
 }

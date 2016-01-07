@@ -73,9 +73,9 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 
 					@Override
 					public void onSubscribe(final Subscription subscription) {
-						eventSpec.close(new Consumer<Void>() {
+						eventSpec.close(new Runnable() {
 							@Override
-							public void accept(Void aVoid) {
+							public void run() {
 								subscription.cancel();
 							}
 						});
@@ -161,13 +161,13 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 
 	public void close() {
 		try {
-			final List<Consumer<Void>> closeHandlers;
+			final List<Runnable> closeHandlers;
 			synchronized (eventSpec.closeHandlers) {
-				closeHandlers = new ArrayList<Consumer<Void>>(eventSpec.closeHandlers);
+				closeHandlers = new ArrayList<Runnable>(eventSpec.closeHandlers);
 			}
 
-			for (Consumer<Void> r : closeHandlers) {
-				r.accept(null);
+			for (Runnable r : closeHandlers) {
+				r.run();
 			}
 		}
 		catch (Throwable t) {
@@ -212,10 +212,10 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 
 	private static class ZeroMQConsumerSpec implements ConsumerSpec {
 
-		final List<Consumer<Void>> closeHandlers = new ArrayList<>();
+		final List<Runnable> closeHandlers = new ArrayList<>();
 
 		@Override
-		public ConsumerSpec close(Consumer<Void> onClose) {
+		public ConsumerSpec close(Runnable onClose) {
 			synchronized (closeHandlers) {
 				closeHandlers.add(onClose);
 			}
@@ -223,12 +223,12 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 		}
 
 		@Override
-		public ConsumerSpec readIdle(long idleTimeout, Consumer<Void> onReadIdle) {
+		public ConsumerSpec readIdle(long idleTimeout, Runnable onReadIdle) {
 			return this;
 		}
 
 		@Override
-		public ConsumerSpec writeIdle(long idleTimeout, Consumer<Void> onWriteIdle) {
+		public ConsumerSpec writeIdle(long idleTimeout, Runnable onWriteIdle) {
 			return this;
 		}
 	}
