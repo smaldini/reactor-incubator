@@ -27,11 +27,9 @@ import reactor.fn.Function
 import reactor.fn.Predicate
 import reactor.fn.tuple.Tuple2
 //import reactor.io.codec.Codec
-import reactor.rx.BiStreams
 //import reactor.rx.IOStreams
 import reactor.rx.Promise
 import reactor.rx.Stream
-import reactor.rx.Streams
 import reactor.rx.subscriber.Control
 
 /**
@@ -51,12 +49,12 @@ class StreamExtensions {
   // PAIR Streams
   static <K, V> Stream<Tuple2<K, V>> reduceByKey(final Publisher<? extends Tuple2<K, V>> selfType,
                                                  BiFunction<V, V, V> accumulator) {
-    BiStreams.reduceByKey(selfType, accumulator)
+    Stream.reduceByKey(selfType, accumulator)
   }
 
   static <K, V> Stream<Tuple2<K, V>> scanByKey(final Publisher<? extends Tuple2<K, V>> selfType,
                                                BiFunction<V, V, V> accumulator) {
-    BiStreams.scanByKey(selfType, accumulator)
+    Stream.scanByKey(selfType, accumulator)
   }
 
   // IO Streams
@@ -104,7 +102,7 @@ class StreamExtensions {
 
   static <T> void rightShift(final Stream<T> selfType, final List<T> other) {
     selfType.consume { other.add(it) }
-    Streams.await(selfType)
+    Stream.await(selfType)
   }
 
   //Consuming
