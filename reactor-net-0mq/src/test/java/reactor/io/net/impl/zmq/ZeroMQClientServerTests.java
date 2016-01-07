@@ -117,11 +117,11 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	@Test//(timeout = 60000)
 	public void zmqRequestReply() throws InterruptedException {
 		ZEROMQ.reply("tcp://*:" + getPort())
-		      .onSuccess(ch -> ch.writeWith(ch.observe(d -> latch.countDown()))
+		      .doOnSuccess(ch -> ch.writeWith(ch.doOnNext(d -> latch.countDown()))
 		                         .consume());
 
 		ZEROMQ.request("tcp://127.0.0.1:" + getPort())
-		      .onSuccess(ch -> {
+		      .doOnSuccess(ch -> {
 			      ch.consume(d -> latch.countDown());
 			      ch.writeWith(Streams.just(data))
 			        .consume();
@@ -133,10 +133,10 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	@Test(timeout = 60000)
 	public void zmqPushPull() throws InterruptedException {
 		ZEROMQ.pull("tcp://*:" + getPort())
-		      .onSuccess(ch -> latch.countDown());
+		      .doOnSuccess(ch -> latch.countDown());
 
 		ZEROMQ.push("tcp://127.0.0.1:" + getPort())
-		      .onSuccess(ch -> ch.writeWith(Streams.just(data))
+		      .doOnSuccess(ch -> ch.writeWith(Streams.just(data))
 		                         .consume());
 
 		assertTrue("PULL socket received data", latch.await(1, TimeUnit.SECONDS));
@@ -145,10 +145,10 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	@Test(timeout = 60000)
 	public void zmqRouterDealer() throws InterruptedException {
 		ZEROMQ.router("tcp://*:" + getPort())
-		  .onSuccess(ch -> latch.countDown());
+		  .doOnSuccess(ch -> latch.countDown());
 
 		ZEROMQ.dealer("tcp://127.0.0.1:" + getPort())
-		  .onSuccess(ch ->
+		  .doOnSuccess(ch ->
 			  ch.writeWith(Streams.just(data).log("zmqp")).consume()
 		  );
 
@@ -158,7 +158,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	@Test(timeout = 60000)
 	public void zmqInprocRouterDealer() throws InterruptedException {
 		ZEROMQ.router("inproc://queue" + getPort())
-		  .onSuccess(ch -> {
+		  .doOnSuccess(ch -> {
 			  ch.consume(data -> {
 				  latch.countDown();
 			  });
@@ -168,7 +168,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		Thread.sleep(500);
 
 		ZEROMQ.dealer("inproc://queue" + getPort())
-		  .onSuccess(ch -> ch.writeWith(Streams.just(data)).consume());
+		  .doOnSuccess(ch -> ch.writeWith(Streams.just(data)).consume());
 
 		assertTrue("ROUTER socket received inproc data", latch.await(5, TimeUnit.SECONDS));
 	}
@@ -185,7 +185,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		);
 
 		server.start(ch -> ch.writeWith(ch.take(1)
-		                                  .observe(buff -> {
+		                                  .doOnNext(buff -> {
 			                                  if (buff.remaining() == 128) {
 				                                  latch.countDown();
 			                                  }
@@ -194,13 +194,13 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 			                                  }
 		                                  })
 		                                  .map(d -> Buffer.wrap("Goodbye World!"))
-		                                  .log("conn"))).await();
+		                                  .log("conn"))).get();
 
 		ZeroMQWriter zmqw = new ZeroMQWriter(zmq, port, latch);
 		threadPool.submit(zmqw);
 
 		assertTrue("reply was received", latch.await(500, TimeUnit.SECONDS));
-		assertTrue("Server was stopped", server.shutdown().awaitSuccess(5, TimeUnit.SECONDS));
+		server.shutdown().get(5, TimeUnit.SECONDS);
 
 		//zmq.destroy();
 	}
@@ -222,7 +222,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 							}
 							return Buffer.wrap("Goodbye World!");
 						}))
-		).await(5, TimeUnit.SECONDS);
+		).get(5, TimeUnit.SECONDS);
 
 		ReactorTcpClient<Buffer, Buffer> zmqc = NetStreams.<Buffer, Buffer>tcpClient(ZeroMQTcpClient.class, s -> s
 						.connect("127.0.0.1", port)
@@ -233,7 +233,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		zmqc.start(ch -> {
 			ch.log("zmq-c").subscribe(promise);
 			return ch.writeWith(Streams.just(Buffer.wrap("Hello World!")));
-		}).await(5, TimeUnit.SECONDS);
+		}).get(5, TimeUnit.SECONDS);
 
 		String msg = promise
 				.await(30, TimeUnit.SECONDS)

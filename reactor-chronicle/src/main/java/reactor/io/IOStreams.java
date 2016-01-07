@@ -141,7 +141,7 @@ public class IOStreams extends Streams {
 	 * @return a Stream of decoded values
 	 */
 	public static <SRC, IN> Stream<IN> decode(Codec<SRC, IN, ?> codec, Publisher<? extends SRC> publisher) {
-		return Streams.wrap(codec.decode(publisher));
+		return Streams.from(codec.decode(publisher));
 	}
 
 
