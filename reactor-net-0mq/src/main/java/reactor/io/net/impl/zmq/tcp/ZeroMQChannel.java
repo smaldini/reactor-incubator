@@ -27,6 +27,7 @@ import org.reactivestreams.Subscription;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
+import reactor.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.subscription.EmptySubscription;
 import reactor.fn.Consumer;
@@ -52,7 +53,7 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 	}
 
 	@Override
-	public Publisher<Void> writeBufferWith(Publisher<? extends Buffer> dataStream) {
+	public Mono<Void> writeBufferWith(Publisher<? extends Buffer> dataStream) {
 		return writeWith(dataStream);
 	}
 
@@ -62,8 +63,8 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 	}
 
 	@Override
-	public Publisher<Void> writeWith(Publisher<? extends Buffer> writer) {
-		return new Publisher<Void>() {
+	public Mono<Void> writeWith(Publisher<? extends Buffer> writer) {
+		return new Mono<Void>() {
 			@Override
 			public void subscribe(final Subscriber<? super Void> postWriter) {
 
