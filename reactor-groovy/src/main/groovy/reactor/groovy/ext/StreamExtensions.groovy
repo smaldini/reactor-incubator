@@ -98,7 +98,7 @@ class StreamExtensions {
     selfType.consume other
   }
 
-  static <T> Promise<T> leftShift(final Promise<T> selfType, final Consumer<T> other) {
+  static <T> Mono<T> leftShift(final Promise<T> selfType, final Consumer<T> other) {
     selfType.doOnSuccess other
   }
 
