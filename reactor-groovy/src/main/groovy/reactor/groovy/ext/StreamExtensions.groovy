@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
 import org.reactivestreams.Publisher
 import org.reactivestreams.Subscriber
+import reactor.Mono
 import reactor.fn.BiFunction
 import reactor.fn.Consumer
 import reactor.fn.Function
@@ -66,7 +67,7 @@ class StreamExtensions {
   /**
    * Operator overloading
    */
-  static <T> Stream<T> mod(final Stream<T> selfType, final BiFunction<T, T, T> other) {
+  static <T> Mono<T> mod(final Stream<T> selfType, final BiFunction<T, T, T> other) {
     selfType.reduce other
   }
 
@@ -98,7 +99,7 @@ class StreamExtensions {
   }
 
   static <T> Promise<T> leftShift(final Promise<T> selfType, final Consumer<T> other) {
-    selfType.onSuccess other
+    selfType.doOnSuccess other
   }
 
   static <T> void rightShift(final Stream<T> selfType, final List<T> other) {
