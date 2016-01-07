@@ -115,7 +115,7 @@ project('reactor-groovy') {
     compile "io.projectreactor:reactor-stream:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
-}
+}/*
 
 project('reactor-net-0mq') {
   description = 'Reactor Net ZeroMq driver'
@@ -133,7 +133,7 @@ project('reactor-net-0mq') {
     testCompile "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
   }
 }
-
+*/
 
 /*project('reactor-chronicle') {
   description = 'Reactor Groovy Extensions'
