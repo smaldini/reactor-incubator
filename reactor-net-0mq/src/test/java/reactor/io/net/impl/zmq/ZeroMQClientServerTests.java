@@ -118,13 +118,13 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	public void zmqRequestReply() throws InterruptedException {
 		ZEROMQ.reply("tcp://*:" + getPort())
 		      .doOnSuccess(ch -> ch.writeWith(ch.doOnNext(d -> latch.countDown()))
-		                         .consume());
+		                         .subscribe());
 
 		ZEROMQ.request("tcp://127.0.0.1:" + getPort())
 		      .doOnSuccess(ch -> {
 			      ch.consume(d -> latch.countDown());
 			      ch.writeWith(Streams.just(data))
-			        .consume();
+			        .subscribe();
 		      });
 
 		assertTrue("REQ/REP socket exchanged data", latch.await(5, TimeUnit.SECONDS));
@@ -137,7 +137,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 
 		ZEROMQ.push("tcp://127.0.0.1:" + getPort())
 		      .doOnSuccess(ch -> ch.writeWith(Streams.just(data))
-		                         .consume());
+		                         .subscribe());
 
 		assertTrue("PULL socket received data", latch.await(1, TimeUnit.SECONDS));
 	}
@@ -149,7 +149,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 
 		ZEROMQ.dealer("tcp://127.0.0.1:" + getPort())
 		  .doOnSuccess(ch ->
-			  ch.writeWith(Streams.just(data).log("zmqp")).consume()
+			  ch.writeWith(Streams.just(data).log("zmqp")).subscribe()
 		  );
 
 		assertTrue("ROUTER socket received data", latch.await(50, TimeUnit.SECONDS));
@@ -168,7 +168,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		Thread.sleep(500);
 
 		ZEROMQ.dealer("inproc://queue" + getPort())
-		  .doOnSuccess(ch -> ch.writeWith(Streams.just(data)).consume());
+		  .doOnSuccess(ch -> ch.writeWith(Streams.just(data)).subscribe());
 
 		assertTrue("ROUTER socket received inproc data", latch.await(5, TimeUnit.SECONDS));
 	}
