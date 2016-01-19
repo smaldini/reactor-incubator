@@ -29,7 +29,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.Assert;
 import reactor.core.support.NamedDaemonThreadFactory;

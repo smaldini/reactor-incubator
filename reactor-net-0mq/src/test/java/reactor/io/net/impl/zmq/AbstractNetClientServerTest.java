@@ -25,7 +25,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.Processors;
+import reactor.core.publisher.Processors;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.fn.Predicate;
 import reactor.io.buffer.Buffer;

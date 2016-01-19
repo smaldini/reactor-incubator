@@ -27,10 +27,9 @@ import org.reactivestreams.Subscription;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.subscription.EmptySubscription;
-import reactor.fn.Consumer;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
 

@@ -19,8 +19,8 @@
 package reactor.groovy.ext
 
 import groovy.transform.CompileStatic
-import reactor.Mono
 import reactor.bus.EventBus
+import reactor.core.publisher.Mono
 import reactor.groovy.support.ClosureConsumer
 
 /**

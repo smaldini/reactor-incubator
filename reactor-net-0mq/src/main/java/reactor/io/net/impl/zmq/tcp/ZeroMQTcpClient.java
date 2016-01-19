@@ -28,7 +28,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.core.support.UUIDUtils;
