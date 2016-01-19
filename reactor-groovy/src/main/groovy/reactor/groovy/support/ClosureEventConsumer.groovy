@@ -22,7 +22,7 @@ import groovy.transform.CompileStatic
 import reactor.bus.Bus
 import reactor.bus.Event
 import reactor.bus.EventBus
-import reactor.core.error.CancelException
+import reactor.core.support.Exceptions
 import reactor.fn.Consumer
 
 /**
@@ -43,7 +43,7 @@ class ClosureEventConsumer<T> implements Consumer<Event<T>> {
 	}
 
 	void cancel() {
-		throw CancelException.get()
+		Exceptions.failWithCancel()
 	}
 
 	@Override
