@@ -27,12 +27,11 @@ import reactor.fn.Function
 import reactor.fn.Predicate
 import reactor.fn.tuple.Tuple2
 import reactor.rx.Promise
-
-//import reactor.io.codec.Codec
-//import reactor.rx.IOStreams
 import reactor.rx.Stream
 import reactor.rx.subscriber.Control
 
+//import reactor.io.codec.Codec
+//import reactor.rx.IOStreams
 /**
  * Glue for Groovy closures and operator overloading applied to Stream, Composable,
  * Promise and Deferred.
