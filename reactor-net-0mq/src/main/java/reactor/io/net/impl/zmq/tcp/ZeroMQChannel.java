@@ -29,7 +29,7 @@ import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
-import reactor.core.subscription.EmptySubscription;
+import reactor.core.util.EmptySubscription;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;
 
