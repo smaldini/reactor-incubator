@@ -32,7 +32,7 @@ import org.zeromq.ZMsg;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.Assert;
-import reactor.core.support.NamedDaemonThreadFactory;
+import reactor.core.support.ExecutorUtils;
 import reactor.core.support.UUIDUtils;
 import reactor.core.timer.Timer;
 import reactor.fn.Consumer;
@@ -78,7 +78,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 			this.zmqOpts = null;
 		}
 
-		this.threadPool = Executors.newCachedThreadPool(new NamedDaemonThreadFactory("zmq-server"));
+		this.threadPool = Executors.newCachedThreadPool(ExecutorUtils.newNamedFactory("zmq-server"));
 	}
 
 	@Override

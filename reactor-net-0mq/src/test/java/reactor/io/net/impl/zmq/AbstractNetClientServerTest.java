@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Processors;
-import reactor.core.support.NamedDaemonThreadFactory;
+import reactor.core.support.ExecutorUtils;
 import reactor.fn.Predicate;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
@@ -70,9 +70,9 @@ public class AbstractNetClientServerTest {
 
 	@Before
 	public void setup() {
-		clientPool = Executors.newCachedThreadPool(new NamedDaemonThreadFactory(getClass().getSimpleName() +
+		clientPool = Executors.newCachedThreadPool(ExecutorUtils.newNamedFactory(getClass().getSimpleName() +
 		  "-server"));
-		serverPool = Executors.newCachedThreadPool(new NamedDaemonThreadFactory(getClass().getSimpleName() +
+		serverPool = Executors.newCachedThreadPool(ExecutorUtils.newNamedFactory(getClass().getSimpleName() +
 		  "-client"));
 
 		port = SocketUtils.findAvailableTcpPort();

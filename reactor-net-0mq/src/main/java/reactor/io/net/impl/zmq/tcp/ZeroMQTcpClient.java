@@ -29,8 +29,9 @@ import org.zeromq.ZFrame;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
-import reactor.core.support.NamedDaemonThreadFactory;
+import reactor.core.support.ExecutorUtils;
 import reactor.core.support.UUIDUtils;
 import reactor.core.timer.Timer;
 import reactor.fn.Consumer;
@@ -76,7 +77,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 			this.zmqOpts = null;
 		}
 
-		this.threadPool = Executors.newCachedThreadPool(new NamedDaemonThreadFactory("zmq-client"));
+		this.threadPool = Executors.newCachedThreadPool(ExecutorUtils.newNamedFactory("zmq-client"));
 	}
 
 	@Override
@@ -102,7 +103,8 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Promise<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
+	protected Mono<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>>
+			handler) {
 		final UUID id = UUIDUtils.random();
 
 		final Promise<Void> p = Promise.ready();

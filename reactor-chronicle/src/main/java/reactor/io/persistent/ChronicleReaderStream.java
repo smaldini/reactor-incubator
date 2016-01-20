@@ -22,7 +22,6 @@ import net.openhft.chronicle.ExcerptTailer;
 import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Subscriber;
 import reactor.core.support.Exceptions;
-import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.persistent.spec.PersistentQueueSpec;
@@ -129,7 +128,7 @@ public class ChronicleReaderStream<K, V> extends MapStream<K, V> {
 	public ChronicleReaderStream(String name, final Chronicle chronicle,
 	                             Codec<Buffer, K, K> keyCodec, Codec<Buffer, V, V> valueCodec) {
 
-		this.executor = Executors.newSingleThreadExecutor(new NamedDaemonThreadFactory(name));
+		this.executor = Executors.newSingleThreadExecutor(ExecutorUtils.newNamedFactory(name));
 		this.keyCodec = keyCodec;
 		this.valueCodec = valueCodec;
 		this.chronicle = chronicle;
