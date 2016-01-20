@@ -21,7 +21,7 @@ import net.openhft.chronicle.ChronicleQueueBuilder;
 import net.openhft.chronicle.ExcerptTailer;
 import org.jetbrains.annotations.NotNull;
 import org.reactivestreams.Subscriber;
-import reactor.core.support.Exceptions;
+import reactor.core.util.Exceptions;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.persistent.spec.PersistentQueueSpec;

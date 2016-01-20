@@ -18,7 +18,7 @@ package reactor.io.net.impl.zmq;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import reactor.core.support.Assert;
+import reactor.core.util.Assert;
 import reactor.fn.Consumer;
 import reactor.io.net.config.ClientSocketOptions;
 

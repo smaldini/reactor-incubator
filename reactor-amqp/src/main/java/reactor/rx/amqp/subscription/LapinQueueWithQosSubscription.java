@@ -1,14 +1,14 @@
 package reactor.rx.amqp.subscription;
 
+import java.io.IOException;
+import java.util.Map;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.support.Assert;
+import reactor.core.util.Assert;
 import reactor.rx.amqp.signal.QueueSignal;
 import reactor.rx.amqp.spec.Queue;
 import reactor.rx.amqp.stream.LapinStream;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Stephane Maldini

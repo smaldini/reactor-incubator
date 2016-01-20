@@ -1,5 +1,8 @@
 package reactor.rx.amqp.subscription;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
@@ -7,14 +10,11 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.support.SpecificationExceptions;
+import reactor.core.util.SpecificationExceptions;
 import reactor.rx.Stream;
 import reactor.rx.amqp.signal.QueueSignal;
 import reactor.rx.amqp.spec.Queue;
 import reactor.rx.subscription.PushSubscription;
-
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Stephane Maldini
