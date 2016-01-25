@@ -26,7 +26,7 @@ import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.persistent.spec.PersistentQueueSpec;
 import reactor.rx.Stream;
-import reactor.rx.stream.MapStream;
+import reactor.rx.MapStream;
 import reactor.rx.subscription.PushSubscription;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.locks.LockSupport;
 
-import static reactor.rx.stream.MapStream.Operation.*;
+import static reactor.rx.MapStream.Operation.*;
 
 
 /**

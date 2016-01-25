@@ -18,8 +18,8 @@ package reactor.io.persistent
 
 import reactor.io.codec.StandardCodecs
 import reactor.io.persistent.spec.PersistentQueueSpec
+import reactor.rx.Broadcaster
 import reactor.rx.IOStreams
-import reactor.rx.broadcast.Broadcaster
 import spock.lang.Specification
 
 /**

@@ -20,9 +20,9 @@ import reactor.Environment;
 import reactor.io.codec.Codec;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
-import reactor.rx.stream.MapStream;
-import reactor.rx.stream.io.ChronicleReaderStream;
-import reactor.rx.stream.io.ChronicleStream;
+import reactor.rx.MapStream;
+import reactor.rx.io.ChronicleReaderStream;
+import reactor.rx.io.ChronicleStream;
 
 import java.io.IOException;
 

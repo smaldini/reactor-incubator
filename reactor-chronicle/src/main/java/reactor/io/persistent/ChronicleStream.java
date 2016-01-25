@@ -22,12 +22,12 @@ import net.openhft.chronicle.tools.ChronicleTools;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.persistent.spec.PersistentQueueSpec;
-import reactor.rx.stream.MapStream;
+import reactor.rx.MapStream;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static reactor.rx.stream.MapStream.Operation.*;
+import static reactor.rx.MapStream.Operation.*;
 
 /**
  * @author Stephane Maldini

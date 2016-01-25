@@ -25,7 +25,7 @@ import org.zeromq.ZContext;
 import org.zeromq.ZLoop;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.rx.broadcast.Broadcaster;
+import reactor.rx.Broadcaster;
 
 /**
  * @author Jon Brisbin
