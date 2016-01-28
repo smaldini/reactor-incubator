@@ -25,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Processors;
 import reactor.core.util.ExecutorUtils;
 import reactor.fn.Predicate;
 import reactor.io.buffer.Buffer;
@@ -54,7 +53,7 @@ public class AbstractNetClientServerTest {
 
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final int senderThreads = Processors.DEFAULT_POOL_SIZE;
+	private final int senderThreads = ProcessorGroup.DEFAULT_POOL_SIZE;
 	protected Data            data;
 	private   ExecutorService serverPool;
 	private   ExecutorService clientPool;
