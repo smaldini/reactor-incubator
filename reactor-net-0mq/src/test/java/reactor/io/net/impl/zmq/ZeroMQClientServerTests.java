@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.core.timer.Timers;
 import reactor.core.util.UUIDUtils;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.json.JsonCodec;
@@ -71,7 +70,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 	public static void classSetup() {
 		KRYO = new Kryo();
 		KRYO_CODEC = new KryoCodec<>(KRYO, false);
-		ZEROMQ = new ZeroMQ<>(Timers.global(), CodecPreprocessor.from(KRYO_CODEC));
+		ZEROMQ = new ZeroMQ<>(Timer.global(), CodecPreprocessor.from(KRYO_CODEC));
 	}
 
 	@AfterClass
@@ -83,14 +82,14 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 
 	@Before
 	public void loadEnv() {
-		Timers.global();
+		Timer.global();
 		threadPool = Executors.newCachedThreadPool();
 	}
 
 	@After
 	public void cleanup() {
 		threadPool.shutdownNow();
-		Timers.unregisterGlobal();
+		Timer.unregisterGlobal();
 	}
 
 	@Override
