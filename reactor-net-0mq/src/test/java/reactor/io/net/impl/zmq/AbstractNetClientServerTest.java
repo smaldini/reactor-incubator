@@ -53,7 +53,7 @@ public class AbstractNetClientServerTest {
 
 	protected final Logger log = LoggerFactory.getLogger(getClass());
 
-	private final int senderThreads = ProcessorGroup.DEFAULT_POOL_SIZE;
+	private final int senderThreads = SchedulerGroup.DEFAULT_POOL_SIZE;
 	protected Data            data;
 	private   ExecutorService serverPool;
 	private   ExecutorService clientPool;
