@@ -59,7 +59,7 @@ class FluxionExtensions {
 
   //Mapping
   static <O, E extends Subscriber<? super O>> E or(final Fluxion<O> selfType, final E other) {
-    selfType.broadcastTo(other)
+    selfType.subscribeWith(other)
   }
 
   static <T, V> Fluxion<V> or(final Fluxion<T> selfType, final Function<T, V> other) {
