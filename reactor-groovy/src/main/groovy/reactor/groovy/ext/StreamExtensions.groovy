@@ -18,17 +18,15 @@ package reactor.groovy.ext
 
 import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
-import org.reactivestreams.Publisher
 import org.reactivestreams.Subscriber
 import reactor.core.publisher.Mono
 import reactor.fn.BiFunction
 import reactor.fn.Consumer
 import reactor.fn.Function
 import reactor.fn.Predicate
-import reactor.fn.tuple.Tuple2
+import reactor.rx.Fluxion
 import reactor.rx.Promise
-import reactor.rx.Stream
-import reactor.rx.subscriber.Control
+import reactor.rx.subscriber.InterruptableSubscriber
 
 //import reactor.io.codec.Codec
 //import reactor.rx.IOStreams
@@ -46,53 +44,43 @@ class StreamExtensions {
   /**
    * Alias
    */
-  // PAIR Streams
-  static <K, V> Stream<Tuple2<K, V>> reduceByKey(final Publisher<? extends Tuple2<K, V>> selfType,
-                                                 BiFunction<V, V, V> accumulator) {
-    Stream.reduceByKey(selfType, accumulator)
-  }
-
-  static <K, V> Stream<Tuple2<K, V>> scanByKey(final Publisher<? extends Tuple2<K, V>> selfType,
-                                               BiFunction<V, V, V> accumulator) {
-    Stream.scanByKey(selfType, accumulator)
-  }
 
   // IO Streams
-  /*static <SRC, IN> Stream<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
+  /*static <SRC, IN> Fluxion<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
     IOStreams.decode(codec, publisher)
   }*/
 
   /**
    * Operator overloading
    */
-  static <T> Mono<T> mod(final Stream<T> selfType, final BiFunction<T, T, T> other) {
+  static <T> Mono<T> mod(final Fluxion<T> selfType, final BiFunction<T, T, T> other) {
     selfType.reduce other
   }
 
   //Mapping
-  static <O, E extends Subscriber<? super O>> E or(final Stream<O> selfType, final E other) {
+  static <O, E extends Subscriber<? super O>> E or(final Fluxion<O> selfType, final E other) {
     selfType.broadcastTo(other)
   }
 
-  static <T, V> Stream<V> or(final Stream<T> selfType, final Function<T, V> other) {
+  static <T, V> Fluxion<V> or(final Fluxion<T> selfType, final Function<T, V> other) {
     selfType.map other
   }
 
-  static <T, V> Stream<V> or(final Promise<T> selfType, final Function<T, V> other) {
+  static <T, V> Fluxion<V> or(final Promise<T> selfType, final Function<T, V> other) {
     selfType.stream().map(other)
   }
 
   //Filtering
-  static <T> Stream<T> and(final Stream<T> selfType, final Predicate<T> other) {
+  static <T> Fluxion<T> and(final Fluxion<T> selfType, final Predicate<T> other) {
     selfType.filter other
   }
 
-  static <T> Stream<T> and(final Promise<T> selfType, final Predicate<T> other) {
+  static <T> Fluxion<T> and(final Promise<T> selfType, final Predicate<T> other) {
     selfType.stream().filter(other)
   }
 
   //Consuming
-  static <T> Control leftShift(final Stream<T> selfType, final Consumer<T> other) {
+  static <T> InterruptableSubscriber<?> leftShift(final Fluxion<T> selfType, final Consumer<T> other) {
     selfType.consume other
   }
 
@@ -100,9 +88,9 @@ class StreamExtensions {
     selfType.doOnSuccess other
   }
 
-  static <T> void rightShift(final Stream<T> selfType, final List<T> other) {
+  static <T> void rightShift(final Fluxion<T> selfType, final List<T> other) {
     selfType.consume { other.add(it) }
-    Stream.await(selfType)
+    Fluxion.await(selfType)
   }
 
   //Consuming
