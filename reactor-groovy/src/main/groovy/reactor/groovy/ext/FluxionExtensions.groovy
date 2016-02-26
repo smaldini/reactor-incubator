@@ -88,9 +88,8 @@ class FluxionExtensions {
     selfType.doOnSuccess other
   }
 
-  static <T> void rightShift(final Fluxion<T> selfType, final List<T> other) {
-    selfType.consume { other.add(it) }
-    Fluxion.await(selfType)
+  static <T> List<T> rightShift(final Fluxion<T> selfType, final List<T> other) {
+    selfType.collect ({ it }, { it }, { a, b -> a.add(b)}).get()
   }
 
   //Consuming
