@@ -89,7 +89,7 @@ class FluxionExtensions {
   }
 
   static <T> List<T> rightShift(final Fluxion<T> selfType, final List<T> other) {
-    selfType.collect ({ it }, { it }, { a, b -> a.add(b)}).get()
+    selfType.collect ({ other },  { a, b -> a.add(b)}).get()
   }
 
   //Consuming
