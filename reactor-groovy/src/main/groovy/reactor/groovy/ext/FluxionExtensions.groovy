@@ -39,7 +39,7 @@ import reactor.rx.subscriber.InterruptableSubscriber
  * @author Stephane Maldini
  */
 @CompileStatic
-class StreamExtensions {
+class FluxionExtensions {
 
   /**
    * Alias

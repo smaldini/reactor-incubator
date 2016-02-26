@@ -112,7 +112,7 @@ project('reactor-groovy') {
     compile("io.projectreactor:reactor-bus:$reactorVersion"){
       transitive = false
     }
-    compile "io.projectreactor:reactor-stream:$reactorVersion",
+    compile "io.projectreactor:reactor-fluxion:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
 }/*
@@ -124,7 +124,7 @@ project('reactor-net-0mq') {
 
   dependencies {
     compile "io.projectreactor:reactor-net:$reactorVersion"
-    compile "io.projectreactor:reactor-stream:$reactorVersion"
+    compile "io.projectreactor:reactor-fluxion:$reactorVersion"
     compile("io.projectreactor:reactor-io:$reactorVersion")
     compile "org.zeromq:jeromq:$jeromqVersion"
 
