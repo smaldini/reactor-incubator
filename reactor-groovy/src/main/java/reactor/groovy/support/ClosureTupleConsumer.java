@@ -1,8 +1,9 @@
 package reactor.groovy.support;
 
+import java.util.function.Consumer;
+
 import groovy.lang.Closure;
 import reactor.core.tuple.Tuple;
-import reactor.fn.Consumer;
 
 /**
  * Invokes a {@link groovy.lang.Closure} using the contents of the incoming {@link reactor.core.tuple.Tuple} as the

@@ -24,10 +24,11 @@ import reactor.bus.EventBus
 import reactor.bus.registry.Registration
 import reactor.bus.selector.Selector
 import reactor.bus.selector.Selectors
-import reactor.fn.Consumer
-import reactor.fn.Function
-import reactor.fn.Supplier
 import reactor.groovy.support.ClosureEventConsumer
+
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.function.Supplier
 
 import static reactor.bus.selector.Selectors.object
 

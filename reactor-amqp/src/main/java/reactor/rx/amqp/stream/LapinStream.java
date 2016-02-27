@@ -140,7 +140,7 @@ public class LapinStream extends Stream<QueueSignal> {
 
 	protected PushSubscription<QueueSignal> createSubscription(Subscriber<? super QueueSignal> subscriber,
 	                                                           Subscription dependency,
-	                                                           reactor.fn.Consumer<QueueSignal> doOnNext) {
+	                                                           java.util.function.Consumer<QueueSignal> doOnNext) {
 		LapinQueueSubscription lapinQueueSubscription;
 
 		if (!qosMode()) {

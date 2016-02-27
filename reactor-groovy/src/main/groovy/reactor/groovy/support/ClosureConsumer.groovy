@@ -19,7 +19,9 @@
 package reactor.groovy.support
 
 import groovy.transform.CompileStatic
-import reactor.fn.Consumer
+
+import java.util.function.Consumer
+
 /**
  * @author Stephane Maldini
  */

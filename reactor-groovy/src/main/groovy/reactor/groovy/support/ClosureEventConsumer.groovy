@@ -23,7 +23,8 @@ import reactor.bus.Bus
 import reactor.bus.Event
 import reactor.bus.EventBus
 import reactor.core.util.Exceptions
-import reactor.fn.Consumer
+
+import java.util.function.Consumer
 
 /**
  * @author Jon Brisbin

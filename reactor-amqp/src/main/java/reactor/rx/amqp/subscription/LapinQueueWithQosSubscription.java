@@ -27,7 +27,7 @@ public class LapinQueueWithQosSubscription extends LapinQueueSubscription {
 	                                     boolean bindAckToRequest,
 	                                     Map<String, Object> consumerArguments,
 	                                     Subscription dependency,
-	                                     reactor.fn.Consumer<QueueSignal> doOnNext
+	                                     java.util.function.Consumer<QueueSignal> doOnNext
 	) {
 		super(lapinStream, subscriber, queue, bindAckToRequest, consumerArguments, dependency, doOnNext);
 		Assert.isTrue(minQos > 0);

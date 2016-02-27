@@ -20,7 +20,7 @@ import net.openhft.chronicle.*;
 import net.openhft.chronicle.tools.ChronicleTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.fn.Function;
+import java.util.function.Function;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.codec.JavaSerializationCodec;

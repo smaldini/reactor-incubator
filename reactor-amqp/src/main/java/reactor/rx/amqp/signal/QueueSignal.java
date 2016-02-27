@@ -3,7 +3,7 @@ package reactor.rx.amqp.signal;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.MessageProperties;
-import reactor.fn.Supplier;
+import java.util.function.Supplier;
 
 /**
  * A little container for rabbit incoming messages

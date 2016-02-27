@@ -19,7 +19,7 @@ package reactor.io.net.impl.zmq;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import reactor.core.util.Assert;
-import reactor.fn.Consumer;
+import java.util.function.Consumer;
 import reactor.io.net.config.ServerSocketOptions;
 
 /**
@@ -81,7 +81,7 @@ public class ZeroMQServerSocketOptions extends ServerSocketOptions {
 
 
 	/**
-	 * The {@link reactor.fn.Consumer} responsible for configuring the underlying ZeroMQ socket.
+	 * The {@link java.util.function.Consumer} responsible for configuring the underlying ZeroMQ socket.
 	 *
 	 * @return the ZMQ.Socket configurer
 	 */
@@ -90,7 +90,7 @@ public class ZeroMQServerSocketOptions extends ServerSocketOptions {
 	}
 
 	/**
-	 * Set the {@link reactor.fn.Consumer} responsible for configure the underlying ZeroMQ socket.
+	 * Set the {@link java.util.function.Consumer} responsible for configure the underlying ZeroMQ socket.
 	 *
 	 * @param socketConfigurer
 	 * 		the ZMQ.Socket configurer

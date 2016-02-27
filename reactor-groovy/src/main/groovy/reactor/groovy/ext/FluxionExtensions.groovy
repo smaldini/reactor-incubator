@@ -20,13 +20,14 @@ import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
 import org.reactivestreams.Subscriber
 import reactor.core.publisher.Mono
-import reactor.fn.BiFunction
-import reactor.fn.Consumer
-import reactor.fn.Function
-import reactor.fn.Predicate
 import reactor.rx.Fluxion
 import reactor.rx.Promise
 import reactor.rx.subscriber.InterruptableSubscriber
+
+import java.util.function.BiFunction
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.function.Predicate
 
 //import reactor.io.codec.Codec
 //import reactor.rx.IOStreams

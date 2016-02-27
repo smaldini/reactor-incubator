@@ -34,7 +34,7 @@ import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.timer.Timer;
 import reactor.core.util.ExecutorUtils;
 import reactor.core.util.UUIDUtils;
-import reactor.fn.Consumer;
+import java.util.function.Consumer;
 import reactor.core.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannel;

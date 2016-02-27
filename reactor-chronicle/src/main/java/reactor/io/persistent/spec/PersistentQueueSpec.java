@@ -17,7 +17,7 @@
 package reactor.io.persistent.spec;
 
 import net.openhft.chronicle.ChronicleQueueBuilder;
-import reactor.fn.Supplier;
+import java.util.function.Supplier;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.persistent.ChronicleQueuePersistor;

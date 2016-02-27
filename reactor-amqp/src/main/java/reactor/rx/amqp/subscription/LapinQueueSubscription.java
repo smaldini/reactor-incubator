@@ -31,7 +31,7 @@ public class LapinQueueSubscription extends PushSubscription<QueueSignal> implem
 
 	private String consumerTag;
 	private long   deliveryTag;
-	private reactor.fn.Consumer<QueueSignal> doOnNext;
+	private java.util.function.Consumer<QueueSignal> doOnNext;
 
 
 	public LapinQueueSubscription(Stream<QueueSignal> lapinStream, final Subscriber<? super QueueSignal> subscriber,
@@ -39,14 +39,14 @@ public class LapinQueueSubscription extends PushSubscription<QueueSignal> implem
 	                              boolean bindAckToRequest,
 	                              Map<String, Object> consumerArguments,
 	                              Subscription dependency,
-	                              reactor.fn.Consumer<QueueSignal> doOnNext
+	                              java.util.function.Consumer<QueueSignal> doOnNext
 	) {
 		super(lapinStream, subscriber);
 		this.queueConfig = queue;
 		this.bindAckToRequest = bindAckToRequest;
 		this.consumerArguments = consumerArguments;
 		this.dependency = dependency;
-		this.doOnNext = doOnNext != null ? doOnNext : new reactor.fn.Consumer<QueueSignal>() {
+		this.doOnNext = doOnNext != null ? doOnNext : new java.util.function.Consumer<QueueSignal>() {
 			@Override
 			public void accept(QueueSignal queueSignal) {
 				subscriber.onNext(queueSignal);

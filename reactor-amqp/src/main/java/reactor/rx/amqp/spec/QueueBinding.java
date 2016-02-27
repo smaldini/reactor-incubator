@@ -2,7 +2,7 @@ package reactor.rx.amqp.spec;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
-import reactor.fn.Function;
+import java.util.function.Function;
 
 import java.io.IOException;
 import java.util.Map;
