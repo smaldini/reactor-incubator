@@ -67,7 +67,7 @@ class FluxionExtensions {
   }
 
   static <T, V> Fluxion<V> or(final Promise<T> selfType, final Function<T, V> other) {
-    selfType.stream().map(other)
+    selfType.fluxion().map(other)
   }
 
   //Filtering
@@ -76,7 +76,7 @@ class FluxionExtensions {
   }
 
   static <T> Fluxion<T> and(final Promise<T> selfType, final Predicate<T> other) {
-    selfType.stream().filter(other)
+    selfType.fluxion().filter(other)
   }
 
   //Consuming
@@ -89,7 +89,7 @@ class FluxionExtensions {
   }
 
   static <T> List<T> rightShift(final Fluxion<T> selfType, final List<T> other) {
-    selfType.collect ({ other },  { a, b -> a.add(b)}).get()
+    selfType.collect ({ other },  { List<T> a, b -> a.add(b)}).get()
   }
 
   //Consuming
