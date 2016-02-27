@@ -85,7 +85,7 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 
 					@Override
 					public void onNext(Buffer out) {
-						super.onNext(out);
+						BaseSubscriber.super.onNext(out);
 						final ByteBuffer data = out.byteBuffer();
 
 						byte[] bytes = new byte[data.remaining()];
@@ -115,7 +115,7 @@ public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher
 
 					@Override
 					public void onError(Throwable throwable) {
-						super.onError(throwable);
+						BaseSubscriber.super.onError(throwable);
 						doFlush(currentMsg, null);
 						postWriter.onError(throwable);
 					}
