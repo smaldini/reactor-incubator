@@ -83,7 +83,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 
 	@Override
 	protected Mono<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
-		Assert.isNull(worker, "This ZeroMQ server has already been started");
+		Assert.state(worker != null, "This ZeroMQ server has already been started");
 
 		final Promise<Void> promise = Promise.ready(getDefaultTimer());
 
