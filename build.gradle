@@ -112,7 +112,7 @@ project('reactor-groovy') {
     compile("io.projectreactor:reactor-bus:$reactorVersion"){
       transitive = false
     }
-    compile "io.projectreactor:reactor-stream:$reactorVersion",
+    compile "io.projectreactor:reactor-core:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
 }/*
