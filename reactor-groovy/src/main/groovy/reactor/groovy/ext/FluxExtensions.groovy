@@ -19,10 +19,8 @@ package reactor.groovy.ext
 import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
 import org.reactivestreams.Subscriber
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.rx.Fluxion
-import reactor.rx.Promise
-import reactor.rx.subscriber.InterruptableSubscriber
 
 import java.util.function.BiFunction
 import java.util.function.Consumer
@@ -40,56 +38,56 @@ import java.util.function.Predicate
  * @author Stephane Maldini
  */
 @CompileStatic
-class FluxionExtensions {
+class FluxExtensions {
 
   /**
    * Alias
    */
 
   // IO Streams
-  /*static <SRC, IN> Fluxion<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
+  /*static <SRC, IN> Flux<IN> decode(final Publisher<? extends SRC> publisher, Codec<SRC, IN, ?> codec) {
     IOStreams.decode(codec, publisher)
   }*/
 
   /**
    * Operator overloading
    */
-  static <T> Mono<T> mod(final Fluxion<T> selfType, final BiFunction<T, T, T> other) {
+  static <T> Mono<T> mod(final Flux<T> selfType, final BiFunction<T, T, T> other) {
     selfType.reduce other
   }
 
   //Mapping
-  static <O, E extends Subscriber<? super O>> E or(final Fluxion<O> selfType, final E other) {
+  static <O, E extends Subscriber<? super O>> E or(final Flux<O> selfType, final E other) {
     selfType.subscribeWith(other)
   }
 
-  static <T, V> Fluxion<V> or(final Fluxion<T> selfType, final Function<T, V> other) {
+  static <T, V> Flux<V> or(final Flux<T> selfType, final Function<T, V> other) {
     selfType.map other
   }
 
-  static <T, V> Fluxion<V> or(final Promise<T> selfType, final Function<T, V> other) {
-    selfType.fluxion().map(other)
+  static <T, V> Mono<V> or(final Mono<T> selfType, final Function<T, V> other) {
+    selfType.map(other)
   }
 
   //Filtering
-  static <T> Fluxion<T> and(final Fluxion<T> selfType, final Predicate<T> other) {
+  static <T> Flux<T> and(final Flux<T> selfType, final Predicate<T> other) {
     selfType.filter other
   }
 
-  static <T> Fluxion<T> and(final Promise<T> selfType, final Predicate<T> other) {
-    selfType.fluxion().filter(other)
+  static <T> Mono<T> and(final Mono<T> selfType, final Predicate<T> other) {
+    selfType.where(other)
   }
 
   //Consuming
-  static <T> InterruptableSubscriber<?> leftShift(final Fluxion<T> selfType, final Consumer<T> other) {
+  static <T> Runnable leftShift(final Flux<T> selfType, final Consumer<T> other) {
     selfType.consume other
   }
 
-  static <T> Mono<T> leftShift(final Promise<T> selfType, final Consumer<T> other) {
+  static <T> Mono<T> leftShift(final Mono<T> selfType, final Consumer<T> other) {
     selfType.doOnSuccess other
   }
 
-  static <T> List<T> rightShift(final Fluxion<T> selfType, final List<T> other) {
+  static <T> List<T> rightShift(final Flux<T> selfType, final List<T> other) {
     selfType.collect ({ other },  { List<T> a, b -> a.add(b)}).get()
   }
 
