@@ -124,7 +124,6 @@ project('reactor-net-0mq') {
 
   dependencies {
     compile "io.projectreactor:reactor-net:$reactorVersion"
-    compile "io.projectreactor:reactor-stream:$reactorVersion"
     compile("io.projectreactor:reactor-io:$reactorVersion")
     compile "org.zeromq:jeromq:$jeromqVersion"
 
@@ -148,7 +147,6 @@ project('reactor-net-0mq') {
   }
 
   dependencies {
-    compile("io.projectreactor:reactor-stream:$reactorVersion")
     compile("io.projectreactor:reactor-io:$reactorVersion")
 
     // High-speed Messaging
@@ -171,7 +169,7 @@ project('reactor-amqp') {
 
   dependencies {
     // Reactor
-    compile "io.projectreactor:reactor-stream:$reactorVersion"
+    compile "io.projectreactor:reactor-io:$reactorVersion"
 
     //RabbitMQ
     compile "com.rabbitmq:amqp-client:$amqpVersion"
