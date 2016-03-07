@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.util.Assert;
 import reactor.rx.amqp.signal.QueueSignal;
 import reactor.rx.amqp.spec.Queue;
 import reactor.rx.amqp.stream.LapinStream;

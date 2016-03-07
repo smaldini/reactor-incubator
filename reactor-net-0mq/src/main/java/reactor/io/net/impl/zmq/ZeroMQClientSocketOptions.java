@@ -18,7 +18,6 @@ package reactor.io.net.impl.zmq;
 
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import reactor.core.util.Assert;
 import java.util.function.Consumer;
 import reactor.io.net.config.ClientSocketOptions;
 
@@ -52,8 +51,7 @@ public class ZeroMQClientSocketOptions extends ClientSocketOptions {
 	 * @return {@literal this}
 	 */
 	public ZeroMQClientSocketOptions context(ZContext context) {
-		Assert.notNull(context, "ZeroMQ Context cannot be null");
-		this.context = context;
+		this.context = Objects.requireNonNull(context, "context must not be null");
 		return this;
 	}
 
