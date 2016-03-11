@@ -37,8 +37,8 @@ import reactor.core.util.UUIDUtils;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.ReactiveChannel;
-import reactor.io.net.ReactiveChannelHandler;
+import reactor.io.ipc.RemoteFlux;
+import reactor.io.ipc.RemoteFluxHandler;
 import reactor.io.net.config.ServerSocketOptions;
 import reactor.io.net.config.SslOptions;
 import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
@@ -81,7 +81,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Mono<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>> handler) {
+	protected Mono<Void> doStart(final RemoteFluxHandler<Buffer, Buffer, RemoteFlux<Buffer, Buffer>> handler) {
 		Assert.state(worker != null, "This ZeroMQ server has already been started");
 
 		final Promise<Void> promise = Promise.ready(getDefaultTimer());

@@ -31,13 +31,13 @@ import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.util.EmptySubscription;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.ReactiveChannel;
+import reactor.io.ipc.RemoteFlux;
 
 /**
  * @author Jon Brisbin
  * @author Stephane Maldini
  */
-public class ZeroMQChannel implements ReactiveChannel<Buffer, Buffer>, Publisher<Buffer> {
+public class ZeroMQChannel implements RemoteFlux<Buffer, Buffer>, Publisher<Buffer> {
 
 	private final ZeroMQConsumerSpec eventSpec = new ZeroMQConsumerSpec();
 	private final InetSocketAddress remoteAddress;

@@ -37,8 +37,8 @@ import reactor.core.util.UUIDUtils;
 import java.util.function.Consumer;
 import reactor.core.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.ReactiveChannel;
-import reactor.io.net.ReactiveChannelHandler;
+import reactor.io.ipc.RemoteFlux;
+import reactor.io.ipc.RemoteFluxHandler;
 import reactor.io.net.Reconnect;
 import reactor.io.net.config.ClientSocketOptions;
 import reactor.io.net.config.SslOptions;
@@ -81,7 +81,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Flux<Tuple2<InetSocketAddress, Integer>> doStart(ReactiveChannelHandler handler, Reconnect reconnect) {
+	protected Flux<Tuple2<InetSocketAddress, Integer>> doStart(RemoteFluxHandler handler, Reconnect reconnect) {
 		throw new IllegalStateException("Reconnects are handled transparently by the ZeroMQ network library");
 	}
 
@@ -103,7 +103,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Mono<Void> doStart(final ReactiveChannelHandler<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>>
+	protected Mono<Void> doStart(final RemoteFluxHandler<Buffer, Buffer, RemoteFlux<Buffer, Buffer>>
 			handler) {
 		final UUID id = UUIDUtils.random();
 

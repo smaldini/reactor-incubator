@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.Preprocessor;
-import reactor.io.net.ReactiveChannel;
+import reactor.io.ipc.RemoteFlux;
 import reactor.io.net.ReactiveNet;
 import reactor.io.net.ReactivePeer;
 import reactor.io.net.Spec;
@@ -68,10 +68,10 @@ public class ZeroMQ<T> {
 
 	private final Timer    timer;
 	private final ZContext zmqCtx;
-	private final Preprocessor<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>, T, T, ReactiveChannel<T, T>>
+	private final Preprocessor<Buffer, Buffer, RemoteFlux<Buffer, Buffer>, T, T, RemoteFlux<T, T>>
 	                       preprocessor;
 
-	private final List<ReactivePeer<T, T, ReactiveChannel<T, T>>> peers = new ArrayList<>();
+	private final List<ReactivePeer<T, T, RemoteFlux<T, T>>> peers = new ArrayList<>();
 
 	private volatile boolean shutdown = false;
 
@@ -80,7 +80,7 @@ public class ZeroMQ<T> {
 	}
 
 	public ZeroMQ(Timer env,
-			Preprocessor<Buffer, Buffer, ReactiveChannel<Buffer, Buffer>, T, T, ReactiveChannel<T, T>> preprocessor) {
+			Preprocessor<Buffer, Buffer, RemoteFlux<Buffer, Buffer>, T, T, RemoteFlux<T, T>> preprocessor) {
 		this.timer = env;
 		this.zmqCtx = new ZContext();
 		this.preprocessor = preprocessor;
@@ -195,7 +195,7 @@ public class ZeroMQ<T> {
 		}
 		shutdown = true;
 
-		List<ReactivePeer<T, T, ReactiveChannel<T, T>>> _peers;
+		List<ReactivePeer<T, T, RemoteFlux<T, T>>> _peers;
 		synchronized (peers) {
 			_peers = new ArrayList<>(peers);
 		}
