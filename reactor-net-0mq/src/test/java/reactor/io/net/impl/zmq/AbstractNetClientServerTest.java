@@ -31,7 +31,7 @@ import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.codec.StandardCodecs;
 import reactor.io.netty.preprocessor.CodecPreprocessor;
-import reactor.io.netty.tcp.support.SocketUtils;
+import reactor.io.netty.SocketUtils;
 import reactor.rx.Promise;
 import reactor.rx.Streams;
 import reactor.io.netty.ReactiveNet;
