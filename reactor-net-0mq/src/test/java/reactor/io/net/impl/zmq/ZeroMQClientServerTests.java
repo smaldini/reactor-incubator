@@ -43,8 +43,8 @@ import reactor.io.netty.preprocessor.CodecPreprocessor;
 import reactor.io.netty.tcp.support.SocketUtils;
 import reactor.rx.Promise;
 import reactor.io.netty.ReactiveNet;
-import reactor.rx.net.tcp.ReactorTcpClient;
-import reactor.rx.net.tcp.ReactorTcpServer;
+import reactor.io.netty.tcp.TcpClient;
+import reactor.io.netty.tcp.TcpServer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -179,7 +179,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		final CountDownLatch latch = new CountDownLatch(2);
 		ZContext zmq = new ZContext();
 
-		ReactorTcpServer<Buffer, Buffer> server = NetStreams.tcpServer(ZeroMQTcpServer.class, spec -> spec
+		TcpServer<Buffer, Buffer> server = ReactiveNet.tcpServer(ZeroMQTcpServer.class, spec -> spec
 						.listen("127.0.0.1", port)
 		);
 
@@ -211,8 +211,8 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 		final int port = SocketUtils.findAvailableTcpPort();
 		final CountDownLatch latch = new CountDownLatch(2);
 
-		ReactorTcpServer<Buffer, Buffer>
-				zmqs = NetStreams.tcpServer(ZeroMQTcpServer.class, spec -> spec.listen(port));
+		TcpServer<Buffer, Buffer>
+				zmqs = ReactiveNet.tcpServer(ZeroMQTcpServer.class, spec -> spec.listen(port));
 
 		zmqs.start(ch ->
 						ch.writeWith(ch.log("zmq").take(1).map(buff -> {
@@ -223,7 +223,7 @@ public class ZeroMQClientServerTests extends AbstractNetClientServerTest {
 						}))
 		).get(5, TimeUnit.SECONDS);
 
-		ReactorTcpClient<Buffer, Buffer> zmqc = NetStreams.<Buffer, Buffer>tcpClient(ZeroMQTcpClient.class, s -> s
+		TcpClient<Buffer, Buffer> zmqc = ReactiveNet.<Buffer, Buffer>tcpClient(ZeroMQTcpClient.class, s -> s
 						.connect("127.0.0.1", port)
 		);
 

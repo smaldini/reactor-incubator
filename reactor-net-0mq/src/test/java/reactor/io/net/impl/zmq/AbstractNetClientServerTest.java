@@ -35,8 +35,8 @@ import reactor.io.netty.tcp.support.SocketUtils;
 import reactor.rx.Promise;
 import reactor.rx.Streams;
 import reactor.io.netty.ReactiveNet;
-import reactor.rx.net.tcp.ReactorTcpClient;
-import reactor.rx.net.tcp.ReactorTcpServer;
+import reactor.io.netty.tcp.TcpClient;
+import reactor.io.netty.tcp.TcpServer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -121,12 +121,12 @@ public class AbstractNetClientServerTest {
 		final Codec<Buffer, T, T> elCodec = codec == null ? (Codec<Buffer, T, T>) StandardCodecs.PASS_THROUGH_CODEC :
 		  codec;
 
-		ReactorTcpServer<T, T> server = NetStreams.tcpServer(serverType, s -> s.listen(LOCALHOST, getPort())
+		TcpServer<T, T> server = ReactiveNet.tcpServer(serverType, s -> s.listen(LOCALHOST, getPort())
 		                                                                       .preprocessor(CodecPreprocessor.from(elCodec)));
 
 		server.start(ch -> ch.writeWith(ch.take(1))).get();
 
-		ReactorTcpClient<T, T> client = NetStreams.tcpClient(clientType, s -> s
+		TcpClient<T, T> client = ReactiveNet.tcpClient(clientType, s -> s
 			.connect(LOCALHOST, getPort())
 			.preprocessor(CodecPreprocessor.from(elCodec))
 		);

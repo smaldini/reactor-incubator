@@ -38,11 +38,11 @@ import reactor.io.netty.impl.zmq.ZeroMQClientSocketOptions;
 import reactor.io.netty.impl.zmq.ZeroMQServerSocketOptions;
 import reactor.rx.Promise;
 import reactor.rx.Streams;
-import reactor.rx.net.ChannelStream;
+import reactor.io.netty.ChannelStream;
 import reactor.io.netty.ReactiveNet;
-import reactor.rx.net.ReactorChannelHandler;
-import reactor.rx.net.tcp.ReactorTcpClient;
-import reactor.rx.net.tcp.ReactorTcpServer;
+import reactor.io.netty.ReactorChannelHandler;
+import reactor.io.netty.tcp.TcpClient;
+import reactor.io.netty.tcp.TcpServer;
 
 /**
  * @author Jon Brisbin
@@ -127,8 +127,8 @@ public class ZeroMQ<T> {
 			final int socketType) {
 		Assert.isTrue(!shutdown, "This ZeroMQ instance has been shut down");
 
-		ReactorTcpClient<T, T> client =
-				NetStreams.tcpClient(ZeroMQTcpClient.class, new ReactiveNet.TcpClientFactory<T, T>() {
+		TcpClient<T, T> client =
+				ReactiveNet.tcpClient(ZeroMQTcpClient.class, new ReactiveNet.TcpClientFactory<T, T>() {
 
 					@Override
 					public Spec.TcpClientSpec<T, T> apply(Spec.TcpClientSpec<T, T> spec) {
@@ -160,8 +160,8 @@ public class ZeroMQ<T> {
 			final int socketType) {
 		Assert.isTrue(!shutdown, "This ZeroMQ instance has been shut down");
 
-		final ReactorTcpServer<T, T> server =
-				NetStreams.tcpServer(ZeroMQTcpServer.class, new ReactiveNet.TcpServerFactory<T, T>() {
+		final TcpServer<T, T> server =
+				ReactiveNet.tcpServer(ZeroMQTcpServer.class, new ReactiveNet.TcpServerFactory<T, T>() {
 
 					@Override
 					public Spec.TcpServerSpec<T, T> apply(Spec.TcpServerSpec<T, T> spec) {
