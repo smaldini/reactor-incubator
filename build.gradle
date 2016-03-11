@@ -117,13 +117,13 @@ project('reactor-groovy') {
   }
 }/*
 
-project('reactor-net-0mq') {
+project('reactor-netty-0mq') {
   description = 'Reactor Net ZeroMq driver'
 
   apply plugin: 'osgi'
 
   dependencies {
-    compile "io.projectreactor:reactor-net:$reactorVersion"
+    compile "io.projectreactor:reactor-netty:$reactorVersion"
     compile("io.projectreactor:reactor-io:$reactorVersion")
     compile "org.zeromq:jeromq:$jeromqVersion"
 
