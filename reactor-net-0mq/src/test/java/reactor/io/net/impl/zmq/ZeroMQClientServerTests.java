@@ -40,7 +40,7 @@ import reactor.io.netty.impl.zmq.tcp.ZeroMQ;
 import reactor.io.netty.impl.zmq.tcp.ZeroMQTcpClient;
 import reactor.io.netty.impl.zmq.tcp.ZeroMQTcpServer;
 import reactor.io.netty.preprocessor.CodecPreprocessor;
-import reactor.io.netty.SocketUtils;
+import reactor.io.netty.util.SocketUtils;
 import reactor.rx.Promise;
 import reactor.io.netty.ReactiveNet;
 import reactor.io.netty.tcp.TcpClient;
