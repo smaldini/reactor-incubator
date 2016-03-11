@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.io.net.impl.zmq.tcp;
+package reactor.io.netty.impl.zmq.tcp;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -31,13 +31,13 @@ import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.util.EmptySubscription;
 import reactor.io.buffer.Buffer;
-import reactor.io.ipc.RemoteFlux;
+import reactor.io.ipc.ChannelFlux;
 
 /**
  * @author Jon Brisbin
  * @author Stephane Maldini
  */
-public class ZeroMQChannel implements RemoteFlux<Buffer, Buffer>, Publisher<Buffer> {
+public class ZeroMQChannel implements ChannelFlux<Buffer, Buffer>, Publisher<Buffer> {
 
 	private final ZeroMQConsumerSpec eventSpec = new ZeroMQConsumerSpec();
 	private final InetSocketAddress remoteAddress;

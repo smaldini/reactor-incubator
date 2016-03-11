@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.io.net.impl.zmq.tcp;
+package reactor.io.netty.impl.zmq.tcp;
 
 import java.util.UUID;
 import java.util.concurrent.locks.LockSupport;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.io.net.impl.zmq.tcp;
+package reactor.io.netty.impl.zmq.tcp;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -37,12 +37,12 @@ import reactor.core.util.UUIDUtils;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import reactor.io.buffer.Buffer;
-import reactor.io.ipc.RemoteFlux;
-import reactor.io.ipc.RemoteFluxHandler;
-import reactor.io.net.config.ServerSocketOptions;
-import reactor.io.net.config.SslOptions;
-import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
-import reactor.io.net.tcp.TcpServer;
+import reactor.io.ipc.ChannelFlux;
+import reactor.io.ipc.ChannelFluxHandler;
+import reactor.io.netty.config.ServerSocketOptions;
+import reactor.io.netty.config.SslOptions;
+import reactor.io.netty.impl.zmq.ZeroMQServerSocketOptions;
+import reactor.io.netty.tcp.TcpServer;
 import reactor.rx.Broadcaster;
 import reactor.rx.GroupedStream;
 import reactor.rx.Promise;
@@ -81,7 +81,7 @@ public class ZeroMQTcpServer extends TcpServer<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Mono<Void> doStart(final RemoteFluxHandler<Buffer, Buffer, RemoteFlux<Buffer, Buffer>> handler) {
+	protected Mono<Void> doStart(final ChannelFluxHandler<Buffer, Buffer, ChannelFlux<Buffer, Buffer>> handler) {
 		Assert.state(worker != null, "This ZeroMQ server has already been started");
 
 		final Promise<Void> promise = Promise.ready(getDefaultTimer());

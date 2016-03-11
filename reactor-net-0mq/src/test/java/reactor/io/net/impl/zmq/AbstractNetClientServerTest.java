@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package reactor.io.net.impl.zmq;
+package reactor.io.netty.impl.zmq;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -30,11 +30,11 @@ import java.util.function.Predicate;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.codec.StandardCodecs;
-import reactor.io.net.preprocessor.CodecPreprocessor;
-import reactor.io.net.tcp.support.SocketUtils;
+import reactor.io.netty.preprocessor.CodecPreprocessor;
+import reactor.io.netty.tcp.support.SocketUtils;
 import reactor.rx.Promise;
 import reactor.rx.Streams;
-import reactor.rx.net.NetStreams;
+import reactor.io.netty.ReactiveNet;
 import reactor.rx.net.tcp.ReactorTcpClient;
 import reactor.rx.net.tcp.ReactorTcpServer;
 
@@ -95,8 +95,8 @@ public class AbstractNetClientServerTest {
 		return port;
 	}
 
-	protected <T> void assertTcpClientServerExchangedData(Class<? extends reactor.io.net.tcp.TcpServer> serverType,
-	                                                      Class<? extends reactor.io.net.tcp.TcpClient> clientType,
+	protected <T> void assertTcpClientServerExchangedData(Class<? extends reactor.io.netty.tcp.TcpServer> serverType,
+	                                                      Class<? extends reactor.io.netty.tcp.TcpClient> clientType,
 	                                                      Buffer data) throws InterruptedException {
 		assertTcpClientServerExchangedData(
 		  serverType,
@@ -112,8 +112,8 @@ public class AbstractNetClientServerTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> void assertTcpClientServerExchangedData(Class<? extends reactor.io.net.tcp.TcpServer> serverType,
-	                                                      Class<? extends reactor.io.net.tcp.TcpClient> clientType,
+	protected <T> void assertTcpClientServerExchangedData(Class<? extends reactor.io.netty.tcp.TcpServer> serverType,
+	                                                      Class<? extends reactor.io.netty.tcp.TcpClient> clientType,
 	                                                      Codec<Buffer, T, T> codec,
 	                                                      T data,
 	                                                      Predicate<T> replyPredicate)

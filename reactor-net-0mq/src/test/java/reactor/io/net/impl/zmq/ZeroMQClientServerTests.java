@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package reactor.io.net.impl.zmq;
+package reactor.io.netty.impl.zmq;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -36,13 +36,13 @@ import reactor.core.util.UUIDUtils;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.json.JsonCodec;
 import reactor.io.codec.kryo.KryoCodec;
-import reactor.io.net.impl.zmq.tcp.ZeroMQ;
-import reactor.io.net.impl.zmq.tcp.ZeroMQTcpClient;
-import reactor.io.net.impl.zmq.tcp.ZeroMQTcpServer;
-import reactor.io.net.preprocessor.CodecPreprocessor;
-import reactor.io.net.tcp.support.SocketUtils;
+import reactor.io.netty.impl.zmq.tcp.ZeroMQ;
+import reactor.io.netty.impl.zmq.tcp.ZeroMQTcpClient;
+import reactor.io.netty.impl.zmq.tcp.ZeroMQTcpServer;
+import reactor.io.netty.preprocessor.CodecPreprocessor;
+import reactor.io.netty.tcp.support.SocketUtils;
 import reactor.rx.Promise;
-import reactor.rx.net.NetStreams;
+import reactor.io.netty.ReactiveNet;
 import reactor.rx.net.tcp.ReactorTcpClient;
 import reactor.rx.net.tcp.ReactorTcpServer;
 

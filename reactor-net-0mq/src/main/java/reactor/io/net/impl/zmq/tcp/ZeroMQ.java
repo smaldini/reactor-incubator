@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.io.net.impl.zmq.tcp;
+package reactor.io.netty.impl.zmq.tcp;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -29,17 +29,17 @@ import reactor.core.timer.Timer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.Preprocessor;
-import reactor.io.ipc.RemoteFlux;
-import reactor.io.net.ReactiveNet;
-import reactor.io.net.ReactivePeer;
-import reactor.io.net.Spec;
-import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
-import reactor.io.net.impl.zmq.ZeroMQServerSocketOptions;
+import reactor.io.netty.Preprocessor;
+import reactor.io.ipc.ChannelFlux;
+import reactor.io.netty.ReactiveNet;
+import reactor.io.netty.ReactivePeer;
+import reactor.io.netty.Spec;
+import reactor.io.netty.impl.zmq.ZeroMQClientSocketOptions;
+import reactor.io.netty.impl.zmq.ZeroMQServerSocketOptions;
 import reactor.rx.Promise;
 import reactor.rx.Streams;
 import reactor.rx.net.ChannelStream;
-import reactor.rx.net.NetStreams;
+import reactor.io.netty.ReactiveNet;
 import reactor.rx.net.ReactorChannelHandler;
 import reactor.rx.net.tcp.ReactorTcpClient;
 import reactor.rx.net.tcp.ReactorTcpServer;
@@ -68,10 +68,10 @@ public class ZeroMQ<T> {
 
 	private final Timer    timer;
 	private final ZContext zmqCtx;
-	private final Preprocessor<Buffer, Buffer, RemoteFlux<Buffer, Buffer>, T, T, RemoteFlux<T, T>>
+	private final Preprocessor<Buffer, Buffer, ChannelFlux<Buffer, Buffer>, T, T, ChannelFlux<T, T>>
 	                       preprocessor;
 
-	private final List<ReactivePeer<T, T, RemoteFlux<T, T>>> peers = new ArrayList<>();
+	private final List<ReactivePeer<T, T, ChannelFlux<T, T>>> peers = new ArrayList<>();
 
 	private volatile boolean shutdown = false;
 
@@ -80,7 +80,7 @@ public class ZeroMQ<T> {
 	}
 
 	public ZeroMQ(Timer env,
-			Preprocessor<Buffer, Buffer, RemoteFlux<Buffer, Buffer>, T, T, RemoteFlux<T, T>> preprocessor) {
+			Preprocessor<Buffer, Buffer, ChannelFlux<Buffer, Buffer>, T, T, ChannelFlux<T, T>> preprocessor) {
 		this.timer = env;
 		this.zmqCtx = new ZContext();
 		this.preprocessor = preprocessor;
@@ -195,7 +195,7 @@ public class ZeroMQ<T> {
 		}
 		shutdown = true;
 
-		List<ReactivePeer<T, T, RemoteFlux<T, T>>> _peers;
+		List<ReactivePeer<T, T, ChannelFlux<T, T>>> _peers;
 		synchronized (peers) {
 			_peers = new ArrayList<>(peers);
 		}

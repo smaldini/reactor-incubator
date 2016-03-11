@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.io.net.impl.zmq.tcp;
+package reactor.io.netty.impl.zmq.tcp;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -37,13 +37,13 @@ import reactor.core.util.UUIDUtils;
 import java.util.function.Consumer;
 import reactor.core.tuple.Tuple2;
 import reactor.io.buffer.Buffer;
-import reactor.io.ipc.RemoteFlux;
-import reactor.io.ipc.RemoteFluxHandler;
-import reactor.io.net.Reconnect;
-import reactor.io.net.config.ClientSocketOptions;
-import reactor.io.net.config.SslOptions;
-import reactor.io.net.impl.zmq.ZeroMQClientSocketOptions;
-import reactor.io.net.tcp.TcpClient;
+import reactor.io.ipc.ChannelFlux;
+import reactor.io.ipc.ChannelFluxHandler;
+import reactor.io.netty.Reconnect;
+import reactor.io.netty.config.ClientSocketOptions;
+import reactor.io.netty.config.SslOptions;
+import reactor.io.netty.impl.zmq.ZeroMQClientSocketOptions;
+import reactor.io.netty.tcp.TcpClient;
 import reactor.rx.Broadcaster;
 import reactor.rx.Promise;
 
@@ -81,7 +81,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Flux<Tuple2<InetSocketAddress, Integer>> doStart(RemoteFluxHandler handler, Reconnect reconnect) {
+	protected Flux<Tuple2<InetSocketAddress, Integer>> doStart(ChannelFluxHandler handler, Reconnect reconnect) {
 		throw new IllegalStateException("Reconnects are handled transparently by the ZeroMQ network library");
 	}
 
@@ -103,7 +103,7 @@ public class ZeroMQTcpClient extends TcpClient<Buffer, Buffer> {
 	}
 
 	@Override
-	protected Mono<Void> doStart(final RemoteFluxHandler<Buffer, Buffer, RemoteFlux<Buffer, Buffer>>
+	protected Mono<Void> doStart(final ChannelFluxHandler<Buffer, Buffer, ChannelFlux<Buffer, Buffer>>
 			handler) {
 		final UUID id = UUIDUtils.random();
 
