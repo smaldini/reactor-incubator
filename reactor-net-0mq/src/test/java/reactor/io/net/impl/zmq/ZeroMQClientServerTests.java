@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
-import reactor.core.timer.Timer;
+import reactor.core.scheduler.Timer;
 import reactor.core.util.UUIDUtils;
 import reactor.io.buffer.Buffer;
 import reactor.io.codec.json.JsonCodec;

@@ -31,7 +31,7 @@ import org.zeromq.ZMsg;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
-import reactor.core.timer.Timer;
+import reactor.core.scheduler.Timer;
 import reactor.core.util.ExecutorUtils;
 import reactor.core.util.UUIDUtils;
 import java.util.function.Consumer;

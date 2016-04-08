@@ -25,7 +25,7 @@ import java.util.Map;
 import org.reactivestreams.Publisher;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
-import reactor.core.timer.Timer;
+import reactor.core.scheduler.Timer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import reactor.io.buffer.Buffer;
