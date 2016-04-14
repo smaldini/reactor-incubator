@@ -19,6 +19,7 @@ package reactor.groovy.ext
 import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
 import org.reactivestreams.Subscriber
+import reactor.core.flow.Cancellation
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -79,7 +80,7 @@ class FluxExtensions {
   }
 
   //Consuming
-  static <T> Runnable leftShift(final Flux<T> selfType, final Consumer<T> other) {
+  static <T> Cancellation leftShift(final Flux<T> selfType, final Consumer<T> other) {
     selfType.consume other
   }
 
