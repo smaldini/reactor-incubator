@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * Create such stream with the provided factory, E.g.:
  * {@code
- * LapinStreams.fromQueue(lapin, "queueId").consume(
+ * LapinStreams.fromQueue(lapin, "queueId").subscribe(
  *log::info,
  *log::error,
  * (-> log.info("complete"))

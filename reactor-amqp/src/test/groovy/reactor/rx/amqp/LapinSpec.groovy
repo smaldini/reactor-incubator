@@ -35,7 +35,7 @@ class LapinSpec extends Specification {
 			def value2 = ''
 
 			def publisher =	LapinStreams.toDefaultExchange()
-				publisher.consume()
+				publisher.subscribe()
 
 
 				LapinStreams.fromQueue(
