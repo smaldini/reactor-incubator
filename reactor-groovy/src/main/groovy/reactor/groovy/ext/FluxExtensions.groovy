@@ -81,7 +81,7 @@ class FluxExtensions {
 
   //Consuming
   static <T> Cancellation leftShift(final Flux<T> selfType, final Consumer<T> other) {
-    selfType.consume other
+    selfType.subscribe other
   }
 
   static <T> Mono<T> leftShift(final Mono<T> selfType, final Consumer<T> other) {
