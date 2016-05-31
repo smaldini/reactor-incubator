@@ -76,7 +76,7 @@ class FluxExtensions {
   }
 
   static <T> Mono<T> and(final Mono<T> selfType, final Predicate<T> other) {
-    selfType.where(other)
+    selfType.filter(other)
   }
 
   //Consuming
