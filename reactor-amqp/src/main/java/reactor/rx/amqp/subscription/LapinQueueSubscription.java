@@ -10,7 +10,7 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.util.SpecificationExceptions;
+import reactor.util.SpecificationExceptions;
 import reactor.rx.Stream;
 import reactor.rx.amqp.signal.QueueSignal;
 import reactor.rx.amqp.spec.Queue;

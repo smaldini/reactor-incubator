@@ -22,7 +22,7 @@ import groovy.transform.CompileStatic
 import reactor.bus.Bus
 import reactor.bus.Event
 import reactor.bus.EventBus
-import reactor.core.util.Exceptions
+import reactor.util.Exceptions
 
 import java.util.function.Consumer
 
