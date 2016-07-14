@@ -1,7 +1,7 @@
 package reactor.rx.amqp;
 
 import com.rabbitmq.client.*;
-import reactor.core.tuple.Tuple2;
+import reactor.core.util.function.Tuple2;
 
 import java.io.IOException;
 import java.util.List;
