@@ -19,7 +19,7 @@ package reactor.groovy.ext
 import groovy.transform.CompileStatic
 import org.reactivestreams.Processor
 import org.reactivestreams.Subscriber
-import reactor.core.Cancellation
+import reactor.Cancellation
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -89,7 +89,7 @@ class FluxExtensions {
   }
 
   static <T> List<T> rightShift(final Flux<T> selfType, final List<T> other) {
-    selfType.collect ({ other },  { List<T> a, b -> a.add(b)}).get()
+    selfType.collect ({ other },  { List<T> a, b -> a.add(b)}).block()
   }
 
   //Consuming
