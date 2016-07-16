@@ -109,9 +109,7 @@ project('reactor-groovy') {
   apply plugin: 'groovy'
 
   dependencies {
-    compile("io.projectreactor:reactor-bus:$reactorVersion"){
-      transitive = false
-    }
+    compile("io.projectreactor:reactor-bus:$reactorVersion")
     compile "io.projectreactor:reactor-core:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
