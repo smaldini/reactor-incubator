@@ -113,26 +113,7 @@ project('reactor-groovy') {
     compile "io.projectreactor:reactor-core:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
-}/*
-
-project('reactor-netty-0mq') {
-  description = 'Reactor Net ZeroMq driver'
-
-  apply plugin: 'osgi'
-
-  dependencies {
-    compile "io.projectreactor:reactor-netty:$reactorVersion"
-    compile("io.projectreactor:reactor-io:$reactorVersion")
-    compile "org.zeromq:jeromq:$jeromqVersion"
-
-    optional "org.slf4j:slf4j-api:$slf4jVersion"
-    testCompile "com.esotericsoftware:kryo:$kryoVersion"
-    testCompile "io.projectreactor:reactor-codec:$reactorVersion"
-    testCompile "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
-  }
 }
-*/
-
 /*project('reactor-chronicle') {
   description = 'Reactor Groovy Extensions'
 
@@ -145,7 +126,7 @@ project('reactor-netty-0mq') {
   }
 
   dependencies {
-    compile("io.projectreactor:reactor-io:$reactorVersion")
+    compile("io.projectreactor.ipc:reactor-ipc-api:$reactorVersion")
 
     // High-speed Messaging
     compile "net.openhft:chronicle:$openHftChronicleVersion",
@@ -167,7 +148,7 @@ project('reactor-amqp') {
 
   dependencies {
     // Reactor
-    compile "io.projectreactor:reactor-io:$reactorVersion"
+    compile "io.projectreactor.ipc:reactor-ipc-api:$reactorVersion"
 
     //RabbitMQ
     compile "com.rabbitmq:amqp-client:$amqpVersion"
