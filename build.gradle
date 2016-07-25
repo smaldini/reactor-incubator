@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-apply plugin: "maven"
-group = 'io.projectreactor'
-
 ext {
   gradleVersion = "2.3"
   gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -68,9 +65,11 @@ apply from: "$gradleScriptDir/setup.gradle"
 
 subprojects {
   apply plugin: "java"
+  apply plugin: "maven"
   apply plugin: 'propdeps'
 
-  group = 'io.projectreactor'
+
+  group = 'io.projectreactor.x'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -109,7 +108,7 @@ project('reactor-groovy') {
   apply plugin: 'groovy'
 
   dependencies {
-    compile("io.projectreactor:reactor-bus:$reactorVersion")
+    compile("io.projectreactor.addons:reactor-bus:$reactorVersion")
     compile "io.projectreactor:reactor-core:$reactorVersion",
         "org.codehaus.groovy:groovy:$groovyVersion"
   }
