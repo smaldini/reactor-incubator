@@ -125,7 +125,7 @@ project('reactor-groovy') {
   }
 
   dependencies {
-    compile("io.projectreactor.ipc:reactor-ipc-api:$reactorVersion")
+    compile("io.projectreactor.ipc:reactor-ipc:$reactorVersion")
 
     // High-speed Messaging
     compile "net.openhft:chronicle:$openHftChronicleVersion",
@@ -147,7 +147,7 @@ project('reactor-amqp') {
 
   dependencies {
     // Reactor
-    compile "io.projectreactor.ipc:reactor-ipc-api:$reactorVersion"
+    compile "io.projectreactor.ipc:reactor-ipc:$reactorVersion"
 
     //RabbitMQ
     compile "com.rabbitmq:amqp-client:$amqpVersion"
