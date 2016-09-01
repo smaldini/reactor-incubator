@@ -19,7 +19,7 @@ ext {
   gradleScriptDir = "${rootProject.projectDir}/gradle"
 
   // Libraries
-  reactorVersion = "3.0.0.BUILD-SNAPSHOT"
+  reactorVersion = "3.0.1.BUILD-SNAPSHOT"
   pcollectionsVersion = "2.1.2"
   redisVersion = "2.7.2"
   kafkaVersion = "0.8.2.1"
